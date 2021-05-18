@@ -10,6 +10,6 @@ echo Installing
           cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
-          git clone https://github.com/smealum/aemstro.git
+          git clone https://github.com/smealum/aemstro.git aemstro
           cp - r 'aemstro/' '/opt/devkitpro/aemstro'
           export AEMSTRO=/opt/devkitpro/aemstro
