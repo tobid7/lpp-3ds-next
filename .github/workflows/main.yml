@@ -20,8 +20,13 @@ jobs:
           
           sudo chmod +x setup.sh
           ./setup.sh
+          mkdir -p ~/artifacts
+          cp BCSTM-Player.3dsx ~/artifacts
+          cp BCSTM-Player.cia ~/artifacts
 
-      # Runs a set of commands using the runners shell
-      - name: Set up aemstro
-        run: |
+      - name: Publish build to GH Actions
+        uses: actions/upload-artifact@v2
+        with:
+          path: ~/artifacts/*
+          name: build
           
