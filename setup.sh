@@ -7,9 +7,9 @@ echo Installing
           git clone https://github.com/Tobi-D7/lpp-3ds-updated.git
           cd lpp-3ds-updated
           sudo mkdir /opt/devkitpro
-          cp -d dka/devkitARM-r45/ /opt/devkitpro/dka-r45
+          cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
           git clone https://github.com/smealum/aemstro.git
-          cp - d aemstro/ /opt/devkitpro/aemstro
+          cp - r 'aemstro/' '/opt/devkitpro/aemstro'
           export AEMSTRO=/opt/devkitpro/aemstro
