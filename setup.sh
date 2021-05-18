@@ -19,5 +19,4 @@ whoami
           export AEMSTRO=/opt/devkitpro/aemstro
 
           cd $DEVKITARM/arm-none-eabi/lib && make CRT=3dsx
-          cd $D7/
-          make
+          
