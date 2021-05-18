@@ -27,5 +27,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Set up aemstro
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          git clone https://github.com/smealum/aemstro.git
+          cp - d aemstro /opt/devkitpro/aemstro
+          export AEMSTRO=/opt/devkitpro/aemstro
