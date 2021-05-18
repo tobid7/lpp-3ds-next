@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	ptmuInit();
 	hidInit();
 	fsInit();
-	#ifndef CITRA3DS_COMPATIBLE
+	#ifndef CITRA3DSCOMPATIBLE
 	romfsInit();
 	#endif
 	irrstInit();
