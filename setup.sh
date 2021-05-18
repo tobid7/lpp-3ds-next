@@ -1,5 +1,5 @@
 echo Installing
-
+whoami
           curl -o pacman.deb https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb
           sudo apt-get install gdebi-core
           sudo chmod +x pacman.deb
