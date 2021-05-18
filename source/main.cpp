@@ -40,10 +40,6 @@
 #include "include/luaplayer.h"
 #include "include/graphics/Graphics.h"
 #include "include/ftp/ftp.h"
-#include "include/khax/khax.h"
-extern "C"{
-	#include "include/khax/svchax.h"
-}
 #include "include/audio.h"
 
 const char *errMsg;
@@ -93,7 +89,7 @@ int main(int argc, char **argv)
 		svcCloseHandle(testHandle);
 	}else{
 		CIA_MODE = false;
-		if (!hbInit()) khaxInit();
+		if (!hbInit()) int nothingint = 0;
 		else{
 			isNinjhax2 = true;
 			#ifdef USE_MEMCHUNKHAX2
@@ -248,7 +244,6 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
-	if (!CIA_MODE) khaxExit();
 	fsExit();
 	irrstExit();
 	hidExit();
