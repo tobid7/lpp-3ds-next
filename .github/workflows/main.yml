@@ -19,7 +19,7 @@ jobs:
         run: |
           curl -L https://github.com/devkitpro/pacman/releases/latest/devkitpro-pacman.amd64.deb
           sudo apt-get install gdebi-core
-          sudo gdebi devkitpro-pacman.<arch>.deb
+          sudo gdebi devkitpro-pacman.amd64.deb
           cp -d dka/devkitARM-r45 /opt/devkitpro/dka-r45
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
