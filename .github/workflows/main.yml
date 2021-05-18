@@ -17,7 +17,7 @@ jobs:
 
       - name: Set Up devkitARM-r45
         run: |
-          curl -L https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb pacman.deb
+          curl -o pacman.deb https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb
           sudo apt-get install gdebi-core
           sudo gdebi pacman.deb
           cp -d dka/devkitARM-r45 /opt/devkitpro/dka-r45
