@@ -6,7 +6,7 @@ echo Installing
           sudo gdebi pacman.deb
           git clone https://github.com/Tobi-D7/lpp-3ds-updated.git
           export D7=/lpp-3ds-updated
-          cd $(D7)/
+          cd $D7/
        
           sudo mkdir /opt/devkitpro
           cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
@@ -15,3 +15,7 @@ echo Installing
           git clone https://github.com/smealum/aemstro.git aemstro
           sudo cp -r 'aemstro/' '/opt/devkitpro/aemstro'
           export AEMSTRO=/opt/devkitpro/aemstro
+
+          cd $DEVKITARM/arm-none-eabi/lib && make CRT=3dsx
+          cd $D7/
+          make
