@@ -9,3 +9,6 @@ echo Installing
           cp -d dka/devkitARM-r45 /opt/devkitpro/dka-r45
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
+          git clone https://github.com/smealum/aemstro.git
+          cp - d aemstro /opt/devkitpro/aemstro
+          export AEMSTRO=/opt/devkitpro/aemstro
