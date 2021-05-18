@@ -17,7 +17,12 @@ jobs:
 
       - name: Set Up devkitARM-r45
         run: |
-          echo T3st
+          curl -L https://github.com/devkitpro/pacman/releases/latest/devkitpro-pacman.amd64.deb
+          sudo apt-get install gdebi-core
+          sudo gdebi devkitpro-pacman.<arch>.deb
+          cp -d dka/devkitARM-r45 /opt/devkitpro/dka-r45
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=/opt/devkitpro/dka-r45
 
       # Runs a set of commands using the runners shell
       - name: Set up aemstro
