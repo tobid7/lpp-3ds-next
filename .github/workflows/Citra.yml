@@ -44,12 +44,7 @@ jobs:
           cp lpp-3ds-updated.3dsx ~/artifacts
           cp lpp-3ds-updated.elf ~/artifacts
           cp lpp-3ds-updated.smdh ~/artifacts
-          mkdir lpp-3ds-citra
-          cp lpp-3ds-updated.3dsx /lpp-3ds-citra/lpp-3ds-updated.3dsx
-          cp lpp-3ds-updated.elf /lpp-3ds-citra/lpp-3ds-updated.elf
-          cp lpp-3ds-updated.smdh /lpp-3ds-citra/lpp-3ds-updated.smdh
-          7z a citra.7z lpp-3ds-citra
-          cp citra.7z ~/artifacts
+         
 
       - name: pbcitra
         uses: actions/upload-artifact@v2
