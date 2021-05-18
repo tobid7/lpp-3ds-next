@@ -92,23 +92,7 @@ jobs:
             UPLOAD_URL="https://uploads.github.com/repos/${{ github.repository }}/releases/$ID/assets?name=$(basename $file)"
             curl -XPOST -H "$AUTH_HEADER" -H "$CONTENT_LENGTH" -H "$CONTENT_TYPE" --upload-file "$file" "$UPLOAD_URL"
           done
-      - name: Commit and push to Tobi-D7/builds
-        id: commit
-        run: |
-          CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
-          echo ::set-output name=current_date::$CURRENT_DATE
-          git config --global user.email "nintenplayid7@gmail.com"
-          git config --global user.name "Tobi-D7"
-          git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/Tobi-D7/builds.git
-          mkdir -p builds/builds/lpp-3ds-updated/
-          cd builds/builds/lpp-3ds-updated/
-          
-          
-          cp ${{ github.workspace }}/build/* .
-          git stage .
-          git commit -m "lpp-3ds-updated | $COMMIT_HASH"
-          git tag v$CURRENT_DATE
-          git push origin master v$CURRENT_DATE
+      
       - name: Release to Tobi-D7/builds
         run: |
           AUTH_HEADER="Authorization: token ${{ secrets.TOKEN }}"
