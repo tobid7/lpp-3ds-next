@@ -1,4 +1,4 @@
-name: Build With devkitARM-r45
+name: Standart
 
 on:
   push:
