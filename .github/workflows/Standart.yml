@@ -11,7 +11,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
+    commit_tag: ${{ steps.build.outputs.commit_tag }}
+      commit_hash: ${{ steps.build.outputs.commit_hash }}
+      author_name: ${{ steps.build.outputs.author_name }}
+      committer_name: ${{ steps.build.outputs.committer_name }}
+      commit_subject: ${{ steps.build.outputs.commit_subject }}
+      commit_message: ${{ steps.build.outputs.commit_message }}
+    
     steps:
       - uses: actions/checkout@v2
 
