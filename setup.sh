@@ -11,5 +11,5 @@ echo Installing
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
           git clone https://github.com/smealum/aemstro.git aemstro
-          cp - r 'aemstro/' '/opt/devkitpro/aemstro'
+          cp - r 'aemstro/' '/opt/devkitpro/aemstro/'
           export AEMSTRO=/opt/devkitpro/aemstro
