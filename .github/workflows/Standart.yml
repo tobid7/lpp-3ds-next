@@ -44,9 +44,10 @@ jobs:
           cp lpp-3ds-updated.elf ~/artifacts
           cp lpp-3ds-updated.smdh ~/artifacts
 
-      - name: Publish build to GH Actions
+      - name: pb
         uses: actions/upload-artifact@v2
         with:
           path: ~/artifacts/*
           name: build
-          
+
+      
