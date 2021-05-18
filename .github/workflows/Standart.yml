@@ -26,7 +26,7 @@ jobs:
           export D7=/home/runner/lpp-3ds-updated
           cd $D7/
        
-          sudo mkdir /opt/devkitpro
+          
           cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=/opt/devkitpro/dka-r45
