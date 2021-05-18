@@ -1,4 +1,5 @@
-# Build [![Build With devkitARM-r45](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml) 
+# Build 
+[![Citra](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml) 
 [![Citra](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/main.yml/badge.svg)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/main.yml)
 
 # Todo
