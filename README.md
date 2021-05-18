@@ -1,6 +1,9 @@
-<p align="center">
-	<img src="http://rinnegatamante.it/lpplogo.png"/>
-</p>
+# Todo
+##### Currently
+Create a CI for devkitARM-r45
+Fix some of the issues
+##### in Future 
+Update to newest devkitARM libctru citro2d citro3d
 
 # Description
 
