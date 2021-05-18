@@ -5,7 +5,9 @@ echo Installing
           sudo chmod +x pacman.deb
           sudo gdebi pacman.deb
           git clone https://github.com/Tobi-D7/lpp-3ds-updated.git
-          cd lpp-3ds-updated
+          export D7=/lpp-3ds-updated
+          cd $(D7)/
+       
           sudo mkdir /opt/devkitpro
           cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
           export DEVKITPRO=/opt/devkitpro
