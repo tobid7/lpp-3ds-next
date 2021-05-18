@@ -1,3 +1,5 @@
+# Build [![Build With devkitARM-r45](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml) 
+
 # Todo
 ##### Currently
 Create a GH Action for compiling with devkitARM-r45
