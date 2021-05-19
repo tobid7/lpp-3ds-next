@@ -40,9 +40,6 @@
 #include "include/Archives.h"
 #include "include/utils.h"
 #include "include/audio.h"
-extern "C"{
-	#include "include/brahma/brahma.h"
-}
 
 #define stringify(str) #str
 #define VariableRegister(lua, value) do { lua_pushinteger(lua, value); lua_setglobal (lua, stringify(value)); } while(0)
@@ -1469,12 +1466,7 @@ static int lua_brahmaloader(lua_State *L) {
 	#ifndef SKIP_ERROR_HANDLING
 	if(argc != 2 ) return luaL_error(L, "wrong number of arguments.");
 	#endif
-	const char* file = luaL_checkstring(L, 1);
-	u32 offset = luaL_checkinteger(L, 2);
-	brahma_init();
-	load_arm9_payload_offset ((char*)file, offset, 0x10000);
-	firm_reboot();
-    brahma_exit();
+	
 	char string[20];
 	strcpy(string,"lpp_exit_0456432");
 	luaL_dostring(L, "collectgarbage()");
