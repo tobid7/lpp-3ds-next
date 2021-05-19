@@ -40,7 +40,6 @@
 #include <string.h>
 #include <3ds.h>
 #include "include/luaplayer.h"
-#include "include/khax/khax.h"
 
 static lua_State *L;
 bool isCSND;
