@@ -108,23 +108,23 @@ static int lua_loadScript(lua_State *L){
 	const char *script = luaL_checkstring(L, 1);
 	bool isStringBuffer = luaL_checkinteger(L, 2);
 	// Standard libraries
-	luaL_openlibs(L);
+	//luaL_openlibs(L);
 	isCSND = false;
 	
 	// Modules
-	luaSystem_init(L);
-	luaScreen_init(L);
-	luaGraphics_init(L);
-	luaControls_init(L);
-	luaNetwork_init(L);
-	luaTimer_init(L);
-	luaSound_init(L);
-	luaVideo_init(L);
-	luaCamera_init(L);
-	luaRender_init(L);
-	luaMic_init(L);
-	luaCore_init(L);
-	luaKeyboard_init(L);
+	//luaSystem_init(L);
+	//luaScreen_init(L);
+	//luaGraphics_init(L);
+	//luaControls_init(L);
+	//luaNetwork_init(L);
+	//luaTimer_init(L);
+	//luaSound_init(L);
+	//luaVideo_init(L);
+	//luaCamera_init(L);
+	//luaRender_init(L);
+	//luaMic_init(L);
+	//luaCore_init(L);
+	//luaKeyboard_init(L);
 	
 	int s = 0;
 	const char *errMsg = NULL;
