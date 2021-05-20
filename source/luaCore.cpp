@@ -103,58 +103,6 @@ func_9x_db db_9x[]={
 	{"csndPlaysound", (func_9x_type1)csndPlaySound}, // 0
 }; 
 
-static int lua_loadScript(lua_State *L){
-	L = luaL_newstate();
-	const char *script = luaL_checkstring(L, 1);
-	bool isStringBuffer = luaL_checkinteger(L, 2);
-	// Standard libraries
-	//luaL_openlibs(L);
-	isCSND = false;
-	
-	// Modules
-	//luaSystem_init(L);
-	//luaScreen_init(L);
-	//luaGraphics_init(L);
-	//luaControls_init(L);
-	//luaNetwork_init(L);
-	//luaTimer_init(L);
-	//luaSound_init(L);
-	//luaVideo_init(L);
-	//luaCamera_init(L);
-	//luaRender_init(L);
-	//luaMic_init(L);
-	//luaCore_init(L);
-	//luaKeyboard_init(L);
-	
-	int s = 0;
-	const char *errMsg = NULL;
-	
-	//Patching dofile function & I/O module
-	char* patch = "dofile = System.dofile\n\
-			 io.open = System.openFile\n\
-			 io.write = System.writeFile\n\
-			 io.close = System.closeFile\n\
-			 io.read = System.readFile\n\
-			 io.size = System.getFileSize";
-	luaL_loadbuffer(L, patch, strlen(patch), NULL); 
-	lua_KFunction dofilecont = (lua_KFunction)(lua_gettop(L) - 1);
-	lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
-	
-	if(!isStringBuffer) s = luaL_loadfile(L, script);
-	else s = luaL_loadbuffer(L, script, strlen(script), NULL);
-		
-	if (s == 0) s = lua_pcall(L, 0, LUA_MULTRET, 0);
-	
-	if (s){
-		errMsg = lua_tostring(L, -1);
-		printf("error: %s\n", lua_tostring(L, -1));
-		lua_pop(L, 1); // remove error message
-	}
-	lua_close(L);
-	
-	return 0;
-}
-
 static int lua_service(lua_State *L){
 	int argc = lua_gettop(L);
 	#ifndef SKIP_ERROR_HANDLING
@@ -355,7 +303,6 @@ static const luaL_Reg Core_functions[] = {
 	{"alloc",               lua_alloc},
 	{"linearFree",          lua_free2},
 	{"linearAlloc",         lua_alloc2},
-	{"loadScript", 			lua_loadScript},
 	{0, 0}
 };
 
