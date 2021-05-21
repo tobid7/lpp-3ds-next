@@ -101,11 +101,11 @@ jobs:
           git config --global user.email "tobid7@outlook.de"
           git config --global user.name "Tobi-D7"
           git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/Tobi-D7/builds.git
-          mkdir -p builds/BCSTM-Player/
-          cd builds/BCSTM-Player/
+          mkdir -p builds/lpp-3ds-next/
+          cd builds/lpp-3ds-next/
           cp ${{ github.workspace }}/build/* .
           git stage .
-          git commit -m "lpp-3da-next | $COMMIT_HASH"
+          git commit -m "lpp-3ds-next | $COMMIT_HASH"
           git tag v$CURRENT_DATE
           git push origin master v$CURRENT_DATE
       
