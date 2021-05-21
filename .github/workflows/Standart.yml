@@ -64,7 +64,7 @@ jobs:
           name: build
 
 
-    publish:
+  publish:
     runs-on: ubuntu-latest
     name: Publish builds
     if: ${{ success() && !startsWith(github.ref, 'refs/pull') }}
