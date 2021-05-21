@@ -73,7 +73,6 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
       - name: Upload builds
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
         run: |
           ID=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)
           for file in ${{ github.workspace }}/*/*; do
