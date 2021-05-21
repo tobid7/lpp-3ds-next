@@ -29,8 +29,8 @@ jobs:
           ./setup.sh
           cd /home/runner/
          
-          git clone https://github.com/Tobi-D7/lpp-3ds-updated.git
-          export D7=/home/runner/lpp-3ds-updated
+          git clone https://github.com/Tobi-D7/lpp-3ds-next.git
+          export D7=/home/runner/lpp-3ds-next
           cd $D7/
           
           sudo mkdir /opt/devkitpro
