@@ -1,0 +1,54 @@
+name: Skip Error
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set Up devkitARM-r45
+        run: |
+          
+          sudo chmod +x setup.sh
+          ./setup.sh
+          cd /home/runner/
+         
+          git clone https://github.com/Tobi-D7/lpp-3ds-updated.git
+          export D7=/home/runner/lpp-3ds-updated
+          cd $D7/
+          
+          sudo mkdir /opt/devkitpro
+          
+          cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITARM=/opt/devkitpro/dka-r45
+          git clone https://github.com/smealum/aemstro.git aemstro
+          sudo cp -r 'aemstro/' '/opt/devkitpro/aemstro'
+          export AEMSTRO=/opt/devkitpro/aemstro
+
+          cd $DEVKITARM/arm-none-eabi/lib && make CRT=3dsx
+          
+          cd $D7/
+          make -j $SKIP_ERROR_HANDLING
+          mkdir -p ~/artifacts
+        
+          cp lpp-3ds-updated.3dsx ~/artifacts
+          cp lpp-3ds-updated.elf ~/artifacts
+          cp lpp-3ds-updated.smdh ~/artifacts
+         
+
+      - name: pbcitra
+        uses: actions/upload-artifact@v2
+        with:
+          path: ~/artifacts/*
+          name: no-error-h
+          
