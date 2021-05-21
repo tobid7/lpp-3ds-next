@@ -100,7 +100,7 @@ jobs:
           echo ::set-output name=current_date::$CURRENT_DATE
           git config --global user.email "tobid7@outlook.de"
           git config --global user.name "Tobi-D7"
-          git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/TobiD7/builds.git
+          git clone --depth 1 https://${{ secrets.TOKEN }}@github.com/Tobi-D7/builds.git
           mkdir -p builds/BCSTM-Player-$CURRENT_DATE-$COMMIT_HASH
           cd builds/BCSTM-Player-CURRENT_DATE-$COMMIT_HASH
           cp ${{ github.workspace }}/build/* .
