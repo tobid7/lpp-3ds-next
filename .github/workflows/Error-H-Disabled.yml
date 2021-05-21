@@ -41,9 +41,9 @@ jobs:
           make -j $SKIP_ERROR_HANDLING
           mkdir -p ~/artifacts
         
-          cp lpp-3ds-updated.3dsx ~/artifacts
-          cp lpp-3ds-updated.elf ~/artifacts
-          cp lpp-3ds-updated.smdh ~/artifacts
+          cp lpp-3ds-updated.3dsx ~/artifacts/lpp-no-error.3dsx
+          cp lpp-3ds-updated.elf ~/artifacts/lpp-no-error.elf
+          cp lpp-3ds-updated.smdh ~/artifacts/lpp-no-error.smdh
          
 
       - name: pbcitra
