@@ -1,6 +1,7 @@
 # Build 
 [![Citra](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml) 
 [![Standart](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml) 
+[![Skip Error](https://github.com/Tobi-D7/lpp-3ds-next/actions/workflows/Error-H-Disabled.yml/badge.svg)](https://github.com/Tobi-D7/lpp-3ds-next/actions/workflows/Error-H-Disabled.yml)
 
 # Todo
 ##### Currently
