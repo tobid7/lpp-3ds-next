@@ -80,10 +80,10 @@ jobs:
           COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
           CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
         with:
-          tag_name: v$CURRENT_DATE
-          release_name: LPP-3DS-NEXT | $COMMIT_HASH
+          tag_name: ${{ steps.tagName.outputs.tag }}
+          release_name: ${{ steps.tagName.outputs.tag }}
           draft: false
-          prerelease: true
+          prerelease: false
       - name: Upload artifacts
         uses: alexellis/upload-assets@0.2.3
         env:
