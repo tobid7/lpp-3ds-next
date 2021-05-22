@@ -64,41 +64,34 @@ jobs:
           name: build
 
 
-  release:
+  test:
+
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
         node-version: [12.x]
 
     steps:
-      runs-on: ubuntu-latest
-      needs: [build]
-      steps:
-        - uses: actions/checkout@v2.3.4
-        - name: Use Node.js ${{ matrix.node-version }}
-          uses: actions/setup-node@v2.1.5
+    - uses: actions/checkout@v2.3.4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2.1.5
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build, and test
+      run: |
+        npm i
+        npm test
+    - name: Get tag name
+      uses: little-core-labs/get-git-tag@master
+      id: tag_name
+    - name: Look at results
+      run: echo ${{ steps.tag_name.outputs.tag }}
+
+  automerge:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v2.0.0
+        if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' && contains(github.head_ref, 'dependabot/github_actions') }}
         with:
-          node-version: ${{ matrix.node-version }}
-        - name: npm install, build, and test
-            run: |
-              npm i
-              npm test
-        - name: Get tag name
-          uses: little-core-labs/get-git-tag@master
-          id: tag_name
-        - name: Look at results
-          run: echo ${{ steps.tag_name.outputs.tag }}
-        - name: Create release
-          uses: actions/create-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: ${{ steps.tagName.outputs.tag }}
-            release_name: ${{ steps.tagName.outputs.tag }}
-            draft: false
-            prerelease: false
-        - name: Upload artifacts
-          uses: alexellis/upload-assets@0.2.3
-          env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          with:
-            asset_paths: '["${{ github.workspace}}/build/*"]'
