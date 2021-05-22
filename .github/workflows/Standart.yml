@@ -72,6 +72,8 @@ jobs:
       - name: Query tag name
         uses: little-core-labs/get-git-tag@v3.0.2
         id: tagName
+      - name: Look at results
+        run: echo ${{ steps.tag_name.outputs.tag }}
       - name: Create release
         uses: actions/create-release@v1
         env:
