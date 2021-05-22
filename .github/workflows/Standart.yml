@@ -78,8 +78,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           COMMIT_TAG: ${{ needs.build.outputs.commit_tag }}
           COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
+          CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
         with:
-          tag_name: $COMMIT_TAG
+          tag_name: v$CURRENT_DATE
           release_name: LPP-3DS-NEXT | $COMMIT_HASH
           draft: false
           prerelease: true
@@ -88,4 +89,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          asset_paths: '["/build/*"]'
+          asset_paths: '["${{ github.workspace}}/build/*"]'
