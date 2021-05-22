@@ -79,8 +79,8 @@ jobs:
           COMMIT_TAG: ${{ needs.build.outputs.commit_tag }}
           COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
         with:
-          tag_name: $COMMIT_HASH
-          release_name: LPP-3DS-NEXT | $COMMIT_TAG
+          tag_name: $COMMIT_TAG
+          release_name: LPP-3DS-NEXT | $COMMIT_HASH
           draft: false
           prerelease: true
       - name: Upload artifacts
