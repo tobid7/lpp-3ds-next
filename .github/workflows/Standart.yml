@@ -75,10 +75,7 @@ jobs:
       - name: Create release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-          COMMIT_TAG: ${{ needs.build.outputs.commit_tag }}
-          COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
-          CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tagName.outputs.tag }}
           release_name: ${{ steps.tagName.outputs.tag }}
