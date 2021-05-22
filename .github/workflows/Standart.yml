@@ -77,8 +77,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          tag_name: ${{ steps.tagName.outputs.tag }}
-          release_name: ${{ steps.tagName.outputs.tag }}
+          tag_name: 1234
+          release_name: LPP-3DS-NEXT
           draft: false
           prerelease: true
       - name: Upload artifacts
