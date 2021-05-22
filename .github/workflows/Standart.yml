@@ -76,8 +76,10 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          COMMIT_TAG: ${{ needs.build.outputs.commit_tag }}
+          COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
         with:
-          tag_name: 1234
+          tag_name: $COMMIT_HASH
           release_name: LPP-3DS-NEXT
           draft: false
           prerelease: true
