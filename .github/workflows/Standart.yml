@@ -108,6 +108,7 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: v
           prerelease: true
           title: "lpp-3ds-next"
           files: |
