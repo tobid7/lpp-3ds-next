@@ -107,8 +107,12 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "latest"
           prerelease: true
-          title: "Development Build"
+          title: "lpp-3ds-next"
           files: |
-            *.*
+            /build/*.3dsx
+            /build/*.elf
+            /build/*.smdh
+            *.3dsx
+            *.elf
+            *.smdh
