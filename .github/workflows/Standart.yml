@@ -88,10 +88,4 @@ jobs:
     - name: Look at results
       run: echo ${{ steps.tag_name.outputs.tag }}
 
-  automerge:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: fastify/github-action-merge-dependabot@v2.0.0
-        if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' && contains(github.head_ref, 'dependabot/github_actions') }}
-        with:
+  
