@@ -69,19 +69,19 @@ jobs:
       matrix:
         node-version: [12.x]
 
-  steps:
-    runs-on: ubuntu-latest
-    needs: [build]
     steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2.1.5
-        with:
+      runs-on: ubuntu-latest
+      needs: [build]
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Use Node.js ${{ matrix.node-version }}
+          uses: actions/setup-node@v2.1.5
+      with:
           node-version: ${{ matrix.node-version }}
       - name: npm install, build, and test
-        run: |
-          npm i
-          npm test
+          run: |
+            npm i
+            npm test
       - name: Get tag name
         uses: little-core-labs/get-git-tag@master
         id: tag_name
