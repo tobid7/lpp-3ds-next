@@ -69,7 +69,7 @@ jobs:
       matrix:
         node-version: [12.x]
 
-    steps:
+  steps:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
