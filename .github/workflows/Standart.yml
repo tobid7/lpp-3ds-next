@@ -80,7 +80,7 @@ jobs:
           COMMIT_HASH: ${{ needs.build.outputs.commit_hash }}
         with:
           tag_name: $COMMIT_HASH
-          release_name: LPP-3DS-NEXT
+          release_name: LPP-3DS-NEXT | $COMMIT_TAG
           draft: false
           prerelease: true
       - name: Upload artifacts
@@ -88,4 +88,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          asset_paths: '["./**","./**/","./**/*.*"]'
+          asset_paths: '["/build/*"]'
