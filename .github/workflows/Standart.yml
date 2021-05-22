@@ -95,6 +95,7 @@ jobs:
           cd $D7/
           make
           mkdir -p ~/artifacts
+          mkdir -p /devbb
           cp lpp-3ds-next.3dsx ~/artifacts
           cp lpp-3ds-next.elf ~/artifacts
           cp lpp-3ds-next.smdh ~/artifacts
@@ -103,6 +104,12 @@ jobs:
           cp lpp-3ds-next.3dsx ~/artifacts/lpp-3ds-next-citra.3dsx
           cp lpp-3ds-next.elf ~/artifacts/lpp-3ds-next-citra.elf
           cp lpp-3ds-next.smdh ~/artifacts/lpp-3ds-next-citra.smdh
+          cp lpp-3ds-next.3dsx /devbb
+          cp lpp-3ds-next.elf /devbb
+          cp lpp-3ds-next.smdh /devbb
+          cp lpp-3ds-next.3dsx /devbb/lpp-3ds-next-citra.3dsx
+          cp lpp-3ds-next.elf /devbb/lpp-3ds-next-citra.elf
+          cp lpp-3ds-next.smdh /devbb/lpp-3ds-next-citra.smdh
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -110,9 +117,9 @@ jobs:
           prerelease: true
           title: "lpp-3ds-next"
           files: |
-            /build/*.3dsx
-            /build/*.elf
-            /build/*.smdh
+            /devbb/*.3dsx
+            /devbb/*.elf
+            /devbb/*.smdh
             *.3dsx
             *.elf
             *.smdh
