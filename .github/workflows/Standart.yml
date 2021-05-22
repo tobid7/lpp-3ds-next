@@ -64,28 +64,21 @@ jobs:
           name: build
 
 
-  test:
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x]
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v2.3.4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2.1.5
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: npm install, build, and test
-      run: |
-        npm i
-        npm test
-    - name: Get tag name
-      uses: little-core-labs/get-git-tag@master
-      id: tag_name
-    - name: Look at results
-      run: echo ${{ steps.tag_name.outputs.tag }}
+      # ...
+      - name: "Build & test"
+        run: |
+          echo "done!"
 
-  
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            *.*
