@@ -100,8 +100,7 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: v$CURRENT_DATE
+          automatic_release_tag: v.$CURRENT_DATE
           prerelease: false
           title: "lpp-3ds-next-nightly | $CURRENT_DATE
-          files: |
-            build/*
+          files: build/*
