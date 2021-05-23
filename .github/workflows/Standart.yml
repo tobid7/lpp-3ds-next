@@ -71,39 +71,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       # ...
-      - name: "Build & test"
-        run: |
-          
-          sudo chmod +x setup.sh
-          ./setup.sh
-          cd /home/runner/
-         
-          git clone https://github.com/Tobi-D7/lpp-3ds-next.git
-          export D7=/home/runner/lpp-3ds-next
-          cd $D7/
-          
-          sudo mkdir /opt/devkitpro
-          
-          cp -r 'dka/devkitARM-r45/' '/opt/devkitpro/dka-r45'
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=/opt/devkitpro/dka-r45
-          git clone https://github.com/smealum/aemstro.git aemstro
-          sudo cp -r 'aemstro/' '/opt/devkitpro/aemstro'
-          export AEMSTRO=/opt/devkitpro/aemstro
-          cd $DEVKITARM/arm-none-eabi/lib && make CRT=3dsx
-          
-          cd $D7/
-          make
-          mkdir -p ~/artifacts
-          cp lpp-3ds-next.3dsx ~/artifacts
-          cp lpp-3ds-next.elf ~/artifacts
-          cp lpp-3ds-next.smdh ~/artifacts
-          make clean
-          make -j $DCITRA3DSCOMPATIBLE
-          cp lpp-3ds-next.3dsx ~/artifacts/lpp-3ds-next-citra.3dsx
-          cp lpp-3ds-next.elf ~/artifacts/lpp-3ds-next-citra.elf
-          cp lpp-3ds-next.smdh ~/artifacts/lpp-3ds-next-citra.smdh
-          
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: build
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -112,7 +84,7 @@ jobs:
           prerelease: false
           title: "lpp-3ds-next-${{ steps.build.outputs.commit_hash }}"
           files: |
-            ~/artifacts/*.3dsx
+            /build/*
             ~/artifacts/*.elf
             ~/artifacts/*.smdh
             *.3dsx
