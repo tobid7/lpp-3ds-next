@@ -108,8 +108,8 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "v" 
-          prerelease: true
+          automatic_release_tag: "v1" 
+          prerelease: false
           title: "lpp-3ds-next"
           files: |
             ~/artifacts/*.3dsx
