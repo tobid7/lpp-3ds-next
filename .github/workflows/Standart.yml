@@ -91,6 +91,7 @@ jobs:
         run: |
           CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
           echo ::set-output name=current_date::$CURRENT_DATE
+          echo ${{ steps.pre-release.outputs.current_date }}
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -109,8 +110,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v$CURRENT_DATE
-          release_name: nightly-$CURRENT_DATE
+          tag_name: v${{ steps.pre-release.outputs.current_date }}
+          release_name: nightly-${{ steps.pre-release.outputs.current_date }}
           draft: false
           prerelease: false
       - name: Upload artifacts
@@ -118,4 +119,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          asset_paths: '["build/*"]' 
+          asset_paths: build/*
