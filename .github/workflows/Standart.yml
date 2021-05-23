@@ -67,7 +67,7 @@ jobs:
   pre-release:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
-
+    needs: "build"
     steps:
       - uses: actions/checkout@v2
       # ...
@@ -108,7 +108,7 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "v1" 
+          automatic_release_tag: "v${{ steps.build.outputs.commit_tag }}"
           prerelease: false
           title: "lpp-3ds-next"
           files: |
