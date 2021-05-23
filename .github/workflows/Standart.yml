@@ -82,9 +82,16 @@ jobs:
       AUTHOR_NAME: ${{ needs.build.outputs.author_name }}
       COMMIT_SUBJECT: ${{ needs.build.outputs.commit_subject }}
       COMMIT_MESSAGE: ${{ needs.build.outputs.commit_message }}
+    outputs:
+      current_date: ${{ steps.commit.outputs.current_date }}
     steps:
       - uses: actions/checkout@v2
       # ...
+      - name: Gen Date
+        id: commit 
+        run: |
+          CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
+          echo ::set-output name=current_date::$CURRENT_DATE
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -94,8 +101,8 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "v$"COMMIT_HASH""
+          automatic_release_tag: v$CURRENT_DATE
           prerelease: false
-          title: "lpp-3ds-next | $"COMMIT_HASH""
+          title: "lpp-3ds-next-nightly | $CURRENT_DATE
           files: |
             build/*
