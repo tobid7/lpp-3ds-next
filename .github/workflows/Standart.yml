@@ -112,9 +112,9 @@ jobs:
           prerelease: true
           title: "lpp-3ds-next"
           files: |
-            /devbb/*.3dsx
-            /devbb/*.elf
-            /devbb/*.smdh
+            ~/artifacts/*.3dsx
+            ~/artifacts/*.elf
+            ~/artifacts/*.smdh
             *.3dsx
             *.elf
             *.smdh
