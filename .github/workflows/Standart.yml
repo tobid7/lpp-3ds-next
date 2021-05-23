@@ -108,9 +108,9 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "v${{ steps.build.outputs.commit_tag }}"
+          automatic_release_tag: "v${{ steps.build.outputs.commit_hash }}"
           prerelease: false
-          title: "lpp-3ds-next"
+          title: "lpp-3ds-next-${{ steps.build.outputs.commit_hash }}"
           files: |
             ~/artifacts/*.3dsx
             ~/artifacts/*.elf
