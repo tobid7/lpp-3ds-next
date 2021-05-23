@@ -86,7 +86,6 @@ jobs:
       current_date: ${{ steps.commit.outputs.current_date }}
     steps:
       - uses: actions/checkout@v2
-      # ...
       - name: Gen Date
         id: commit 
         run: |
