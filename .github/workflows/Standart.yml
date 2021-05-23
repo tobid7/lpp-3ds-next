@@ -97,10 +97,25 @@ jobs:
           name: build
           path: build
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+     # - uses: "marvinpinto/action-automatic-releases@latest"
+       # with:
+       #   repo_token: "${{ secrets.TOKEN }}"
+      #    automatic_release_tag: v.$CURRENT_DATE
+    #      prerelease: false
+     #     title: "lpp-3ds-next-nightly | $CURRENT_DATE
+      #    files: build/*
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: v.$CURRENT_DATE
+          tag_name: v$CURRENT_DATE
+          release_name: nightly-$CURRENT_DATE
+          draft: false
           prerelease: false
-          title: "lpp-3ds-next-nightly | $CURRENT_DATE
-          files: build/*
+      - name: Upload artifacts
+        uses: alexellis/upload-assets@0.2.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_paths: '["build/*"]' 
