@@ -94,8 +94,8 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "v$COMMIT_HASH"
+          automatic_release_tag: "v$"COMMIT_HASH""
           prerelease: false
-          title: "lpp-3ds-next | $COMMIT_HASH"
+          title: "lpp-3ds-next | $"COMMIT_HASH""
           files: |
             build/*
