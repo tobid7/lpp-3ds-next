@@ -55,6 +55,7 @@ jobs:
           cp lpp-3ds-next.3dsx ~/artifacts/lpp-3ds-next-citra.3dsx
           cp lpp-3ds-next.elf ~/artifacts/lpp-3ds-next-citra.elf
           cp lpp-3ds-next.smdh ~/artifacts/lpp-3ds-next-citra.smdh
+          echo ::set-output name=commit_hash::$(git log --format=%h -1)
 
 
       - name: pb
@@ -84,9 +85,4 @@ jobs:
           prerelease: false
           title: "lpp-3ds-next-${{ steps.build.outputs.commit_hash }}"
           files: |
-            /build/*
-            ~/artifacts/*.elf
-            ~/artifacts/*.smdh
-            *.3dsx
-            *.elf
-            *.smdh
+            build/*
