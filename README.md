@@ -8,7 +8,7 @@
 Create a GH Action for compiling with devkitARM-r45
 Fix some of the issues
 ##### in Future 
-Update to newest devkitARM libctru citro2d citro3d
+Update to latest devkitARM libctru citro2d citro3d
 
 # Description
 
