@@ -715,6 +715,17 @@ static int lua_batterycharge(lua_State *L){
 	return 1;
 }
 
+static int lua_syslp(lua_State *L){
+	int argc = lua_gettop(L);
+	#ifndef SKIP_ERROR_HANDLING
+	if (argc != 0) return luaL_error(L, "wrong number of arguments");
+	#endif
+	bool syslp = aptMainLoop();
+	
+	lua_pushboolean(L,syslp);
+	return 1;
+}
+
 static int lua_readsmdh(lua_State *L){
 	int argc = lua_gettop(L);
 	#ifndef SKIP_ERROR_HANDLING
@@ -1972,6 +1983,7 @@ static const luaL_Reg System_functions[] = {
 	{"extractFromZIP",      lua_getfilefromzip},
 	{"checkSDMC",           lua_detectsd},
 	{"fork",                lua_dup},
+        {"mainLoop",            lua_syslp},
 // I/O Module and Dofile Patch
 	{"openFile",            lua_openfile},
 	{"getFileSize",         lua_getsize},
