@@ -1,5 +1,5 @@
 -- Main Loop
-while true do
+while System.mainLoop() do
 
 	-- Updating screens
 	Screen.waitVblankStart()
