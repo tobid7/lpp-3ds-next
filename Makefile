@@ -30,14 +30,14 @@ include $(DEVKITARM)/3ds_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source/include/lua	source source/include source/include/graphics \
-				source/include/ftp source/include/sf2d source/include/audiodec \
+				source/include/ftp source/include/audiodec \
 				source/include/lodepng/	source/include/unrar/	source/include/libjpeg \
 				source/include/ttf
 DATA		:=	data
 INCLUDES	:=	source/include
 
-APP_TITLE	:=	Lua Player Plus 3DS
-APP_AUTHOR	:=	Rinnegatamante
+APP_TITLE	:=	Lua Player Plus 3DS Next
+APP_AUTHOR	:=	Rinnegatamante, Tobi-D7
 APP_DESCRIPTION	:=	Lua interpreter for 3DS
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -61,7 +61,7 @@ LIBS	:= -lsf2d -lctru -lm -lz -logg -lcitro3d -llua -ljpeg -lmpg123 -lhbkb
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(LPP_LIBS)
+LIBDIRS	:= $(LPP_LIBS) $(CTRULIB)
 
 
 #---------------------------------------------------------------------------------

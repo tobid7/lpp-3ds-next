@@ -30,9 +30,8 @@
 #- Jean-loup Gailly and Mark Adler for zlib ----------------------------------------------------------------------------#
 #- Special thanks to Aurelio for testing, bug-fixing and various help with codes and implementations -------------------#
 #-----------------------------------------------------------------------------------------------------------------------*/
-extern "C"{
-	#include "../sf2d/sf2d.h"
-}
+#include <citro2d.h>
+
 struct Bitmap{
 	u32 magic;
 	u8* pixels;
@@ -44,13 +43,24 @@ struct gpu_text{
 	u32 magic;
 	u16 width;
 	u16 height;
-	sf2d_texture* tex;
+	C3D_Tex *tex;
+	Tex3DS_SubTexture *subtex;
 };
 struct Console{
 	u32 magic;
 	int screen;
 	char text[1500];
 };
+enum Target
+{
+	TOP,
+	BOTTOM
+};
+
+extern C3D_RenderTarget TG_Top;
+extern C3D_RenderTarget TG_TopRight;
+extern C3D_RenderTarget TG_Bottom;
+
 extern u8* TopLFB;
 extern u8* TopRFB;
 extern u8* BottomFB;

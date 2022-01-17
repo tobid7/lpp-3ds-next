@@ -38,6 +38,8 @@
 #include "include/graphics/Graphics.h"
 #include "include/utils.h"
 
+extern bool c3disinit;
+
 u32 CLEAR_COLOR = 0x68B0D8FF;
 float light_r = 1.0f;
 float light_g = 1.0f;
@@ -441,7 +443,7 @@ static int lua_init(lua_State *L){
 	u32 CLEAR_COLOR = ARGB2RGBA(luaL_checkinteger(L, 3));
 	
 	// Initialize graphics
-	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+	if (!c3disinit){ C3D_Init(C3D_DEFAULT_CMDBUF_SIZE); c3disinit = true;}
 
 	// Initialize the render targets
 	targets[0] = C3D_RenderTargetCreate(h, w, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);

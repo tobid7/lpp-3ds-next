@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "3DS",
+            "includePath": [
+                "${workspaceFolder}",
+                "/opt/devkitpro/libctru/include/**",
+                "/opt/devkitpro/portlibs/3ds/include/**"
+            ],
+            "intelliSenseMode": "gcc-arm",
+            
+            "cStandard": "c17",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}

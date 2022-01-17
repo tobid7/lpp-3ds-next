@@ -63,12 +63,12 @@ static int lua_check(lua_State *L){
 	u32 pad = luaL_checkinteger(L, 1);
 	u32 button = luaL_checkinteger(L, 2);
 	if (button == KEY_HOME){
-		APT_AppStatus status = aptGetStatus();
-		lua_pushboolean(L,((status == APP_SUSPENDING) && aptGetStatusPower() == 0));
-	}else if (button == KEY_POWER){
-		APT_AppStatus status = aptGetStatus();
+		bool status = aptIsHomeAllowed();
+		lua_pushboolean(L,((status == false) && aptIsHomeAllowed() == 0));
+	}/*else if (button == KEY_POWER){
+		
 		lua_pushboolean(L,((status == APP_SUSPENDING) && aptGetStatusPower() == 1));
-	}else lua_pushboolean(L, ((pad & button) == button));
+	}*/else lua_pushboolean(L, ((pad & button) == button));
 	return 1;
 }
 

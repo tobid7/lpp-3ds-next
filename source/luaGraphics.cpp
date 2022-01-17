@@ -39,16 +39,21 @@
 #define stringify(str) #str
 #define VariableRegister(lua, value) do { lua_pushinteger(lua, value); lua_setglobal (lua, stringify(value)); } while(0)
 
-int cur_screen;
+Target screentg = TOP;
+C3D_RenderTarget curtg;
+bool rfshcl = false;
 
+bool c3disinit = false;
 static int lua_init(lua_State *L) {
 	int argc = lua_gettop(L);
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 0) return luaL_error(L, "wrong number of arguments");	
 	#endif
-	sf2d_init();
-	cur_screen = 2;
-	sf2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
+	if (!c3disinit){ C3D_Init(C3D_DEFAULT_CMDBUF_SIZE); c3disinit = true;}
+	C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+	TG_Top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	TG_TopRight = C2D_CreateScreenTarget(GFX_TOP, GFX_RIGHT);
+	TG_Bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 	return 0;
 }
 
@@ -57,8 +62,9 @@ static int lua_term(lua_State *L) {
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 0) return luaL_error(L, "wrong number of arguments");
 	#endif
-	cur_screen = 2;
-	sf2d_fini();
+	
+	C2D_Fini();
+	C3D_Fini();
 	return 0;
 }
 
@@ -67,17 +73,25 @@ static int lua_refresh(lua_State *L) {
 	#ifndef SKIP_ERROR_HANDLING
 	if ((argc != 1) && (argc != 2))  return luaL_error(L, "wrong number of arguments");
 	#endif
-	int screen = luaL_checkinteger(L,1);
+	Target tg = (Target)luaL_checkinteger(L,1);
 	int side=0;
 	if (argc == 2) side = luaL_checkinteger(L,2);
-	gfxScreen_t my_screen;
-	gfx3dSide_t eye;
-	cur_screen = screen;
-	if (screen == 0) my_screen = GFX_TOP;
-	else my_screen = GFX_BOTTOM;
-	if (side == 0) eye = GFX_LEFT;
-	else eye = GFX_RIGHT;
-	sf2d_start_frame(my_screen,eye);
+	screentg = tg;
+	switch (tg)
+	{
+	case TOP:
+		curtg = TG_Top;
+		break;
+	case TOP:
+		curtg = TG_Bottom;
+		break;
+	default:
+		curtg = TG_Top;
+		break;
+	}
+	rfshcl = true;
+	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+	C2D_SceneBegin()
 	return 0;
 }
 
@@ -86,7 +100,7 @@ static int lua_end(lua_State *L) {
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 0) return luaL_error(L, "wrong number of arguments");
 	#endif
-	sf2d_end_frame();
+	C3D_FrameEnd(0);
 	return 0;
 }
 
@@ -95,37 +109,26 @@ static int lua_flip(lua_State *L) {
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 0) return luaL_error(L, "wrong number of arguments");
 	#endif
-	sf2d_swapbuffers();
+	luaL_error(L, "This Function is useless in lpp-3ds-next");
 	return 0;
 }
 
 static int lua_rect(lua_State *L) {
 	int argc = lua_gettop(L);
 	#ifndef SKIP_ERROR_HANDLING
-	if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments");
+	if (argc != 5) return luaL_error(L, "wrong number of arguments");
 	#endif
 	float x1 = luaL_checknumber(L,1);
 	float x2 = luaL_checknumber(L,2);
 	float y1 = luaL_checknumber(L,3);
 	float y2 = luaL_checknumber(L,4);
 	float radius = 0;
-	if (x2 < x1){
-		int tmp = x2;
-		x2 = x1;
-		x1 = tmp;
-	}
-	if (y2 < y1){
-		int tmp = y2;
-		y2 = y1;
-		y1 = tmp;
-	}
+	
 	u32 color = luaL_checkinteger(L,5);
 	#ifndef SKIP_ERROR_HANDLING
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
-	if (argc == 6) radius = luaL_checknumber(L,6);
-	if (radius == 0) sf2d_draw_rectangle(x1, y1, x2-x1, y2-y1, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	else sf2d_draw_rectangle_rotate(x1, y1, x2-x1, y2-y1, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF), radius);
+	C2D_DrawRectSolid(x1, y1, x2, y2, color);
 	return 0;
 }
 
@@ -139,9 +142,9 @@ static int lua_fillcircle(lua_State *L) {
 	int radius = luaL_checkinteger(L,3);
 	u32 color = luaL_checkinteger(L,4);
 	#ifndef SKIP_ERROR_HANDLING
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
-	sf2d_draw_fill_circle(x, y, radius, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+	C2D_DrawCircleSolid(x, y, 0.5, radius, color);
 	return 0;
 }
 
@@ -156,10 +159,10 @@ static int lua_line(lua_State *L) {
 	float y1 = luaL_checknumber(L,3);
 	float y2 = luaL_checknumber(L,4);
 	#ifndef SKIP_ERROR_HANDLING
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	u32 color = luaL_checkinteger(L,5);
-	sf2d_draw_line(x1, y1, x2, y2, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+	C2D_DrawLine(x1, y1, color, x2, y2, color, 1, 1);
 	return 0;
 }
 
@@ -172,14 +175,21 @@ static int lua_emptyrect(lua_State *L) {
 	float x2 = luaL_checknumber(L,2);
 	float y1 = luaL_checknumber(L,3);
 	float y2 = luaL_checknumber(L,4);
+	if (x2 < x1){
+		int tmp = x2;
+		x2 = x1;
+		x1 = tmp;
+	}
+	if (y2 < y1){
+		int tmp = y2;
+		y2 = y1;
+		y1 = tmp;
+	}
 	#ifndef SKIP_ERROR_HANDLING
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	u32 color = luaL_checkinteger(L,5);
-	sf2d_draw_line(x1, y1, x1, y2, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	sf2d_draw_line(x2, y1, x2, y2, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	sf2d_draw_line(x1, y2, x2, y2, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	sf2d_draw_line(x1, y1, x2, y1, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+	C2D_DrawLine(x1, y1, color, x2, y2, color, 1, 1);
 	return 0;
 }
 
@@ -241,10 +251,31 @@ static int lua_loadimg(lua_State *L){
 		free(bitmap->pixels);
 		bitmap->pixels = real_pixels;
 	}
-	sf2d_texture *tex = sf2d_create_texture_mem_RGBA8(bitmap->pixels, bitmap->width, bitmap->height, TEXFMT_RGBA8, SF2D_PLACE_RAM);
+	C3D_Tex *tex;
+	Tex3DS_SubTexture subtex;
+	C3D_TexInit(tex, (u16)bitmap->width, (u16)bitmap->height, GPU_RGBA8);
+	C3D_TexSetFilter(tex, GPU_LINEAR, GPU_LINEAR);
+	subtex = = new Tex3DS_SubTexture({(u16)bitmap->width, (u16)bitmap->height, 0.0f, 1.0f, bitmap->width / 1024.0f, 1.0f - (bitmap->height / 1024.0f)});
+	tex.border = 0xFFFFFFFF;
+	C3D_TexSetWrap(tex, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+	for (u32 x = 0; x < bitmap->width && x < 1024; x++) {
+		for (u32 y = 0; y < bitmap->height && y < 1024; y++) {
+			const u32 dstPos = ((((y >> 3) * (1024 >> 3) + (x >> 3)) << 6) +
+								((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) |
+								((x & 4) << 2) | ((y & 4) << 3))) * 4;
+
+			const u32 srcPos = (y * bitmap->width + x) * 4;
+			((uint8_t *)tex->data)[dstPos + 0] = bitmap->pixels[srcPos + 3];
+			((uint8_t *)tex->data)[dstPos + 1] = bitmap->pixels[srcPos + 2];
+			((uint8_t *)tex->data)[dstPos + 2] = bitmap->pixels[srcPos + 1];
+			((uint8_t *)tex->data)[dstPos + 3] = bitmap->pixels[srcPos + 0];
+		}
+	}
+	
 	gpu_text* result = (gpu_text*)malloc(sizeof(gpu_text));
 	result->magic = 0x4C545854;
 	result->tex = tex;
+	result->subtex = subtex;
 	result->width = bitmap->width;
 	result->height = bitmap->height;
 	free(bitmap->pixels);
@@ -289,10 +320,31 @@ static int lua_convert(lua_State *L){
 			i = i + 4;
 		}
 	}
-	sf2d_texture *tex = sf2d_create_texture_mem_RGBA8(real_pixels, bitmap->width, bitmap->height, TEXFMT_RGBA8, SF2D_PLACE_RAM);
+	C3D_Tex *tex;
+	Tex3DS_SubTexture subtex;
+	C3D_TexInit(tex, (u16)bitmap->width, (u16)bitmap->height, GPU_RGBA8);
+	C3D_TexSetFilter(tex, GPU_LINEAR, GPU_LINEAR);
+	subtex = = new Tex3DS_SubTexture({(u16)bitmap->width, (u16)bitmap->height, 0.0f, 1.0f, bitmap->width / 1024.0f, 1.0f - (bitmap->height / 1024.0f)});
+	tex.border = 0xFFFFFFFF;
+	C3D_TexSetWrap(tex, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+	for (u32 x = 0; x < bitmap->width && x < 1024; x++) {
+		for (u32 y = 0; y < bitmap->height && y < 1024; y++) {
+			const u32 dstPos = ((((y >> 3) * (1024 >> 3) + (x >> 3)) << 6) +
+								((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) |
+								((x & 4) << 2) | ((y & 4) << 3))) * 4;
+
+			const u32 srcPos = (y * bitmap->width + x) * 4;
+			((uint8_t *)tex->data)[dstPos + 0] = bitmap->pixels[srcPos + 3];
+			((uint8_t *)tex->data)[dstPos + 1] = bitmap->pixels[srcPos + 2];
+			((uint8_t *)tex->data)[dstPos + 2] = bitmap->pixels[srcPos + 1];
+			((uint8_t *)tex->data)[dstPos + 3] = bitmap->pixels[srcPos + 0];
+		}
+	}
+	
 	gpu_text* result = (gpu_text*)malloc(sizeof(gpu_text));
 	result->magic = 0x4C545854;
 	result->tex = tex;
+	result->subtex = subtex;
 	result->width = bitmap->width;
 	result->height = bitmap->height;
 	free(real_pixels);
@@ -308,20 +360,26 @@ static int lua_drawimg(lua_State *L){
 	float x = luaL_checknumber(L,1);
 	float y = luaL_checknumber(L,2);
 	gpu_text* texture = (gpu_text*)luaL_checkinteger(L,3);
+	C2D_Image img;
+	img.tex = texture->tex;
+	img.subtex = texture->subtex;
+	C2D_ImageTint tnt;
+	
 	u32 color = 0;
 	if (argc == 4){ 
 		color = luaL_checkinteger(L,4);
 		#ifndef SKIP_ERROR_HANDLING
 		if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-		if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+		if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 		#endif
-		sf2d_draw_texture_blend(texture->tex, x, y, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+		tnt.corners->color = color;
+		C2D_DrawImageAt(img, x, y, 0.5f, tnt);
 	}else{
 		#ifndef SKIP_ERROR_HANDLING
 		if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-		if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+		if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 		#endif
-		sf2d_draw_texture(texture->tex, x, y);
+		C2D_DrawImageAt(img, x, y, 0.5f, nullptr);
 	}
 	return 0;
 }
@@ -337,14 +395,19 @@ static int lua_drawimg_scale(lua_State *L){
 	float scale_x = luaL_checknumber(L,4);
 	float scale_y = luaL_checknumber(L,5);
 	u32 color;
+	C2D_Image img;
+	img.tex = texture->tex;
+	img.subtex = texture->subtex;
+	C2D_ImageTint tnt;
 	#ifndef SKIP_ERROR_HANDLING
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 6){
 		color = luaL_checkinteger(L,6);
-		sf2d_draw_texture_scale_blend(texture->tex, x, y, scale_x, scale_y, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	}else sf2d_draw_texture_scale(texture->tex, x, y, scale_x, scale_y);
+		tnt.corners->color = color;
+		C2D_DrawImageAt(img, x, y, 0.5f, tnt);
+	}else C2D_DrawImageAt(img, x, y, 0.5f, nullptr);
 	return 0;
 }
 
@@ -360,7 +423,7 @@ static int lua_drawimg_rotate(lua_State *L){
 	u32 color;
 	#ifndef SKIP_ERROR_HANDLING
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 5){
 		color = luaL_checkinteger(L,5);
@@ -388,7 +451,7 @@ static int lua_drawimg_full(lua_State *L){
 	if (argc == 11) color = luaL_checkinteger(L, 11);
 	#ifndef SKIP_ERROR_HANDLING
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 10) sf2d_draw_texture_part_rotate_scale(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y);
 	else sf2d_draw_texture_part_rotate_scale_blend(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
@@ -411,7 +474,7 @@ static int lua_partial(lua_State *L){
 	if (argc == 8) color = luaL_checkinteger(L, 8);
 	#ifndef SKIP_ERROR_HANDLING
 	if (file->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
-	if (cur_screen != 1 && cur_screen != 0) return luaL_error(L, "you need to call initBlend to use GPU rendering");
+	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 8) sf2d_draw_texture_part_blend(file->tex, x, y, st_x, st_y, width, height, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
 	else sf2d_draw_texture_part(file->tex, x, y, st_x, st_y, width, height);
@@ -529,6 +592,10 @@ void luaGraphics_init(lua_State *L) {
 	lua_setglobal(L, "Graphics");
 	u8 BORDER = 1;
 	u8 CENTER = 3;
+	Target Top = TOP;
+	Target Bottom = BOTTOM;
+	VariableRegister(L, Top);
+	VariableRegister(L, Bottom);
 	VariableRegister(L,BORDER);
 	VariableRegister(L,CENTER);
 }

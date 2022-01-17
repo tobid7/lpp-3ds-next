@@ -189,7 +189,7 @@ static int lua_camimage(lua_State *L){
 static int lua_camshot(lua_State *L){
 	int argc = lua_gettop(L);
 	#ifndef SKIP_ERROR_HANDLING
-	if (argc != 2 && argc != 3) return luaL_error(L, "wrong number of arguments.");
+	if (argc < 4) return luaL_error(L, "wrong number of arguments.");
 	#endif
 	const char *screenpath = luaL_checkstring(L, 1);
 	CAMU_Size res = (CAMU_Size)luaL_checkinteger(L, 2);
@@ -221,7 +221,8 @@ static int lua_camshot(lua_State *L){
 		height = 240;
 	}
 	bool isJPG = false;
-	if (argc == 3) isJPG = lua_toboolean(L, 3);
+	isJPG = lua_toboolean(L, 3);
+	FS_ArchiveID a_id = (FS_ArchiveID)luaL_checkinteger(L, 4);
 	if (is3D) CAMU_StopCapture(PORT_BOTH);
 	else CAMU_StopCapture(PORT_CAM1);
 	camExit();
@@ -237,10 +238,12 @@ static int lua_camshot(lua_State *L){
 	CAMU_PlayShutterSound(SHUTTER_SOUND_TYPE_NORMAL);
 	Handle fileHandle;
 	int x, y;
-	FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
+	FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+	FS_Archive sdmcArchive;
+	FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);
 	if (!isJPG){ //BMP Format
 		FS_Path filePath=fsMakePath(PATH_ASCII, screenpath);
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+		Result ret=FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		u32 bytesWritten;
 		u8* tempbuf = (u8*)malloc(0x36 + BUFFER_SIZE);
 		memset(tempbuf, 0, 0x36+BUFFER_SIZE);
@@ -285,12 +288,10 @@ static int lua_camshot(lua_State *L){
 				si++;
 			}	
 		}
-		sdmcInit();
 		char tmpPath2[1024];
 		strcpy(tmpPath2,"sdmc:");
 		strcat(tmpPath2,(char*)screenpath);
 		saveJpg(tmpPath2,(u32*)tempbuf,width,height);
-		sdmcExit();
 		free(tempbuf);
 	}
 	svcCloseHandle(camReceiveEvent);
@@ -338,6 +339,10 @@ void luaCamera_init(lua_State *L) {
 	u8 OUTER_CAM = SELECT_OUT1;
 	VariableRegister(L,INNER_CAM);
 	VariableRegister(L,OUTER_CAM);
+	FS_ArchiveID SDMC = ARCHIVE_SDMC;
+	FS_ArchiveID NAND = ARCHIVE_NAND_CTR_FS;
+	VariableRegister(L,SDMC);
+	VariableRegister(L,NAND);
 	
 	// Camera Resolutions
 	u8 VGA_RES = SIZE_VGA;
