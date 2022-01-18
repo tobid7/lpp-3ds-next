@@ -57,9 +57,9 @@ enum Target
 	BOTTOM
 };
 
-extern C3D_RenderTarget TG_Top;
-extern C3D_RenderTarget TG_TopRight;
-extern C3D_RenderTarget TG_Bottom;
+extern C3D_RenderTarget *TG_Top;
+extern C3D_RenderTarget *TG_TopRight;
+extern C3D_RenderTarget *TG_Bottom;
 
 extern u8* TopLFB;
 extern u8* TopRFB;

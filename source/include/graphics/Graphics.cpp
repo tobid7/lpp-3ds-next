@@ -51,9 +51,9 @@ u8* TopLFB;
 u8* TopRFB;
 u8* BottomFB;
 
-C3D_RenderTarget TG_Top;
-C3D_RenderTarget TG_TopRight;
-C3D_RenderTarget TG_Bottom;
+C3D_RenderTarget *TG_Top;
+C3D_RenderTarget *TG_TopRight;
+C3D_RenderTarget *TG_Bottom;
 
 void putPixel565(u8* dst, u8 x, u8 y, u16 v){
 	dst[(x+(47-y)*48)*3+0]=(v&0x1F)<<3;
