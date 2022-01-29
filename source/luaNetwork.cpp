@@ -125,7 +125,7 @@ static int lua_download(lua_State *L){
 	httpcContext context;
 	u32 statuscode=0;
 	HTTPC_RequestMethod useMethod = HTTPC_METHOD_GET;
-
+	FS_ArchiveID a_id = ARCHIVE_SDMC;//(FS_ArchiveID)luaL_checkinteger(L, 4);
 	if(method <= 3 && method >= 1) useMethod = (HTTPC_RequestMethod)method;
 
 	do {
@@ -169,7 +169,7 @@ static int lua_download(lua_State *L){
 		#endif
 			httpcBeginRequest(&context);
 			u32 contentsize=0;
-			httpcGetResponseStatusCode(&context, &statuscode, 0);
+			httpcGetResponseStatusCode(&context, &statuscode);
 			if (statuscode == 200){
 				u32 readSize = 0;
 				long int bytesWritten = 0;
@@ -177,9 +177,11 @@ static int lua_download(lua_State *L){
 				memset(buf, 0, 0x1000);
 
 				Handle fileHandle;
-				FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-				FS_Path filePath=fsMakePath(PATH_ASCII, file);
-				FSUSER_OpenFileDirectly( &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+				FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+				FS_Archive sdmcArchive;
+				FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);
+				
+				FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 
 				do {
 					ret = httpcDownloadData(&context, buf, 0x1000, &readSize);
@@ -260,7 +262,7 @@ static int lua_downstring(lua_State *L){
 			httpcBeginRequest(&context);
 			long int contentsize=0; // Crash on the += if u32. WTF?
 			u32 readSize=0;
-			httpcGetResponseStatusCode(&context, &statuscode, 0);
+			httpcGetResponseStatusCode(&context, &statuscode);
 			if (statuscode == 200) {
 				unsigned char *buffer = (unsigned char*)malloc(0x1000);
 				do {
@@ -351,7 +353,7 @@ static int lua_sendmail(lua_State *L){ //BETA func
 		}
 		u32 statuscode=0;
 		u32 contentsize=0;
-		httpcGetResponseStatusCode(&context, &statuscode, 0);
+		httpcGetResponseStatusCode(&context, &statuscode);
 		if (statuscode != 200) luaL_error(L, "request error");
 		httpcGetDownloadSizeState(&context, NULL, &contentsize);
 		u8 response;
@@ -599,8 +601,10 @@ static int lua_addCert(lua_State *L)
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 1)  return luaL_error(L, "wrong number of arguments");
 	#endif
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	const char *text = luaL_checkstring(L, 1);
 	fileStream fileHandle;
+	Handle fs;
 	if (strncmp("romfs:/",text,7) == 0){
 		fileHandle.isRomfs = true;
 		FILE* handle = fopen(text,"r");
@@ -610,11 +614,13 @@ static int lua_addCert(lua_State *L)
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Path filePath = fsMakePath(PATH_ASCII, text);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret = FSUSER_OpenFileDirectly( &fileHandle.handle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fs, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "file doesn't exist.");
+		//if (ret) return luaL_error(L, "file doesn't exist.");
 		#endif
 	}
 	u64 cert_size;

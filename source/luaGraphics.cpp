@@ -366,7 +366,7 @@ static int lua_drawimg(lua_State *L){
 	C2D_Image img;
 	img.tex = texture->tex;
 	img.subtex = texture->subtex;
-	C2D_ImageTint tnt;
+	C2D_ImageTint* tnt;
 	
 	u32 color = 0;
 	if (argc == 4){ 
@@ -375,7 +375,7 @@ static int lua_drawimg(lua_State *L){
 		if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
 		if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 		#endif
-		tnt.corners->color = color;
+		tnt->corners->color = color;
 		C2D_DrawImageAt(img, x, y, 0.5f, tnt);
 	}else{
 		#ifndef SKIP_ERROR_HANDLING
@@ -401,14 +401,14 @@ static int lua_drawimg_scale(lua_State *L){
 	C2D_Image img;
 	img.tex = texture->tex;
 	img.subtex = texture->subtex;
-	C2D_ImageTint tnt;
+	C2D_ImageTint* tnt;
 	#ifndef SKIP_ERROR_HANDLING
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
 	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 6){
 		color = luaL_checkinteger(L,6);
-		tnt.corners->color = color;
+		tnt->corners->color = color;
 		C2D_DrawImageAt(img, x, y, 0.5f, tnt);
 	}else C2D_DrawImageAt(img, x, y, 0.5f, nullptr);
 	return 0;
@@ -427,14 +427,14 @@ static int lua_drawimg_rotate(lua_State *L){
 	C2D_Image img;
 	img.tex = texture->tex;
 	img.subtex = texture->subtex;
-	C2D_ImageTint tnt;
+	C2D_ImageTint* tnt;
 	#ifndef SKIP_ERROR_HANDLING
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
 	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
 	if (argc == 5){
 		color = luaL_checkinteger(L,5);
-		tnt.corners->color = color;
+		tnt->corners->color = color;
 		C2D_DrawImageAtRotated(img, x, y, 1.0f, radius, tnt);
 	}else C2D_DrawImageAtRotated(img, x, y, 1.0f, radius, nullptr);
 	return 0;
@@ -461,8 +461,8 @@ static int lua_drawimg_full(lua_State *L){
 	if (texture->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
 	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
-	if (argc == 10) //sf2d_draw_texture_part_rotate_scale(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y);
-	else //sf2d_draw_texture_part_rotate_scale_blend(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+	if (argc == 10) {}//sf2d_draw_texture_part_rotate_scale(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y);
+	else {}//sf2d_draw_texture_part_rotate_scale_blend(texture->tex, x, y, radius, st_x, st_y, width, height, scale_x, scale_y, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
 	return 0;
 }
 
@@ -484,8 +484,8 @@ static int lua_partial(lua_State *L){
 	if (file->magic != 0x4C545854) return luaL_error(L, "attempt to access wrong memory block type");
 	if (rfshcl) return luaL_error(L, "you need to call initBlend to use GPU rendering");
 	#endif
-	if (argc == 8) //sf2d_draw_texture_part_blend(file->tex, x, y, st_x, st_y, width, height, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
-	else //sf2d_draw_texture_part(file->tex, x, y, st_x, st_y, width, height);
+	if (argc == 8) {}//sf2d_draw_texture_part_blend(file->tex, x, y, st_x, st_y, width, height, RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF, (color >> 24) & 0xFF));
+	else {}//sf2d_draw_texture_part(file->tex, x, y, st_x, st_y, width, height);
 	return 0;
 }
 

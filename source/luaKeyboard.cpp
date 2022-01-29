@@ -49,7 +49,7 @@ static int lua_setText(lua_State *L){
 	#ifndef SKIP_ERROR_HANDLING
 	if (argc != 1) return luaL_error(L, "wrong number of arguments");
 	#endif
-	char* text = luaL_checkstring(L, 1);
+	char* text = (char*)luaL_checkstring(L, 1);
 	std::string s(text);
 	keyboard.UserInput = s;
 	return 0;
