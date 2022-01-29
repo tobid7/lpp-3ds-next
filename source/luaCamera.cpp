@@ -222,6 +222,7 @@ static int lua_camshot(lua_State *L){
 	}
 	bool isJPG = false;
 	isJPG = lua_toboolean(L, 3);
+	
 	FS_ArchiveID a_id = (FS_ArchiveID)luaL_checkinteger(L, 4);
 	if (is3D) CAMU_StopCapture(PORT_BOTH);
 	else CAMU_StopCapture(PORT_CAM1);
@@ -243,7 +244,8 @@ static int lua_camshot(lua_State *L){
 	FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);
 	if (!isJPG){ //BMP Format
 		FS_Path filePath=fsMakePath(PATH_ASCII, screenpath);
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+		Result ret=FSUSER_OpenFileDirectly( 
+			&fileHandle, a_id, m_path, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		u32 bytesWritten;
 		u8* tempbuf = (u8*)malloc(0x36 + BUFFER_SIZE);
 		memset(tempbuf, 0, 0x36+BUFFER_SIZE);
