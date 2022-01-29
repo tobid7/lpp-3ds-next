@@ -98,6 +98,7 @@ static int lua_loadobj(lua_State *L){
 	
 	// Opening texture file
 	fileStream fileHandle;
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	u32 bytesRead;
 	u16 magic;
 	u64 long_magic;
@@ -110,11 +111,13 @@ static int lua_loadobj(lua_State *L){
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Path filePath = fsMakePath(PATH_ASCII, text);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret = FSUSER_OpenFileDirectly( &fileHandle.handle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle.handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "file doesn't exist.");
+		//if (ret) return luaL_error(L, "file doesn't exist.");
 		#endif
 	}
 	FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -183,11 +186,12 @@ static int lua_loadobj(lua_State *L){
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, file_tbo);
-		Result ret=FSUSER_OpenFileDirectly(&fileHandle.handle, sdmcArchive, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle.handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if(ret) return luaL_error(L, "error opening file");
+		//if(ret) return luaL_error(L, "error opening file");
 		#endif
 	}
 	
@@ -447,13 +451,13 @@ static int lua_init(lua_State *L){
 
 	// Initialize the render targets
 	targets[0] = C3D_RenderTargetCreate(h, w, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetSetClear(targets[0], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+	C3D_RenderTargetClear(targets[0], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
 	C3D_RenderTargetSetOutput(targets[0], GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 	targets[1] = C3D_RenderTargetCreate(h, w, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetSetClear(targets[1], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+	C3D_RenderTargetClear(targets[1], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
 	C3D_RenderTargetSetOutput(targets[1], GFX_TOP, GFX_RIGHT, DISPLAY_TRANSFER_FLAGS);
 	targets[2] = C3D_RenderTargetCreate(h, w, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetSetClear(targets[2], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
+	C3D_RenderTargetClear(targets[2], C3D_CLEAR_ALL, CLEAR_COLOR, 0);
 	C3D_RenderTargetSetOutput(targets[2], GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 	
 	// Load the vertex shader, create a shader program and bind it
@@ -478,7 +482,7 @@ static int lua_init(lua_State *L){
 	AttrInfo_AddLoader(attrInfo, 2, GPU_FLOAT, 3); // v2=normal
 	
 	// Compute the projection matrix
-	Mtx_PerspTilt(&projection, 80.0f*M_PI/180.0f, float(w)/float(h), 0.01f, 1000.0f);
+	Mtx_PerspTilt(&projection, 80.0f*M_PI/180.0f, float(w)/float(h), 0.01f, 1000.0f,  false);
 	
 	return 0;
 }
@@ -531,6 +535,7 @@ static int lua_useTexture(lua_State *L){
 
 	// Opening new texture
 	fileStream fileHandle;
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	u32 bytesRead;
 	u16 magic;
 	u64 long_magic;
@@ -543,11 +548,12 @@ static int lua_useTexture(lua_State *L){
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Path filePath = fsMakePath(PATH_ASCII, text);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret = FSUSER_OpenFileDirectly( &fileHandle.handle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle.handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "file doesn't exist.");
+		//if (ret) return luaL_error(L, "file doesn't exist.");
 		#endif
 	}
 	FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -640,6 +646,7 @@ static int lua_loadModel(lua_State *L){
 	u32 bytesRead;
 	u16 magic;
 	u64 long_magic;
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",text,7) == 0){
 		fileHandle.isRomfs = true;
 		FILE* handle = fopen(text,"r");
@@ -649,11 +656,12 @@ static int lua_loadModel(lua_State *L){
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Path filePath = fsMakePath(PATH_ASCII, text);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret = FSUSER_OpenFileDirectly( &fileHandle.handle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle.handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "file doesn't exist.");
+		//if (ret) return luaL_error(L, "file doesn't exist.");
 		#endif
 	}
 	FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -843,15 +851,15 @@ static int lua_blend(lua_State *L){
 	
 	// Configure the first fragment shading substage
 	C3D_TexEnv env;
-	C3D_TexEnvSrc(&env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
-	C3D_TexEnvOp(&env, C3D_Both, 0, 0, 0);
+	C3D_TexEnvSrc(&env, C3D_Both, GPU_TEXTURE0, GPU_PRIMARY_COLOR, GPU_TEVSRC::GPU_CONSTANT);
+	//C3D_TexEnvOpRgb(&env, C3D_RGB, 0, 0, 0);
 	C3D_TexEnvFunc(&env, C3D_Both, GPU_MODULATE);
 	C3D_SetTexEnv(0, &env);
 	
 	// Calculate the modelView matrix
 	C3D_Mtx modelView;
 	Mtx_Identity(&modelView);
-	Mtx_Translate(&modelView, x, y, z);
+	Mtx_Translate(&modelView, x, y, z, true);
 	Mtx_RotateX(&modelView, angleX, true);
 	Mtx_RotateY(&modelView, angleY, true);
 

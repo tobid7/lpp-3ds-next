@@ -116,6 +116,7 @@ static int lua_loadimg(lua_State *L){
 	u32 bytesRead;
 	u16 magic;
 	u64 long_magic;
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",text,7) == 0){
 		fileHandle.isRomfs = true;
 		FILE* handle = fopen(text,"r");
@@ -125,11 +126,12 @@ static int lua_loadimg(lua_State *L){
 		fileHandle.handle = (u32)handle;
 	}else{
 		fileHandle.isRomfs = false;
-		FS_Path filePath=fsMakePath(PATH_ASCII, text);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle.handle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle.handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "file doesn't exist.");
+		//if (ret) return luaL_error(L, "file doesn't exist.");
 		#endif
 	}
 	FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -270,13 +272,15 @@ static int lua_saveimg(lua_State *L){
 	if (src->magic != 0x4C494D47) return luaL_error(L, "attempt to access wrong memory block type");
 	#endif
 	bool isJPG = false;
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (argc == 3) isJPG = lua_toboolean(L, 3);
 	if (!isJPG){ //BMP Format
 		Handle fileHandle;
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, text);
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
-		if(ret) return luaL_error(L, "error opening file");
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+		//if(ret) return luaL_error(L, "error opening file");
 		u32 bytesWritten;
 		u8 moltiplier = src->bitperpixel >> 3;
 		u8* tempbuf = (u8*)malloc(0x36+(src->width)*(src->height)*moltiplier);
@@ -319,13 +323,13 @@ static int lua_saveimg(lua_State *L){
 			}
 			free(tmp);
 		}
-		sdmcInit();
+		
 		char tmpPath2[1024];
 		strcpy(tmpPath2,"sdmc:");
 		strcat(tmpPath2,(char*)text);
 		saveJpg(tmpPath2,(u32*)flip_pixels,src->width,src->height);
 		free(flip_pixels);
-		sdmcExit();
+		
 	}
 	return 0;
 }
@@ -531,7 +535,7 @@ static int lua_pixel(lua_State *L){
 	if (screen > 1){
 		if (((gpu_text*)screen)->magic == 0x4C545854){
 			RBswap(&color);
-			sf2d_set_pixel(((gpu_text*)screen)->tex,x,y,color);
+			//sf2d_set_pixel(((gpu_text*)screen)->tex,x,y,color);
 		}else if (((Bitmap*)screen)->bitperpixel == 32) Draw32bppImagePixel(x,y,color,(Bitmap*)screen);
 		else if (alpha == 255) DrawImagePixel(x,y,color,(Bitmap*)screen);
 		else DrawAlphaImagePixel(x,y,color,(Bitmap*)screen);
@@ -755,9 +759,7 @@ static int lua_loadFont(lua_State *L) {
 		strcat(tmpPath2,(char*)text);
 	}
 	Font F;
-	sdmcInit();
 	ttf* result = (ttf*)F.loadFromFile(tmpPath2);
-	sdmcExit();
 	F.setSize(16);
 	result->f = F;
 	lua_pushinteger(L,(u32)result);

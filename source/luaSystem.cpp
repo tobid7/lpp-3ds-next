@@ -87,9 +87,11 @@ static int lua_dofile (lua_State *L) {
 	}else{
 		Handle fileHandle;
 		u32 bytesRead;
-		FS_Path filePath=fsMakePath(PATH_ASCII, fname);
-		FS_Archive script=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		Result ret = FSUSER_OpenFileDirectly( &fileHandle, script, filePath, FS_OPEN_READ, 0x00000000);
+		FS_ArchiveID a_id = ARCHIVE_SDMC;
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+	F	SUSER_OpenFileDirectly( &fileHandle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
 		if (ret) return luaL_error(L, "script doesn't exist.");
 		#endif

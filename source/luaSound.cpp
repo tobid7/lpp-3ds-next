@@ -451,7 +451,7 @@ static int lua_openogg_old(lua_State *L) {
 		strcpy(myFile,"sdmc:");
 		strcat(myFile,file_tbo);
 	}
-	sdmcInit();
+	
 	
 	// Initializing libogg and vorbisfile
 	int eof=0;
@@ -624,7 +624,7 @@ static int lua_openogg_old(lua_State *L) {
 	
 		// Deallocate OGG decoder resources and close file if not streaming
 		ov_clear(vf);
-		sdmcExit();
+		
 		
 	}else{
 		wav_file->sourceFile = (u32)vf;
@@ -654,7 +654,7 @@ static int lua_openmp3_old(lua_State *L){
 		strcpy(myFile,"sdmc:");
 		strcat(myFile,file_tbo);
 	}
-	sdmcInit();
+	
 	
 	// Initializing audio decoder
 	FILE* fp = fopen(myFile,"rb");
@@ -717,6 +717,7 @@ static int lua_openwav_old(lua_State *L){
 	bool mem_size = false;
 	if (argc == 2) mem_size = lua_toboolean(L, 2);
 	fileStream* fileHandle = (fileStream*)malloc(sizeof(fileStream));
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",file_tbo,7) == 0){
 		fileHandle->isRomfs = true;
 		FILE* handle = fopen(file_tbo,"rb");
@@ -725,13 +726,15 @@ static int lua_openwav_old(lua_State *L){
 		#endif
 		fileHandle->handle = (u32)handle;
 	}else{
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, file_tbo);
-		Result ret=FSUSER_OpenFileDirectly(&fileHandle->handle, sdmcArchive, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle->handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if(ret) return luaL_error(L, "error opening file");
+		//if (ret) return luaL_error(L, "error opening file");
 		#endif
 	}
+	
 	u32 magic,samplerate,bytesRead,jump,chunk=0x00000000;
 	u16 audiotype;
 	FS_Read(fileHandle, &bytesRead, 0, &magic, 4);
@@ -1011,6 +1014,7 @@ static int lua_openaiff_old(lua_State *L){
 	bool mem_size = false;
 	if (argc == 2) mem_size = lua_toboolean(L, 2);
 	fileStream* fileHandle = (fileStream*)malloc(sizeof(fileStream));
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",file_tbo,7) == 0){
 		fileHandle->isRomfs = true;
 		FILE* handle = fopen(file_tbo,"r");
@@ -1020,11 +1024,12 @@ static int lua_openaiff_old(lua_State *L){
 		fileHandle->handle = (u32)handle;
 	}else{
 		fileHandle->isRomfs = false;
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, file_tbo);
-		Result ret=FSUSER_OpenFileDirectly(&fileHandle->handle, sdmcArchive, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle->handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "error opening file.");
+		//if (ret) return luaL_error(L, "error opening file.");
 		#endif
 	}
 	u32 magic,bytesRead,jump,chunk=0x00000000;
@@ -1266,7 +1271,7 @@ static int lua_openogg(lua_State *L)
 		strcpy(myFile,"sdmc:");
 		strcat(myFile,file_tbo);
 	}
-	sdmcInit();
+	
 	
 	// Init libogg and vorbisfile
 	int eof=0;
@@ -1378,7 +1383,7 @@ static int lua_openogg(lua_State *L)
 	
 		// Deallocate OGG decoder resources and close file if not streaming
 		ov_clear(vf);
-		sdmcExit();
+		
 		
 	}else songFile->sourceFile = (u32)vf;
 	
@@ -1403,6 +1408,7 @@ static int lua_openwav(lua_State *L){
 	
 	// Open file
 	fileStream* fileHandle = (fileStream*)malloc(sizeof(fileStream));
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",file_tbo,7) == 0){
 		fileHandle->isRomfs = true;
 		FILE* handle = fopen(file_tbo,"r");
@@ -1412,11 +1418,12 @@ static int lua_openwav(lua_State *L){
 		fileHandle->handle = (u32)handle;
 	}else{
 		fileHandle->isRomfs = false;
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, file_tbo);
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle->handle, sdmcArchive, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle->handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 		#ifndef SKIP_ERROR_HANDLING
-		if (ret) return luaL_error(L, "error opening file.");
+		//if (ret) return luaL_error(L, "error opening file.");
 		#endif
 	}
 	
@@ -1549,6 +1556,7 @@ static int lua_openaiff(lua_State *L){
 	
 	// Opening file
 	fileStream* fileHandle = (fileStream*)malloc(sizeof(fileStream));
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	if (strncmp("romfs:/",file_tbo,7) == 0){
 		fileHandle->isRomfs = true;
 		FILE* handle = fopen(file_tbo,"r");
@@ -1558,9 +1566,10 @@ static int lua_openaiff(lua_State *L){
 		fileHandle->handle = (u32)handle;
 	}else{
 		fileHandle->isRomfs = false;
-		FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-		FS_Path filePath=fsMakePath(PATH_ASCII, file_tbo);
-		Result ret=FSUSER_OpenFileDirectly( &fileHandle->handle, sdmcArchive, filePath, FS_OPEN_READ, 0x00000000);
+		FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+		FS_Archive sdmcArchive;
+		FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+		FSUSER_OpenFileDirectly( &fileHandle->handle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 	}
 	
 	// Init wav struct
@@ -1739,7 +1748,7 @@ static int lua_play(lua_State *L){
 	if (src->mem_size > 0){
 		src->lastCheck = ndspChnGetSamplePos(ch);
 		src->streamLoop = loop;
-		svcCreateEvent(&updateStream,0);
+		svcCreateEvent(&updateStream,RESET_ONESHOT);
 		svcSignalEvent(updateStream);
 		threadCreate(streamFunction, src, 32768, 0x18, 0, true);
 	}
@@ -1807,7 +1816,7 @@ static int lua_play_old(lua_State *L){
 	if (src->audiobuf2 == NULL){
 		if (src->mem_size > 0){
 			src->streamLoop = loop;
-			svcCreateEvent(&updateStream,0);
+			svcCreateEvent(&updateStream,RESET_ONESHOT);
 			svcSignalEvent(updateStream);
 			threadCreate(streamFunction, src, 32768, 0x18, 1, true);
 			if (interp != 0xDEADBEEF) My_CSND_playsound(ch, SOUND_LINEAR_INTERP | SOUND_FORMAT(src->encoding) | SOUND_REPEAT, src->samplerate, (u32*)src->audiobuf, (u32*)(src->audiobuf), src->mem_size, 1.0, 2.0);
@@ -1823,7 +1832,7 @@ static int lua_play_old(lua_State *L){
 	}else{
 		if (src->mem_size > 0){
 			src->streamLoop = loop;
-			svcCreateEvent(&updateStream,0);
+			svcCreateEvent(&updateStream,RESET_ONESHOT);
 			svcSignalEvent(updateStream);
 			threadCreate(streamFunction, src, 32768, 0x18, 1, true);
 			if (interp != 0xDEADBEEF){
@@ -1879,7 +1888,7 @@ static int lua_closesong(lua_State *L){
 		// Closing opened file
 		if (src->encoding == CSND_ENCODING_VORBIS){
 			ov_clear((OggVorbis_File*)src->sourceFile);
-			sdmcExit();
+			
 		}else{
 			FS_Close((fileStream*)src->sourceFile);
 			free((fileStream*)src->sourceFile);
@@ -1937,10 +1946,10 @@ static int lua_close_old(lua_State *L){
 			// Closing opened file
 			if (src->encoding == CSND_ENCODING_VORBIS){
 				ov_clear((OggVorbis_File*)src->sourceFile);
-				sdmcExit();
+				
 			}else if (src->encoding == CSND_ENCODING_MPEG){
 				free(src->misc);
-				sdmcExit();
+				
 			}else{
 				FS_Close((fileStream*)src->sourceFile);
 				free((fileStream*)src->sourceFile);
@@ -2067,11 +2076,13 @@ static int lua_save(lua_State *L){
 	#endif
 	if (src->mem_size != 0) return luaL_error(L, "cannot save a stream");
 	const char* file = luaL_checkstring(L, 2);
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	Handle fileHandle;
 	u32 bytesWritten;
-	FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-	FS_Path filePath=fsMakePath(PATH_ASCII, file);
-	FSUSER_OpenFileDirectly( &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+	FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+	FS_Archive sdmcArchive;
+	FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+	FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 	u32 four_bytes;
 	u16 two_bytes;
 	FSFILE_Write(fileHandle, &bytesWritten, 0, "RIFF", 4, FS_WRITE_FLUSH);
@@ -2111,11 +2122,13 @@ static int lua_save_old(lua_State *L){
 	if (src->mem_size != 0) return luaL_error(L, "cannot save a stream");
 	if (src->audiobuf2 != NULL) return luaL_error(L, "csnd:SND system cannot save stereo files");
 	const char* file = luaL_checkstring(L, 2);
+	FS_ArchiveID a_id = ARCHIVE_SDMC;
 	Handle fileHandle;
 	u32 bytesWritten;
-	FS_Archive sdmcArchive=(FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8*)""}};
-	FS_Path filePath=fsMakePath(PATH_ASCII, file);
-	FSUSER_OpenFileDirectly( &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
+	FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8*)""};
+	FS_Archive sdmcArchive;
+	FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);		
+	FSUSER_OpenFileDirectly( &fileHandle, a_id, m_path, m_path, FS_OPEN_CREATE|FS_OPEN_WRITE, 0x00000000);
 	u32 four_bytes;
 	u16 two_bytes;
 	FSFILE_Write(fileHandle, &bytesWritten, 0, "RIFF", 4, FS_WRITE_FLUSH);
