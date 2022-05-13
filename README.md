@@ -9,7 +9,7 @@ Create a GH Action for compiling with devkitARM-r45
 Fix some of the issues
 ##### in Future 
 Update to latest devkitARM libctru citro2d citro3d
-
+This takes a long time xd↑
 # Description
 
 **Lua Player Plus 3DS** is the first lua interpreter made for Nintendo 3DS.
