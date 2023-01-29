@@ -1,96 +1,43 @@
-/*----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#------  This File is Part Of : ----------------------------------------------------------------------------------------#
-#------- _  -------------------  ______   _   --------------------------------------------------------------------------#
-#------ | | ------------------- (_____ \ | |  --------------------------------------------------------------------------#
-#------ | | ---  _   _   ____    _____) )| |  ____  _   _   ____   ____   ----------------------------------------------#
-#------ | | --- | | | | / _  |  |  ____/ | | / _  || | | | / _  ) / ___)  ----------------------------------------------#
-#------ | |_____| |_| |( ( | |  | |      | |( ( | || |_| |( (/ / | |  --------------------------------------------------#
-#------ |_______)\____| \_||_|  |_|      |_| \_||_| \__  | \____)|_|  --------------------------------------------------#
-#------------------------------------------------- (____/  -------------------------------------------------------------#
-#------------------------   ______   _   -------------------------------------------------------------------------------#
-#------------------------  (_____ \ | |  -------------------------------------------------------------------------------#
-#------------------------   _____) )| | _   _   ___   ------------------------------------------------------------------#
-#------------------------  |  ____/ | || | | | /___)  ------------------------------------------------------------------#
-#------------------------  | |      | || |_| ||___ |  ------------------------------------------------------------------#
-#------------------------  |_|      |_| \____|(___/   ------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Licensed under the GPL License --------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Copyright (c) Nanni <lpp.nanni@gmail.com> ---------------------------------------------------------------------------#
-#- Copyright (c) Rinnegatamante <rinnegatamante@gmail.com> -------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Credits : -----------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Smealum for ctrulib and ftpony src ----------------------------------------------------------------------------------#
-#- StapleButter for debug font -----------------------------------------------------------------------------------------#
-#- Lode Vandevenne for lodepng -----------------------------------------------------------------------------------------#
-#- Jean-loup Gailly and Mark Adler for zlib ----------------------------------------------------------------------------#
-#- Special thanks to Aurelio for testing, bug-fixing and various help with codes and implementations -------------------#
-#-----------------------------------------------------------------------------------------------------------------------*/
+/*
+*   This file is part of lpp-3ds-next
+*   based on https://github.com/Rinnegatamante/lpp-3ds/
+*   Copyright (C) 2021-2023 Tobi-D7
+*/
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <3ds.h>
-#include "include/luaplayer.h"
+#include <iostream>
+#include <luaplayer.hpp>
+#include <memory>
 
-static lua_State *L;
-bool isCSND;
+void Npi_Error(std::string Error) {
+  std::cout << "Error:\n" << Error << std::endl;
+  exit(-1);
+}
 
-const char *runScript(const char* script, bool isStringBuffer){
-	L = luaL_newstate();
-	
-	// Standard libraries
-	luaL_openlibs(L);
-	isCSND = false;
-	
-	// Modules
-	luaSystem_init(L);
-	luaScreen_init(L);
-	luaGraphics_init(L);
-	luaControls_init(L);
-	luaNetwork_init(L);
-	luaTimer_init(L);
-	luaSound_init(L);
-	luaVideo_init(L);
-	luaCamera_init(L);
-	luaRender_init(L);
-	luaMic_init(L);
-	luaCore_init(L);
-	luaKeyboard_init(L);
-	
-	int s = 0;
-	const char *errMsg = NULL;
-	
-	//Patching dofile function & I/O module
-	char* patch = "dofile = System.dofile\n\
-			 io.open = System.openFile\n\
-			 io.write = System.writeFile\n\
-			 io.close = System.closeFile\n\
-			 io.read = System.readFile\n\
-			 io.size = System.getFileSize";
-	luaL_loadbuffer(L, patch, strlen(patch), NULL); 
-	lua_KFunction dofilecont = (lua_KFunction)(lua_gettop(L) - 1);
-	lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
-	
-	if(!isStringBuffer) s = luaL_loadfile(L, script);
-	else s = luaL_loadbuffer(L, script, strlen(script), NULL);
-		
-	if (s == 0) s = lua_pcall(L, 0, LUA_MULTRET, 0);
-	
-	if (s){
-		errMsg = lua_tostring(L, -1);
-		printf("error: %s\n", lua_tostring(L, -1));
-		lua_pop(L, 1); // remove error message
-	}
-	lua_close(L);
-	
-	return errMsg;
+static void InitLibraries(lua_State *LState) {
+  luaL_openlibs(LState); // Standard Libraries.
+  luaTimer_init(LState);
+}
+
+void Run(std::string path) {
+  if (path == "")
+    return;
+
+  std::pair<int, std::string> Status = std::make_pair(0, "");
+  lua_State *LUAScript = luaL_newstate();
+  InitLibraries(LUAScript);
+
+  Status.first = luaL_loadfile(LUAScript, path.c_str());
+  if (Status.first == 0)
+    Status.first = lua_pcall(LUAScript, 0, LUA_MULTRET, 0);
+
+  if (Status.first) {                            // 1+, an error occured.
+    Status.second = lua_tostring(LUAScript, -1); // Return error message.
+    lua_pop(LUAScript, 1); // Remove error message from LUA Script.
+  };
+
+  lua_close(LUAScript);
+
+  if (Status.first) {
+    Npi_Error(Status.second);
+  };
 }

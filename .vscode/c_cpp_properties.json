@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "3ds",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/devkitpro/libnx/include/**",
+                "/opt/devkitpro/libnx/include/**",
+                "C:/devkitpro/libctru/include/**",
+                "/opt/devkitpro/libctru/include/**",
+                "C:/devkitpro/portlibs/switch/include/**",
+                "/opt/devkitpro/portlibs/switch/include/**",
+                "/opt/devkitpro/portlibs/3ds/include/**",
+                "C:/devkitpro/portlibs/3ds/include/**",
+                "/usr/include/**",
+                "base/**"
+            ],
+            "defines": [],
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
