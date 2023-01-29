@@ -7,11 +7,15 @@
 #include "include/luaplayer.hpp"
 #include <3ds.h>
 #include <stdio.h>
-#include <string.h>
+#include <string.h> 
 
+bool ftp_state;
 
 int main(int argc, char **argv) {
-	
+	aptInit();
+    cfguInit();
     Run("romfs:/index.lua");
+    cfguExit();
+    aptExit();
     return 0;
 }

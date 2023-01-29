@@ -66,11 +66,12 @@ VERSION_MICRO := 0
 #---------------------------------------------------------------------------------
 TARGET		:=	lpp-3ds-next
 BUILD		:=	build
-SOURCES		:=	source source/include source/lua
+SOURCES		:=	source source/include source/include/ftp
 DATA		:=	datas
-INCLUDES	:=	source source/include source/include/lua
+INCLUDES	:=	source source/include source/include/ftp
 APP_AUTHOR	:=	Tobi-D7
 APP_DESCRIPTION :=  Lua Player
+ROMFS		:= romfs
 ICON						:= icon.png
 
 #---------------------------------------------------------------------------------
@@ -85,20 +86,20 @@ CFLAGS	:=	-g -Wall -Wno-psabi -O2 -mword-relocations \
 			-fomit-frame-pointer -ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -D__3DS__ -D_GNU_SOURCE=1 -DLUA_C89_NUMBERS
+CFLAGS	+=	$(INCLUDE) -D__3DS__ -D_GNU_SOURCE=1
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++20 
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lcurl -lstdc++ -lm -lcitro2d -lcitro3d -lctru -ljpeg
+LIBS	:= -llua -lcurl -lstdc++ -lm -lcitro2d -lcitro3d -lctru -ljpeg
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(CTRULIB) $(LIBTWEEN)
+LIBDIRS	:= $(PORTLIBS) $(CTRULIB) ../libs
 
 
 #---------------------------------------------------------------------------------
@@ -195,6 +196,7 @@ endif
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(GFXBUILD) $(DEPSDIR) $(ROMFS_T3XFILES) $(T3XHFILES)
+	$(BANNERTOOL) makesmdh -i "icon.png" -s "$(TARGET)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -o lpp-3ds-next.smdh
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 #------------------------------------------------------------------------------
 clean:
@@ -205,6 +207,7 @@ clean:
 3dsx: $(BUILD)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile 3dsx
 
+		
 #---------------------------------------------------------------------------------
 $(GFXBUILD)/%.t3x	$(BUILD)/%.h	:	%.t3s
 #---------------------------------------------------------------------------------

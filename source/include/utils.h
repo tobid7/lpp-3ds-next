@@ -1,5 +1,5 @@
 #include "ttf/Font.hpp"
-#include "lua/lua.hpp"
+#include "lua.hpp"
 #include <citro3d.h>
 
 // Old FS_dirent struct

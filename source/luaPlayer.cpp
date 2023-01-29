@@ -16,6 +16,8 @@ void Npi_Error(std::string Error) {
 static void InitLibraries(lua_State *LState) {
   luaL_openlibs(LState); // Standard Libraries.
   luaTimer_init(LState);
+  luaNetwork_init(LState);
+  luaCore_init(LState);
 }
 
 void Run(std::string path) {

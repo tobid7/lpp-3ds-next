@@ -6,7 +6,7 @@
 
 #pragma once
 #include <stdlib.h>
-#include <lua/lua.hpp>
+#include <lua.hpp>
 #include <string>
 
 extern void luaC_collectgarbage (lua_State *L);
@@ -24,10 +24,10 @@ void luaTimer_init(lua_State *L);
 //void luaSound_init(lua_State *L);
 //void luaVideo_init(lua_State *L);
 //void luaGraphics_init(lua_State *L);
-//void luaNetwork_init(lua_State *L);
+void luaNetwork_init(lua_State *L);
 //void luaCamera_init(lua_State *L);
 //void luaRender_init(lua_State *L);
 //void luaMic_init(lua_State *L);
-//void luaCore_init(lua_State *L);
+void luaCore_init(lua_State *L);
 //void luaKeyboard_init(lua_State *L);
 //void stackDump (lua_State *L);
