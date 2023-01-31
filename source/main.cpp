@@ -15,6 +15,11 @@ bool ftp_state;
 bool isTopLCDOn = true;
 bool isBottomLCDOn = true;
 
+bool GW_MODE;
+bool CIA_MODE;
+bool isCSND;
+char cur_dir[256];
+
 int main(int argc, char **argv)
 {
     aptInit();
@@ -23,6 +28,7 @@ int main(int argc, char **argv)
     ErrorHelper::SetupDirectories();
     gfxInitDefault();
     consoleInit(GFX_BOTTOM, NULL);
+    sprintf(cur_dir, "sdmc:/");
     Run("sdmc:/index.lua");
     
     cfguExit();

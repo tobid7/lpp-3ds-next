@@ -66,9 +66,9 @@ VERSION_MICRO := 0
 #---------------------------------------------------------------------------------
 TARGET		:=	lpp-3ds-next
 BUILD		:=	build
-SOURCES		:=	source source/include source/include/ftp
+SOURCES		:=	source source/include source/include/ftp source/include/lodepng
 DATA		:=	datas
-INCLUDES	:=	source source/include source/include/ftp
+INCLUDES	:=	source source/include source/include/ftp source/include/lodepng
 GRAPHICS	:=	gfx
 #GFXBUILD	:=	$(BUILD)
 ROMFS		:=	romfs

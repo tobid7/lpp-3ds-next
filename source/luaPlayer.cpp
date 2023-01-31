@@ -24,6 +24,7 @@ static void InitLibraries(lua_State *LState)
   luaNetwork_init(LState);
   luaCore_init(LState);
   luaControls_init(LState);
+  luaSystem_init(LState);
 }
 
 void Run(std::string path)
