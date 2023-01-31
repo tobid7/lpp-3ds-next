@@ -1,20 +1,25 @@
 
 timer = Timer.new()
-print("Adress: ", timer)
 
-print(Timer.getTime(timer))
+s = "0x"
+s = s .. string.format("%x",timer)
 
-rnn = true
-
-print("Firmware: ", System.getFirmware())
-System.launch3DSX("")
-System.launchPayload("")
+print("hexAddr: ", s)
 
 -- Main Loop
-while rnn do
+while System.mainLoop() do
+    -- Updating screens
+	Screen.waitVblankStart()
+	Screen.refresh()
+	
+	-- Writing something on screen
+	Screen.debugPrint(0,0,"Welcome to the Screen Module!",Color.new(255,255,255),TOP_SCREEN)
+	
+	-- Flipping screen
+	Screen.flip()
+
 	if Controls.check(Controls.read(),KEY_A) then
         print("KEY_A Pressed")
-        rnn = false
     end
 
 end

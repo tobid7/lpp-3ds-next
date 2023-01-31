@@ -156,7 +156,7 @@ void Font::drawString(int x, int y, const std::string& str, Color color, bool to
 void Font::measureText(const std::wstring str, int& width, int& height, int max_width) {
 	if(!isLoaded())
 	{
-		return NULL;
+		return;
 	}
 
 	Image char_render;
