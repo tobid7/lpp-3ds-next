@@ -196,7 +196,7 @@ static int lua_download(lua_State *L)
     } while ((statuscode >= 301 && statuscode <= 303) || (statuscode >= 307 && statuscode <= 308));
 #ifndef SKIP_ERROR_HANDLING
     if ((statuscode < 200 && statuscode > 226) && statuscode != 304)
-        luaL_error(L, "error opening url");
+        return luaL_error(L, "error opening url");
 #endif
     httpcCloseContext(&context);
     lua_pushinteger(L, statuscode);

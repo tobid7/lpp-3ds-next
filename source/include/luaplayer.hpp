@@ -18,7 +18,7 @@ void Run(std::string path);
 void luaC_collectgarbage (lua_State *L);
 
 //void luaScreen_init(lua_State *L);
-//void luaControls_init(lua_State *L);
+void luaControls_init(lua_State *L);
 //void luaSystem_init(lua_State *L);
 void luaTimer_init(lua_State *L);
 //void luaSound_init(lua_State *L);

@@ -1,26 +1,33 @@
 /*
-*   This file is part of lpp-3ds-next
-*   based on https://github.com/Rinnegatamante/lpp-3ds/
-*   Copyright (C) 2021-2023 Tobi-D7
-*/
+ *   This file is part of lpp-3ds-next
+ *   based on https://github.com/Rinnegatamante/lpp-3ds/
+ *   Copyright (C) 2021-2023 Tobi-D7
+ */
 
 #include <iostream>
 #include <luaplayer.hpp>
+#include <ErrorHelper.hpp>
 #include <memory>
 
-void Npi_Error(std::string Error) {
-  std::cout << "Error:\n" << Error << std::endl;
+void Npi_Error(std::string Error)
+{
+  std::cout << "Error:\n"
+            << Error << std::endl;
+  ErrorHelper::WriteErr(Error);
   exit(-1);
 }
 
-static void InitLibraries(lua_State *LState) {
+static void InitLibraries(lua_State *LState)
+{
   luaL_openlibs(LState); // Standard Libraries.
   luaTimer_init(LState);
   luaNetwork_init(LState);
   luaCore_init(LState);
+  luaControls_init(LState);
 }
 
-void Run(std::string path) {
+void Run(std::string path)
+{
   if (path == "")
     return;
 
@@ -32,14 +39,16 @@ void Run(std::string path) {
   if (Status.first == 0)
     Status.first = lua_pcall(LUAScript, 0, LUA_MULTRET, 0);
 
-  if (Status.first) {                            // 1+, an error occured.
+  if (Status.first)
+  {                                              // 1+, an error occured.
     Status.second = lua_tostring(LUAScript, -1); // Return error message.
-    lua_pop(LUAScript, 1); // Remove error message from LUA Script.
+    lua_pop(LUAScript, 1);                       // Remove error message from LUA Script.
   };
 
   lua_close(LUAScript);
 
-  if (Status.first) {
+  if (Status.first)
+  {
     Npi_Error(Status.second);
   };
 }

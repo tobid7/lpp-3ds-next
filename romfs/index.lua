@@ -1,3 +1,16 @@
 
-Network.downloadFile("http://rinnegatamante.netsons.org/ORG/0.7/TEST.zip","/Downloaded.zip")
-	
+timer = Timer.new()
+print("Adress: ", timer)
+
+print(Timer.getTime(timer))
+
+rnn = true
+
+-- Main Loop
+while rnn do
+	if Controls.check(Controls.read(),KEY_A) then
+        print("KEY_A Pressed")
+        rnn = false
+    end
+
+end

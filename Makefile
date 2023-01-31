@@ -56,9 +56,9 @@ endif
 # Version number
 #---------------------------------------------------------------------------------
 
-VERSION_MAJOR := 1
+VERSION_MAJOR := 0
 
-VERSION_MINOR := 5
+VERSION_MINOR := 6
 
 VERSION_MICRO := 0
 
@@ -69,10 +69,16 @@ BUILD		:=	build
 SOURCES		:=	source source/include source/include/ftp
 DATA		:=	datas
 INCLUDES	:=	source source/include source/include/ftp
+GRAPHICS	:=	gfx
+#GFXBUILD	:=	$(BUILD)
+ROMFS		:=	romfs
+GFXBUILD	:=	$(ROMFS)/gfx
 APP_AUTHOR	:=	Tobi-D7
-APP_DESCRIPTION :=  Lua Player
-ROMFS		:= romfs
-ICON						:= icon.png
+APP_DESCRIPTION :=      BCSTM MusicPlayer for the 3ds.
+ICON		:=	app/icon.png
+BNR_IMAGE	:=  app/banner.png
+BNR_AUDIO	:=	app/BannerAudio.wav
+RSF_FILE	:=	app/build-cia.rsf
 
 #---------------------------------------------------------------------------------
 IP			:=  0.0.0.0
@@ -196,18 +202,32 @@ endif
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(GFXBUILD) $(DEPSDIR) $(ROMFS_T3XFILES) $(T3XHFILES)
-	$(BANNERTOOL) makesmdh -i "icon.png" -s "$(TARGET)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -o lpp-3ds-next.smdh
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
 #------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).3dsx $(TARGET).smdh app/*.bin 
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).3dsx $(TARGET).cia $(TARGET).smdh app/*.bin 
 	@rm -fr $(OUTDIR)
+
+#---------------------------------------------------------------------------------
+send:
+	@3dslink -a $(IP) $(TARGET).3dsx
+#---------------------------------------------------------------------------------
+run:
+	@flatpak run org.citra_emu.citra $(TARGET).3dsx
+#---------------------------------------------------------------------------------
+andsend:
+	@make all
+	@3dslink -a $(IP) $(TARGET).3dsx
+#---------------------------------------------------------------------------------
+cia: $(BUILD)
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile cia
+
 #---------------------------------------------------------------------------------
 3dsx: $(BUILD)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile 3dsx
 
-		
 #---------------------------------------------------------------------------------
 $(GFXBUILD)/%.t3x	$(BUILD)/%.h	:	%.t3s
 #---------------------------------------------------------------------------------
@@ -224,10 +244,16 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all: $(OUTPUT).elf $(OUTPUT).3dsx
+all: $(OUTPUT).cia $(OUTPUT).elf $(OUTPUT).3dsx
 
 $(OUTPUT).elf	:	$(OFILES)
 
+$(OUTPUT).cia	:	$(OUTPUT).elf $(OUTPUT).smdh
+	$(BANNERTOOL) makebanner -i "../app/banner.png" -a "../app/BannerAudio.wav" -o "../app/banner.bin"
+
+	$(BANNERTOOL) makesmdh -i "../app/icon.png" -s "$(TARGET)" -l "$(APP_DESCRIPTION)" -p "$(APP_AUTHOR)" -o "../app/icon.bin"
+
+	$(MAKEROM) -f cia -target t -exefslogo -o "../lpp-3ds-next.cia" -elf "../lpp-3ds-next.elf" -rsf "../app/build-cia.rsf" -banner "../app/banner.bin" -icon "../app/icon.bin" -logo "../app/splash.lz" -DAPP_ROMFS="$(TOPDIR)/$(ROMFS)" -major $(VERSION_MAJOR) -minor $(VERSION_MINOR) -micro $(VERSION_MICRO) -DAPP_VERSION_MAJOR="$(VERSION_MAJOR)"
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
 #---------------------------------------------------------------------------------
