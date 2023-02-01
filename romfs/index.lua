@@ -1,3 +1,7 @@
+local api = {}
+
+-- Note: dofile(path) is the same as loadfile(path)()
+loadfile(minetest.get_modpath("mymod") .. "/lppn/ScreenTest.lua")(api)
 
 timer = Timer.new()
 

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ErrorHelper.hpp>
+#include <NpiDbgServer.hpp>
 
 bool ftp_state;
 
@@ -27,12 +28,14 @@ int main(int argc, char **argv)
     romfsInit();
     ErrorHelper::SetupDirectories();
     gfxInitDefault();
-    consoleInit(GFX_BOTTOM, NULL);
+    Npi::InitDbgServer();
+    //consoleInit(GFX_BOTTOM, NULL);
     sprintf(cur_dir, "sdmc:/");
     Run("sdmc:/index.lua");
     
     cfguExit();
     romfsExit();
     aptExit();
+    Npi::ExitDbgServer();
     return 0;
 }

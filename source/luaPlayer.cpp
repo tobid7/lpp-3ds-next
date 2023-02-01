@@ -26,6 +26,7 @@ static void InitLibraries(lua_State *LState)
   luaControls_init(LState);
   luaSystem_init(LState);
   luaScreen_init(LState);
+  luaGraphics_init(LState);
 }
 
 void Run(std::string path)
