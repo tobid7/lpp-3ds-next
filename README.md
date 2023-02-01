@@ -1,21 +1,12 @@
-# Build 
-[![Citra](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Citra.yml) 
-[![Standart](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml/badge.svg?branch=master)](https://github.com/Tobi-D7/lpp-3ds-updated/actions/workflows/Standart.yml) 
-[![Skip Error](https://github.com/Tobi-D7/lpp-3ds-next/actions/workflows/Error-H-Disabled.yml/badge.svg)](https://github.com/Tobi-D7/lpp-3ds-next/actions/workflows/Error-H-Disabled.yml)
 
 # Todo
-##### Currently
-Create a GH Action for compiling with devkitARM-r45
-Fix some of the issues
-##### in Future 
-Update to latest devkitARM libctru citro2d citro3d
-This takes a long time xd↑
+##### Finish rewrite and bugfixes
 # Description
 
 **Lua Player Plus 3DS** is the first lua interpreter made for Nintendo 3DS.
 
-The interpreter currently runs under Lua 5.3.1. 
-It has also a debug FTP server to correct your errors in runtime.
+The interpreter now runs under Lua 5.4.4
+It has now a debug Server for Npi-Debug Viewer (Not release yet)
 
 Official documentation: http://rinnegatamante.it/lpp-3ds_doc.html<br>
 Official support board: http://rinnegatamante.it/board/forumdisplay.php?fid=12
@@ -63,13 +54,16 @@ Official support board: http://rinnegatamante.it/board/forumdisplay.php?fid=12
 ##### Utilities
 
 * Timer system
-* Advanced arithmetical functions support (math library)
+* Advanced arithmetical functions support (math library) (this is a lie cause it uses the default lua math lib)
 
 # Nightly Builds
 
-We offer an automated builder service for our nightly builds. Nightly builds are automatically updated every 4 hours by a server we own. To take advantage of this service, you should visit [this page](http://rinnegatamante.it/lpp-nightly.php).
+Not yet
 
 # Showcase
+3ds Homebrews using llp-3ds-next
+
+* [Cookie Clicker](http://gbatemp.net/threads/w-i-p-cookie-clicker-for-3ds.460836/)
 
 Here are some 3DS homebrews made using Lua Player Plus 3DS:
 
@@ -120,25 +114,18 @@ Here are some 3DS homebrews made using Lua Player Plus 3DS:
 
 # Compiling the source
 
-The repository will provide you a full set of all of the needed libraries. Take in mind that a lot of them are modified versions of the original ones so if you want to update them, take a look at [this repository](https://github.com/Rinnegatamante/lpp-3ds_libraries) where you can find sourcecodes of every pre-builded library used in this repository. Also take in mind that **libkhax** includes also **libSu** sourcecode. Last but not least, please note that **libjpeg.a** file is a standard compilation of libjpeg-turbo.<br><br>
-Lua Player Plus 3DS supports different flags to enables some features:<br>
-**-DUSE_MEMCHUNKHAX2** enables memchunkhax2 usage through svchax at startup for firmwares between 9.3 and 10.7.<br>
-**-DCITRA3DS_COMPATIBLE** removes romFs support causing Citra3DS emulator crash.<br>
-**-DSKIP_ERROR_HANDLING** disables error handling for faster code execution (this is used for Unsafe version).<br>
-**-DFORCE_SD** forces interpreter to load main script from SD instead of romFs filesystem.<br>
-**-DFORCE_DSP** forces interpreter to use dsp::DSP audio service even if csnd:SND is available.<br>
+Repo with custom lua makefile later here.
 
 # Credits
 
-* Everyone involved in ctrulib creation
-* Smealum for ftpony source used for debug ftp server
-* Myria for libkhax
-* xerpi for sf2dlib
-* fincs for citro3dlib
+* Tobi-D7 for lpp-3ds-next, including to port everything to the latest versions of the libraries 
+  and fix all the mistakes made in lpp-3ds
+* Everyone involved in libctru creation
+* Rinnegatamante for lpp-3ds
+* fincs for citro2d
+* fincs for citro3
 * Sean Barrett for stb_truetype
 * Everyone involved in lodepng, zlib, mpg123, libogg, vorbisfile libraries
-* Everyone involved in Brahma developing
-* aliaspider for svchax
 * Misledz for the Lua Player Plus 3DS logo
 * EasyRPG Team for the AudioDecoder used for MP3 support
 * ksanislo for the network module improvements
