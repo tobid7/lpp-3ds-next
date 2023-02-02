@@ -73,6 +73,7 @@ static int lua_refresh(lua_State *L)
         eye = GFX_LEFT;
     else
         eye = GFX_RIGHT;
+    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
     if (eye == GFX_RIGHT && my_screen == GFX_TOP)
         C2D_SceneBegin(t_targets[2]);
     else if (eye == GFX_LEFT && my_screen == GFX_TOP)

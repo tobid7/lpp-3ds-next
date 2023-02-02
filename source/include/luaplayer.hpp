@@ -9,6 +9,8 @@
 #include <lua.hpp>
 #include <string>
 
+#define init_fnc(fnc_i, fnc_e) ({fnc_i(); atexit(fnc_e); })
+
 extern void luaC_collectgarbage (lua_State *L);
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

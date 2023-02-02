@@ -8,6 +8,7 @@
 #include <luaplayer.hpp>
 #include <ErrorHelper.hpp>
 #include <memory>
+#include <cstring>
 
 void Npi_Error(std::string Error)
 {
@@ -52,6 +53,8 @@ void Run(std::string path)
 
   if (Status.first)
   {
+    if (strstr(Status.second.c_str(), "lpp_exit_04"))
+      exit(0);
     Npi_Error(Status.second);
   };
 }

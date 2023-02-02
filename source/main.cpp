@@ -9,7 +9,29 @@
 #include <stdio.h>
 #include <string.h>
 #include <ErrorHelper.hpp>
-#include <NpiDbgServer.hpp>
+#include <NDS.hpp>
+
+bool f_quit = false;
+
+void InitLppServ()
+{
+    gfxInitDefault();
+    aptInit();
+    cfguInit();
+    romfsInit();
+    //nds::Init();
+}
+
+void ExitLppServ()
+{
+    aptMainLoop();
+    f_quit = true;
+    aptExit();
+    cfguExit();
+    romfsExit();
+    //nds::Exit();
+    gfxExit();
+}
 
 bool ftp_state;
 
@@ -23,19 +45,11 @@ char cur_dir[256];
 
 int main(int argc, char **argv)
 {
-    aptInit();
-    cfguInit();
-    romfsInit();
+    init_fnc(InitLppServ, ExitLppServ);
     ErrorHelper::SetupDirectories();
-    gfxInitDefault();
-    Npi::InitDbgServer();
-    //consoleInit(GFX_BOTTOM, NULL);
+    consoleInit(GFX_BOTTOM, NULL);
     sprintf(cur_dir, "sdmc:/");
-    Run("sdmc:/index.lua");
-    
-    cfguExit();
-    romfsExit();
-    aptExit();
-    Npi::ExitDbgServer();
-    return 0;
+    Run("romfs:/index.lua");
+    //return 0; // Just caused by all the fnc
+    //          // not contain return value pain lol
 }

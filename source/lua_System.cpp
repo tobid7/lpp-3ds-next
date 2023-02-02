@@ -22,7 +22,7 @@ u16 OLD_3DS_CLOCK = 268;
 u16 NEW_3DS_CLOCK = 804;
 int current_clock = OLD_3DS_CLOCK;
 bool isTitleDatabaseInit = false;
-
+extern bool f_quit;
 FS_Archive main_extdata_archive;
 
 static int lua_exit(lua_State *L)
@@ -809,7 +809,7 @@ static int lua_syslp(lua_State *L)
 	if (argc != 0)
 		return luaL_error(L, "wrong number of arguments");
 #endif
-	bool syslp = aptMainLoop();
+	bool syslp = (f_quit ? false : aptMainLoop());
 
 	lua_pushboolean(L, syslp);
 	return 1;
