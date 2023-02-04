@@ -20,10 +20,9 @@ typedef void Zip;
 /**
  * A file within a zip
  */
-typedef struct
-{
-	unsigned char *data;	/**<  The file data */
-	int size;				/**<  Size of the data */
+typedef struct {
+  unsigned char *data; /**<  The file data */
+  int size;            /**<  Size of the data */
 
 } ZipFile;
 
@@ -34,7 +33,7 @@ typedef struct
  *
  * @returns A pointer to a ::Zip struct or NULL on error.
  */
-Zip* ZipOpen(const char *filename);
+Zip *ZipOpen(const char *filename);
 
 /**
  * Close a Zip file
@@ -56,7 +55,7 @@ int ZipClose(Zip *zip);
  *
  * @returns A ::ZipFile struct containing the file
  */
-ZipFile* ZipFileRead(Zip *zip, const char *filename, const char *password);
+ZipFile *ZipFileRead(Zip *zip, const char *filename, const char *password);
 
 /**
  * Extract all files from a zip

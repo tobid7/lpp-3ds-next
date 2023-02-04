@@ -5,8 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace nds
-{
-    void Init();
-    void Exit();
-}
+namespace nds {
+void Init();
+void Exit();
+} // namespace nds

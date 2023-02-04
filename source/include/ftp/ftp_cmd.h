@@ -3,12 +3,11 @@
 
 #define PATH_EXISTS (0xC82044BE)
 
-typedef void (*ftp_cmdhandler)(int s, char* cmd, char* arg);
-typedef struct
-{
-	const char* name;
-	ftp_cmdhandler handler;
-}ftp_cmd_s;
+typedef void (*ftp_cmdhandler)(int s, char *cmd, char *arg);
+typedef struct {
+  const char *name;
+  ftp_cmdhandler handler;
+} ftp_cmd_s;
 
 extern ftp_cmd_s ftp_cmd[];
 extern int ftp_cmd_num;

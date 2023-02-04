@@ -16,6 +16,6 @@ int ftp_getConnection();
 
 int ftp_openCommandChannel();
 int ftp_openDataChannel();
-int ftp_sendResponse(int s, int n, const char* mes);
+int ftp_sendResponse(int s, int n, const char *mes);
 
 #endif

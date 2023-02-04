@@ -9,44 +9,50 @@
 #include "stb_truetype.h"
 #include <cstring>
 
-class Font
-{
+class Font {
 public:
-	Font();
+  Font();
 
-	Font(const std::string& filename);
+  Font(const std::string &filename);
 
-	Font(const unsigned char* buffer, unsigned int buffer_size);
+  Font(const unsigned char *buffer, unsigned int buffer_size);
 
-	Font(const std::vector<unsigned char>& buffer);
+  Font(const std::vector<unsigned char> &buffer);
 
-	void* loadFromFile(const std::string& filename);
+  void *loadFromFile(const std::string &filename);
 
-	bool loadFromMemory(const unsigned char* buffer, unsigned int buffer_size);
+  bool loadFromMemory(const unsigned char *buffer, unsigned int buffer_size);
 
-	bool loadFromMemory(const std::vector<unsigned char>& buffer);
+  bool loadFromMemory(const std::vector<unsigned char> &buffer);
 
-	void setSize(int pixels);
+  void setSize(int pixels);
 
-	void setScale(float scale);
-	
-	bool isLoaded();
+  void setScale(float scale);
 
-	float getScale() const { return m_scale; }
-	
-	void drawString(int x, int y, const std::string& str, Color color, bool top_screen = true, bool side = true, int max_width = 0);
-	
-	void drawStringUnicode(int x, int y, const std::wstring& str, Color color, bool top_screen = true, bool side = true, int max_width = 0);
+  bool isLoaded();
 
-	void drawStringToBuffer(int x, int y, const std::wstring& str, Color color, unsigned char* buffer, int buffer_width, int buffer_height, int bitsperpixel, int max_width = 0);
+  float getScale() const { return m_scale; }
 
-	void measureText(const std::wstring str, int& width, int& height, int max_width = 0);
+  void drawString(int x, int y, const std::string &str, Color color,
+                  bool top_screen = true, bool side = true, int max_width = 0);
 
-	static std::wstring utf8_to_UCS2(char * code);
+  void drawStringUnicode(int x, int y, const std::wstring &str, Color color,
+                         bool top_screen = true, bool side = true,
+                         int max_width = 0);
+
+  void drawStringToBuffer(int x, int y, const std::wstring &str, Color color,
+                          unsigned char *buffer, int buffer_width,
+                          int buffer_height, int bitsperpixel,
+                          int max_width = 0);
+
+  void measureText(const std::wstring str, int &width, int &height,
+                   int max_width = 0);
+
+  static std::wstring utf8_to_UCS2(char *code);
 
 private:
-	stbtt_fontinfo m_info;
-	float m_scale;
+  stbtt_fontinfo m_info;
+  float m_scale;
 };
 
 #endif // FONT_HPP_INC

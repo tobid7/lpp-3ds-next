@@ -6,31 +6,41 @@
 
 #include "include/luaplayer.hpp"
 #include <3ds.h>
-#include <stdio.h>
-#include <string.h>
 #include <ErrorHelper.hpp>
 #include <NDS.hpp>
+#include <stdio.h>
+#include <string.h>
 
 bool f_quit = false;
+bool catch_at = true;
 
-void InitLppServ()
-{
-    gfxInitDefault();
-    aptInit();
-    cfguInit();
-    romfsInit();
-    //nds::Init();
+extern void nsocExit();
+
+void InitLppServ() {
+  gfxInitDefault();
+  aptInit();
+  cfguInit();
+  romfsInit();
+  consoleInit(GFX_BOTTOM, NULL);
+  // nds::Init();
 }
 
-void ExitLppServ()
-{
-    aptMainLoop();
-    f_quit = true;
-    aptExit();
-    cfguExit();
-    romfsExit();
-    //nds::Exit();
-    gfxExit();
+void ExitLppServ() {
+  if (catch_at) {
+    while (aptMainLoop()) {
+      hidScanInput();
+      if (hidKeysDown() & KEY_START) {
+        break;
+      }
+    }
+  }
+  f_quit = true;
+  aptExit();
+  cfguExit();
+  romfsExit();
+  // nsocExit();
+  // nds::Exit();
+  gfxExit();
 }
 
 bool ftp_state;
@@ -43,13 +53,11 @@ bool CIA_MODE;
 bool isCSND;
 char cur_dir[256];
 
-int main(int argc, char **argv)
-{
-    init_fnc(InitLppServ, ExitLppServ);
-    ErrorHelper::SetupDirectories();
-    consoleInit(GFX_BOTTOM, NULL);
-    sprintf(cur_dir, "sdmc:/");
-    Run("romfs:/index.lua");
-    //return 0; // Just caused by all the fnc
-    //          // not contain return value pain lol
+int main(int argc, char **argv) {
+  init_fnc(InitLppServ, ExitLppServ);
+  ErrorHelper::SetupDirectories();
+  sprintf(cur_dir, "sdmc:/");
+  Run("romfs:/index.lua");
+  // return 0; // Just caused by all the fnc
+  //           // not contain return value pain lol
 }
