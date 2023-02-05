@@ -284,11 +284,11 @@ static int lua_flipBitmap(lua_State *L) {
 #endif
   not_flipped = dst->pixels;
   u8 *flip_pixels =
-      (u8 *)malloc((src->width) * (src->height) * (src->bitperpixel / 8));
+      new u8[(src->width) * (src->height) * (src->bitperpixel / 8)];
   dst->pixels = flipBitmap(flip_pixels, src);
   dst->width = src->width;
   dst->height = src->height;
-  free(not_flipped);
+  delete not_flipped;
   return 0;
 }
 
@@ -317,8 +317,7 @@ static int lua_saveimg(lua_State *L) {
       return luaL_error(L, "error opening file");
     u32 bytesWritten;
     u8 moltiplier = src->bitperpixel >> 3;
-    u8 *tempbuf =
-        (u8 *)malloc(0x36 + (src->width) * (src->height) * moltiplier);
+    u8 *tempbuf = new u8[0x36 + (src->width) * (src->height) * moltiplier];
     memset(tempbuf, 0, 0x36 + (src->width) * (src->height) * moltiplier);
     tempbuf[0x36 + (src->width) * (src->height) * moltiplier] = 0;
     FSFILE_SetSize(fileHandle,
@@ -343,15 +342,15 @@ static int lua_saveimg(lua_State *L) {
                  0x36 + (src->width) * (src->height) * moltiplier, 0x10001);
     FSFILE_Close(fileHandle);
     svcCloseHandle(fileHandle);
-    free(tempbuf);
+    delete[] tempbuf;
   } else { // JPG Format
     u8 moltiplier = src->bitperpixel >> 3;
     int size_val = (src->width) * (src->height) * moltiplier;
-    u8 *flip_pixels = (u8 *)malloc(size_val);
+    u8 *flip_pixels = new u8[size_val];
     flip_pixels = flipBitmap(flip_pixels, src);
     if (moltiplier == 4) { // 32bpp image - Need to delete alpha channel
       u8 *tmp = flip_pixels;
-      flip_pixels = (u8 *)malloc((src->width) * (src->height) * 3);
+      flip_pixels = new u8[(src->width) * (src->height) * 3];
       u32 i = 0;
       u32 j = 0;
       while ((i + 1) < size_val) {
@@ -360,13 +359,13 @@ static int lua_saveimg(lua_State *L) {
         flip_pixels[j++] = tmp[i + 2];
         i = i + 4;
       }
-      free(tmp);
+      delete[] tmp;
     }
     char tmpPath2[1024];
     strcpy(tmpPath2, "sdmc:");
     strcat(tmpPath2, (char *)text);
     saveJpg(tmpPath2, (u32 *)flip_pixels, src->width, src->height);
-    free(flip_pixels);
+    delete[] flip_pixels;
   }
   return 0;
 }
@@ -380,11 +379,11 @@ static int lua_newBitmap(lua_State *L) {
   int width_new = luaL_checkinteger(L, 1);
   int height_new = luaL_checkinteger(L, 2);
   u32 color = luaL_checkinteger(L, 3);
-  Bitmap *bitmap = (Bitmap *)malloc(sizeof(Bitmap));
+  Bitmap *bitmap = new Bitmap;
   bitmap->width = width_new;
   bitmap->magic = 0x4C494D47;
   bitmap->height = height_new;
-  u8 *pixels_new = (u8 *)malloc((width_new * height_new) << 2);
+  u8 *pixels_new = new u8[(width_new * height_new) << 2];
   memset(pixels_new, color, (width_new * height_new) << 2);
   bitmap->pixels = pixels_new;
   bitmap->bitperpixel = 32;
@@ -403,8 +402,8 @@ static int lua_free(lua_State *L) {
   if (src->magic != 0x4C494D47)
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
-  free(src->pixels);
-  free(src);
+  delete[] src->pixels;
+  delete[] src;
   return 0;
 }
 
@@ -808,7 +807,7 @@ static int lua_console(lua_State *L) {
     return luaL_error(L, "wrong number of arguments");
 #endif
   int screen = luaL_checkinteger(L, 1);
-  Console *console = (Console *)malloc(sizeof(Console));
+  Console *console = new Console;
   console->screen = screen;
   console->magic = 0x4C434E53;
   strcpy(console->text, "");
@@ -842,7 +841,7 @@ static int lua_condest(lua_State *L) {
   if (console->magic != 0x4C434E53)
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
-  free(console);
+  delete[] console;
   return 0;
 }
 
@@ -951,8 +950,8 @@ static int lua_unloadFont(lua_State *L) {
   if (font->magic != 0x4C464E54)
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
-  free(font->buffer);
-  free(font);
+  delete[] font->buffer;
+  delete[] font;
   return 0;
 }
 

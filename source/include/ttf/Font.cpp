@@ -21,7 +21,7 @@ void *Font::loadFromFile(const std::string &filename) {
     return NULL;
   fseek(fp, 0, SEEK_END);
   unsigned int buffer_size = ftell(fp);
-  unsigned char *buffer = (unsigned char *)malloc(buffer_size);
+  unsigned char *buffer = new unsigned char[buffer_size];
   if (!buffer) {
     fclose(fp);
     return NULL;
@@ -32,7 +32,7 @@ void *Font::loadFromFile(const std::string &filename) {
 
   bool ret = loadFromMemory(buffer, buffer_size);
 
-  ttf *result = (ttf *)malloc(sizeof(ttf));
+  ttf *result = new ttf;
   result->buffer = buffer;
   result->magic = 0x4C464E54;
   result->bufsize = buffer_size;

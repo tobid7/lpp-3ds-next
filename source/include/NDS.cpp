@@ -11,7 +11,7 @@
 
 static std::vector<Thread> threads;
 
-static void create(ThreadFunc entrypoint) {
+void create(ThreadFunc entrypoint) {
   s32 prio = 0;
   svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
   Thread thread = threadCreate((ThreadFunc)entrypoint, NULL, 64 * 1024,
@@ -19,7 +19,7 @@ static void create(ThreadFunc entrypoint) {
   threads.push_back(thread);
 }
 
-static void destroy(void) {
+void destroy(void) {
   for (u32 i = 0; i < threads.size(); i++) {
     threadJoin(threads.at(i), U64_MAX);
     threadFree(threads.at(i));

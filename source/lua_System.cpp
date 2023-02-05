@@ -54,7 +54,7 @@ static int lua_dofile(lua_State *L) {
     fseek(script, 0, SEEK_END);
     int size = ftell(script);
     fseek(script, 0, SEEK_SET);
-    buffer = (unsigned char *)malloc(size + 1);
+    buffer = new unsigned char[size + 1];
     fread(buffer, size, 1, script);
     fclose(script);
     buffer[size] = 0;
@@ -67,7 +67,7 @@ static int lua_dofile(lua_State *L) {
     fseek(ret, 0, SEEK_END);
     size = ftell(ret);
     fseek(ret, 0, SEEK_SET);
-    buffer = (unsigned char *)malloc(size + 1);
+    buffer = new unsigned char[size + 1];
     fread(buffer, size, 1, ret);
     buffer[size] = 0;
     fclose(ret);
@@ -108,7 +108,7 @@ static int lua_openfile(lua_State *L) {
     if (Handle == NULL)
       return luaL_error(L, "file doesn't exist.");
 #endif
-    result = (fileStream *)malloc(sizeof(fileStream));
+    result = new fileStream;
     result->handle = (u32)Handle;
     result->isRomfs = true;
   } else if (extdata) {
@@ -154,7 +154,7 @@ static int lua_openfile(lua_State *L) {
     if (ret)
       return luaL_error(L, "error opening file.");
 #endif
-    result = (fileStream *)malloc(sizeof(fileStream));
+    result = new fileStream;
     result->handle = (u32)fileHandle;
     result->isRomfs = false;
   } else {
@@ -180,7 +180,7 @@ static int lua_openfile(lua_State *L) {
     if (ret)
       return luaL_error(L, "file doesn't exist.");
 #endif
-    result = (fileStream *)malloc(sizeof(fileStream));
+    result = new fileStream;
     result->handle = (u32)fileHandle;
     result->isRomfs = false;
   }
@@ -255,7 +255,7 @@ static int lua_screenshot(lua_State *L) {
       return luaL_error(
           L, "error opening file"); // Sometimes this gives false positives
     u32 bytesWritten;
-    u8 *tempbuf = (u8 *)malloc(0x36 + 576000);
+    u8 *tempbuf = new u8[0x36 + 576000];
     memset(tempbuf, 0, 0x36 + 576000);
     tempbuf[0x36 + 576000] = 0;
     FSFILE_SetSize(fileHandle, (u16)(0x36 + 576000));
@@ -304,9 +304,9 @@ static int lua_screenshot(lua_State *L) {
                  0x10001);
     FSFILE_Close(fileHandle);
     svcCloseHandle(fileHandle);
-    free(tempbuf);
+    delete[] tempbuf;
   } else { // JPG Format
-    u8 *tempbuf = (u8 *)malloc(576000);
+    u8 *tempbuf = new u8[576000];
     u8 *framebuf = (u8 *)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
     for (y = 0; y < 240; y++) {
       for (x = 0; x < 400; x++) {
@@ -344,7 +344,7 @@ static int lua_screenshot(lua_State *L) {
     strcpy(tmpPath2, "sdmc:");
     strcat(tmpPath2, (char *)screenpath);
     saveJpg(tmpPath2, (u32 *)tempbuf, 400, 480);
-    free(tempbuf);
+    delete[] tempbuf;
   }
   return 0;
 }
@@ -380,7 +380,7 @@ static int lua_closefile(lua_State *L) {
   FS_Close(file);
   if (argc == 2)
     FSUSER_CloseArchive(main_extdata_archive);
-  free(file);
+  delete[] file;
   return 0;
 }
 
@@ -397,12 +397,12 @@ static int lua_readfile(lua_State *L) {
 #endif
   u64 init = luaL_checkinteger(L, 2);
   u64 size = luaL_checkinteger(L, 3);
-  unsigned char *buffer = (unsigned char *)malloc(size + 1);
+  unsigned char *buffer = new unsigned char[size + 1];
   u32 bytesRead;
   FS_Read(file, &bytesRead, init, buffer, size);
   buffer[size] = 0;
   lua_pushlstring(L, (const char *)buffer, size);
-  free(buffer);
+  delete[] buffer;
   return 1;
 }
 
@@ -803,7 +803,7 @@ static int lua_readsmdh(lua_State *L) {
   FS_Read(&tmp, &bytesRead, 0, &magic, 4);
   if (magic != 0x48444D53)
     return luaL_error(L, "error opening SMDH file.");
-  unsigned char *buffer = (unsigned char *)(malloc((129) * sizeof(char)));
+  unsigned char *buffer = new unsigned char[(129) * sizeof(char)];
   buffer[128] = 0;
   FS_Read(&tmp, &bytesRead, 8, buffer, 128);
   int i = 0;
@@ -825,8 +825,8 @@ static int lua_readsmdh(lua_State *L) {
     i++;
   }
   author[i] = 0;
-  free(buffer);
-  buffer = (unsigned char *)(malloc((257) * sizeof(char)));
+  delete[] buffer;
+  buffer = new unsigned char[(257) * sizeof(char)];
   buffer[256] = 0;
   FS_Read(&tmp, &bytesRead, 136, buffer, 256);
   i = 0;
@@ -838,13 +838,13 @@ static int lua_readsmdh(lua_State *L) {
     i++;
   }
   desc[i] = 0;
-  free(buffer);
-  Bitmap *bitmap = (Bitmap *)malloc(sizeof(Bitmap));
+  delete[] buffer;
+  Bitmap *bitmap = new Bitmap;
   bitmap->width = 48;
   bitmap->height = 48;
-  bitmap->pixels = (u8 *)malloc(6912);
+  bitmap->pixels = new u8[6912];
   bitmap->bitperpixel = 24;
-  u16 *icon_buffer = (u16 *)malloc(0x1200);
+  u16 *icon_buffer = new u16[0x1200];
   FS_Read(&tmp, &bytesRead, 0x24C0, icon_buffer, 0x1200);
   FS_Close(&tmp);
 
@@ -884,7 +884,7 @@ static int lua_readsmdh(lua_State *L) {
     i = i + 48;
   }
   bitmap->magic = 0x4C494D47;
-  free(icon_buffer);
+  delete[] icon_buffer;
   lua_newtable(L);
   lua_newtable(L);
   lua_pushstring(L, "title");
@@ -1163,26 +1163,26 @@ static int lua_installCia(lua_State *L) {
   }
   AM_StartCiaInstall(media, &ciaHandle);
   if (size < MAX_RAM_ALLOCATION) {
-    u8 *cia_buffer = (u8 *)(malloc(size * sizeof(u8)));
+    u8 *cia_buffer = new u8[size * sizeof(u8)];
     FS_Read(&tmp, &bytes, 0, cia_buffer, size);
     FSFILE_Write(ciaHandle, &bytes, 0, cia_buffer, size, 0);
-    free(cia_buffer);
+    delete[] cia_buffer;
   } else {
     u64 i = 0;
     u8 *cia_buffer;
     while (i < size) {
       u64 bytesToRead;
       if (i + MAX_RAM_ALLOCATION > size) {
-        cia_buffer = (u8 *)malloc(size - i);
+        cia_buffer = new u8[size - i];
         bytesToRead = size - i;
       } else {
-        cia_buffer = (u8 *)malloc(MAX_RAM_ALLOCATION);
+        cia_buffer = new u8[MAX_RAM_ALLOCATION];
         bytesToRead = MAX_RAM_ALLOCATION;
       }
       FS_Read(&tmp, &bytes, i, cia_buffer, bytesToRead);
       FSFILE_Write(ciaHandle, &bytes, i, cia_buffer, bytesToRead, 0);
       i = i + bytesToRead;
-      free(cia_buffer);
+      delete[] cia_buffer;
     }
   }
   AM_FinishCiaInstall(ciaHandle);
@@ -1211,10 +1211,9 @@ static int lua_listCia(lua_State *L) {
   u32 cia_nums;
   u32 titlesRead;
   AM_GetTitleCount(MEDIATYPE_SD, &cia_nums);
-  TitleId *TitleIDs = (TitleId *)malloc(cia_nums * sizeof(TitleId));
+  TitleId *TitleIDs = new TitleId[cia_nums * sizeof(TitleId)];
   AM_GetTitleList(&titlesRead, MEDIATYPE_SD, cia_nums, (u64 *)TitleIDs);
-  AM_TitleEntry *entries =
-      (AM_TitleEntry *)malloc(sizeof(AM_TitleEntry) * cia_nums);
+  AM_TitleEntry *entries = new AM_TitleEntry[sizeof(AM_TitleEntry) * cia_nums];
   AM_GetTitleInfo(MEDIATYPE_SD, cia_nums, (u64 *)TitleIDs, entries);
   u32 i = 1;
   lua_newtable(L);
@@ -1261,13 +1260,13 @@ static int lua_listCia(lua_State *L) {
     lua_settable(L, -3);
     i++;
   }
-  free(TitleIDs);
-  free(entries);
+  delete[] TitleIDs;
+  delete[] entries;
   u32 z = 1;
   AM_GetTitleCount(MEDIATYPE_NAND, &cia_nums);
-  TitleIDs = (TitleId *)malloc(cia_nums * sizeof(TitleId));
+  TitleIDs = new TitleId[cia_nums * sizeof(TitleId)];
   AM_GetTitleList(&titlesRead, MEDIATYPE_NAND, cia_nums, (u64 *)TitleIDs);
-  entries = (AM_TitleEntry *)malloc(sizeof(AM_TitleEntry) * cia_nums);
+  entries = new AM_TitleEntry[sizeof(AM_TitleEntry) * cia_nums];
   AM_GetTitleInfo(MEDIATYPE_NAND, cia_nums, (u64 *)TitleIDs, entries);
   while (z <= cia_nums) {
     lua_pushinteger(L, i);
@@ -1313,8 +1312,8 @@ static int lua_listCia(lua_State *L) {
     i++;
     z++;
   }
-  free(TitleIDs);
-  free(entries);
+  delete[] TitleIDs;
+  delete[] entries;
   amExit();
   return 1;
 }
@@ -1340,7 +1339,7 @@ static int lua_uninstallCia(lua_State *L) {
   u32 cia_nums;
   u32 titlesRead;
   AM_GetTitleCount(media, &cia_nums);
-  TitleId *TitleIDs = (TitleId *)malloc(cia_nums * sizeof(TitleId));
+  TitleId *TitleIDs = new TitleId[cia_nums * sizeof(TitleId)];
   AM_GetTitleList(&titlesRead, media, cia_nums, (u64 *)TitleIDs);
   u64 id = TitleIDs[delete_id - 1].uniqueid |
            ((u64)TitleIDs[delete_id - 1].category << 32) |
@@ -1348,7 +1347,7 @@ static int lua_uninstallCia(lua_State *L) {
   AM_DeleteAppTitle(media, id);
   AM_DeleteTitle(media, id);
   amExit();
-  free(TitleIDs);
+  delete[] TitleIDs;
   return 0;
 }
 
@@ -1392,7 +1391,7 @@ static int lua_ciainfo(lua_State *L) {
   lua_pushnumber(L, info.size);
   lua_settable(L, -3);
   lua_pushstring(L, "icon");
-  char *smdh_data = (char *)malloc(0x36C0);
+  char *smdh_data = new char[0x36C0];
   if (R_SUCCEEDED(AM_GetCiaIcon((void *)smdh_data, fileHandle))) {
     char name[64];
     char desc[128];
@@ -1429,10 +1428,10 @@ static int lua_ciainfo(lua_State *L) {
     desc[i] = 0;
     buffer = (char *)&smdh_data[0x24C0];
     u16 *icon_buffer = (u16 *)buffer;
-    Bitmap *bitmap = (Bitmap *)malloc(sizeof(Bitmap));
+    Bitmap *bitmap = new Bitmap;
     bitmap->width = 48;
     bitmap->height = 48;
-    bitmap->pixels = (u8 *)malloc(6912);
+    bitmap->pixels = new u8[6912];
     bitmap->bitperpixel = 24;
 
     // convert RGB565 to RGB24
@@ -1495,7 +1494,7 @@ static int lua_ciainfo(lua_State *L) {
     lua_pushnil(L);
   }
   amExit();
-  free(smdh_data);
+  delete[] smdh_data;
   lua_settable(L, -3);
   FSFILE_Close(fileHandle);
   svcCloseHandle(fileHandle);
@@ -1883,7 +1882,7 @@ static int lua_addnews(lua_State *L) {
           FS_Close(&tmp);
           return luaL_error(L, "image is too big.");
         }
-        u8 *buffer = (u8 *)malloc(img_size);
+        u8 *buffer = new u8[img_size];
         FS_Read(&tmp, &bytesRead, 0, buffer, img_size);
         FS_Close(&tmp);
         image = (u32 *)buffer;
@@ -1912,11 +1911,11 @@ static int lua_addnews(lua_State *L) {
     if (!processed) {
       u8 moltiplier = file->bitperpixel >> 3;
       u32 size_val = file->width * file->height * moltiplier;
-      u8 *flip_pixels = (u8 *)malloc(size_val);
+      u8 *flip_pixels = new u8[size_val];
       flip_pixels = flipBitmap(flip_pixels, file);
-      if (moltiplier == 4) { // 32bpp image - Need to delete alpha channel
+      if (moltiplier == 4) { // 32bpp image - Need to delete[] alpha channel
         u8 *tmp = flip_pixels;
-        flip_pixels = (u8 *)malloc((file->width) * (file->height) * 3);
+        flip_pixels = new u8[(file->width) * (file->height) * 3];
         u32 i = 0;
         u32 j = 0;
         while ((i + 1) < size_val) {
@@ -1925,32 +1924,32 @@ static int lua_addnews(lua_State *L) {
           flip_pixels[j++] = tmp[i + 2];
           i = i + 4;
         }
-        free(tmp);
+        delete[] tmp;
       }
       image = toJpg(&img_size, (u32 *)flip_pixels, file->width, file->height);
       if (isFile) {
-        free(file->pixels);
-        free(file);
+        delete[] file->pixels;
+        delete[] file;
       }
       if (img_size > 0x10000) {
-        free(image);
+        delete[] image;
         return luaL_error(L, "image is too big.");
       }
     }
     hasImage = true;
   }
-  u16 *uni_title = (u16 *)malloc(strlen(title) * sizeof(u16));
-  u16 *uni_text = (u16 *)malloc(strlen(text) * sizeof(u16));
+  u16 *uni_title = new u16[strlen(title) * sizeof(u16)];
+  u16 *uni_text = new u16[strlen(text) * sizeof(u16)];
   ascii2utf(uni_title, (char *)title);
   ascii2utf(uni_text, (char *)text);
   newsInit();
   NEWS_AddNotification(uni_title, strlen(title), uni_text, strlen(text), image,
                        img_size, hasImage);
   if (image != NULL)
-    free(image);
+    delete[] image;
   newsExit();
-  free(uni_title);
-  free(uni_text);
+  delete[] uni_title;
+  delete[] uni_text;
   return 0;
 }
 
@@ -2037,43 +2036,43 @@ static int lua_dup(lua_State *L) { // TODO: Add Music and wav struct support
       L, 1); // Music is just a random memory block ptr type
   u8 *res = NULL;
   if (src->magic == 0x4C544D52) { // Timer
-    Timer *dst = (Timer *)malloc(sizeof(Timer));
+    Timer *dst = new Timer;
     memcpy(dst, src, sizeof(Timer));
     res = (u8 *)dst;
   } else if (src->magic == 0x4C464E54) { // Font
-    ttf *dst = (ttf *)malloc(sizeof(ttf));
+    ttf *dst = new ttf;
     ttf *src2 = (ttf *)src;
     memcpy(dst, src2, sizeof(ttf));
-    dst->buffer = (unsigned char *)malloc(src2->bufsize);
+    dst->buffer = new unsigned char[src2->bufsize];
     memcpy(dst->buffer, src2->buffer, src2->bufsize);
     res = (u8 *)dst;
   } else if (src->magic == 0x4C494D47) { // CPU Render Image
-    Bitmap *dst = (Bitmap *)malloc(sizeof(Bitmap));
+    Bitmap *dst = new Bitmap;
     Bitmap *src2 = (Bitmap *)src;
     memcpy(dst, src2, sizeof(Bitmap));
     u32 bufsize = src2->width * src2->height * (src2->bitperpixel >> 3);
-    dst->pixels = (u8 *)malloc(bufsize);
+    dst->pixels = new u8[bufsize];
     memcpy(dst->pixels, src2->pixels, bufsize);
     res = (u8 *)dst;
   } else if (src->magic == 0x4C545854) { // GPU Render Image
-    gpu_text *dst = (gpu_text *)malloc(sizeof(gpu_text));
+    gpu_text *dst = new gpu_text;
     gpu_text *src2 = (gpu_text *)src;
     memcpy(dst, src2, sizeof(gpu_text));
-    dst->tex = (C2D_Image *)(malloc(sizeof(C2D_Image)));
+    dst->tex = new C2D_Image;
     memcpy(dst->tex, src2->tex, sizeof(C2D_Image));
     dst->tex->tex->data = linearAlloc(src2->tex->tex->size);
     memcpy(dst->tex->tex->data, src2->tex->tex->data, src2->tex->tex->size);
     res = (u8 *)dst;
   } else if (src->magic == 0xC0C0C0C0) { // Render-type Color
-    color *dst = (color *)malloc(sizeof(color));
+    color *dst = new color;
     memcpy(dst, (color *)src, sizeof(color));
     res = (u8 *)dst;
   } else if (src->magic == 0xC00FFEEE) { // 3D Model
-    model *dst = (model *)malloc(sizeof(model));
+    model *dst = new model;
     model *src2 = (model *)src;
     memcpy(dst, src2, sizeof(model));
     u32 vbo_size = src2->vertex_count * sizeof(vertex);
-    dst->vbo_data = (u8 *)malloc(vbo_size);
+    dst->vbo_data = new u8[vbo_size];
     memcpy(dst->vbo_data, src2->vbo_data, vbo_size);
     dst->texture = (C3D_Tex *)linearAlloc(sizeof(C3D_Tex));
     memcpy(dst->texture, src2->texture, sizeof(C3D_Tex));
@@ -2092,7 +2091,7 @@ static int lua_dup(lua_State *L) { // TODO: Add Music and wav struct support
     }};
     res = (u8 *)dst;
   } else if (src->magic == 0x4C434E53) { // Console
-    Console *dst = (Console *)malloc(sizeof(Console));
+    Console *dst = new Console;
     memcpy(dst, (Console *)src, sizeof(Console));
     res = (u8 *)dst;
   } else

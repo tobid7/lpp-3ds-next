@@ -1,114 +1,56 @@
--- Load a texture
-texture = Graphics.loadImage("/file.bmp")
+-- Initialize some colors
+white = Color.new(255,255,255)
+black = Color.new(0,0,0)
 
--- Create a cube
-model = {
- 
-    -- First face (PZ)
-    -- First triangle
-    Render.createVertex(-0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0),
-    Render.createVertex(0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0),
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0),
-    -- Second triangle
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0),
-    Render.createVertex(-0.5, 0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0),
-    Render.createVertex(-0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0),
- 
-    -- Second face (MZ)
-    -- First triangle
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, -1.0),
-    Render.createVertex(-0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 0.0, -1.0),
-    Render.createVertex(0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 0.0, -1.0),
-    -- Second triangle
-    Render.createVertex(0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 0.0, -1.0),
-    Render.createVertex(0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, -1.0),
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, -1.0),
- 
-    -- Third face (PX)
-    -- First triangle
-    Render.createVertex(0.5, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0),
-    Render.createVertex(0.5, 0.5, -0.5, 1.0, 0.0, 1.0, 0.0, 0.0),
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 0.0, 0.0),
-    -- Second triangle
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 0.0, 0.0),
-    Render.createVertex(0.5, -0.5, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0),
-    Render.createVertex(0.5, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0),
- 
-    -- Fourth face (MX)
-    -- First triangle
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 0.0),
-    Render.createVertex(-0.5, -0.5, 0.5, 1.0, 0.0, -1.0, 0.0, 0.0),
-    Render.createVertex(-0.5, 0.5, 0.5, 1.0, 1.0, -1.0, 0.0, 0.0),
-    -- Second triangle
-    Render.createVertex(-0.5, 0.5, 0.5, 1.0, 1.0, -1.0, 0.0, 0.0),
-    Render.createVertex(-0.5, 0.5, -0.5, 0.0, 1.0, -1.0, 0.0, 0.0),
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 0.0),
- 
-    -- Fifth face (PY)
-    -- First triangle
-    Render.createVertex(-0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0),
-    Render.createVertex(-0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0),
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 1.0, 0.0),
-    -- Second triangle
-    Render.createVertex(0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 1.0, 0.0),
-    Render.createVertex(0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0),
-    Render.createVertex(-0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0),
- 
-    -- Sixth face (MY)
-    -- First triangle
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0),
-    Render.createVertex(0.5, -0.5, -0.5, 1.0, 0.0, 0.0, -1.0, 0.0),
-    Render.createVertex(0.5, -0.5, 0.5, 1.0, 1.0, 0.0, -1.0, 0.0),
-    -- Second triangle
-    Render.createVertex(0.5, -0.5, 0.5, 1.0, 1.0, 0.0, -1.0, 0.0),
-    Render.createVertex(-0.5, -0.5, 0.5, 0.0, 1.0, 0.0, -1.0, 0.0),
-    Render.createVertex(-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, -1.0, 0.0)
-   
-}
+-- Initialize oldpad
+oldpad = 0
 
--- Init 3D Rendering
-Render.init(400, 240, Color.new(255, 255, 255, 255))
+-- Loading an image from SD root
+bitmap2 = Screen.loadImage("/file.bmp")
 
--- Set vertex shader light
-light_color = Render.createColor(1.0, 1.0, 1.0, 1.0)
-Render.setLightColor(light_color)
-Render.setLightSource(0.5, 0.5, -0.5)
+-- Creating a full black image
+bitmap = Screen.createImage(1,1,black)
 
--- Set model material attributes
-ambient = Render.createColor(0.2, 0.2, 0.2, 0.0)
-diffuse = Render.createColor(0.4, 0.4, 0.4, 0.0)
-specular = Render.createColor(0.8, 0.8, 0.8, 0.0)
+-- Saving flipped bitmap2 image on bitmap pointer
+Screen.flipImage(bitmap2,bitmap)
 
--- Load the cube
-mod1 = Render.loadModel(model, texture, ambient, diffuse, specular, 1.0)
+-- Drawing something on bitmap2 image
+Screen.fillRect(50,150,1,15,white,bitmap2)
 
--- Set default angle and z position
-z = -5.0
-angleX = 1.0
-angleY = 1.0
+-- Writing something on bitmap2 image
+Screen.debugPrint(51,3,"Image...OK!",black,bitmap2)
 
--- Main loop
-while System.mainLoop() do
- 
-	-- Rotate the model
-    angleX = angleX + 0.017
-    angleY = angleY + 0.034
+-- Main Loop
+while true do
 	
-	-- Move the model
-    x = math.sin(angleX)
-    y = math.sin(angleY)
+	-- Update screens
+	Screen.waitVblankStart()
+	Screen.refresh()
 	
-	-- Blend the model on top screen
-    Render.initBlend(TOP_SCREEN)
-    Render.drawModel(mod1, x, y, z, angleX, angleY)
-    Render.termBlend()
-   
-   -- Exit sample
-    if Controls.check(Controls.read(), KEY_START) then
-        --Render.unloadModel(mod1)
-        Render.term()
-        --Graphics.freeImage(texture)
-        System.exit()
-    end
-   
+	-- Read controls input
+	pad = Controls.read()
+	
+	-- Exit sample
+	if (Controls.check(pad,KEY_A)) then
+		Screen.freeImage(bitmap)
+		Screen.freeImage(bitmap2)
+		System.exit()
+	end
+	
+	-- Save bitmap2 image and take a full screenshot
+	if (Controls.check(pad,KEY_B)) and not (Controls.check(oldpad,KEY_B)) then
+		Screen.saveImage(bitmap2,"/bitmap.bmp",false)
+		System.takeScreenshot("/screenshot.bmp",false)
+	end
+	
+	-- Drawing both images on screens
+	Screen.drawImage(100,127,bitmap2,TOP_SCREEN)
+	Screen.drawImage(60,0,bitmap,BOTTOM_SCREEN)
+	
+	-- Flipping screens
+	Screen.flip()
+	
+	-- Updating oldpad
+	oldpad = pad
+	
 end

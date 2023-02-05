@@ -33,7 +33,7 @@ static int lua_newVertex(lua_State *L) {
   if (argc != 8)
     return luaL_error(L, "wrong number of arguments");
 #endif
-  vertex *res = (vertex *)malloc(sizeof(vertex));
+  vertex *res = new vertex;
   res->x = luaL_checknumber(L, 1);
   res->y = luaL_checknumber(L, 2);
   res->z = luaL_checknumber(L, 3);
@@ -112,15 +112,15 @@ static int lua_loadobj(lua_State *L) {
 
   // Flipping texture
   u8 *flipped =
-      (u8 *)malloc(bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3));
+      new u8[bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3)];
   flipped = flipBitmap(flipped, bitmap);
-  free(bitmap->pixels);
+  delete[] bitmap->pixels;
   bitmap->pixels = flipped;
 
   // Converting 24bpp texture to a 32bpp ones
   int length = (bitmap->width * bitmap->height) << 2;
   if (bitmap->bitperpixel == 24) {
-    u8 *real_pixels = (u8 *)malloc(length);
+    u8 *real_pixels = new u8[length];
     int i = 0;
     int z = 0;
     while (i < length) {
@@ -131,7 +131,7 @@ static int lua_loadobj(lua_State *L) {
       i = i + 4;
       z = z + 3;
     }
-    free(bitmap->pixels);
+    delete[] bitmap->pixels;
     bitmap->pixels = real_pixels;
   }
 
@@ -176,7 +176,7 @@ static int lua_loadobj(lua_State *L) {
   // Loading file on RAM
   u64 size;
   FS_GetSize(&fileHandle, &size);
-  char *content = (char *)malloc(size + 1);
+  char *content = new char[size + 1];
   FS_Read(&fileHandle, &bytesRead, 0, content, size);
   content[size] = 0;
 
@@ -184,7 +184,7 @@ static int lua_loadobj(lua_State *L) {
   FS_Close(&fileHandle);
 
   // Creating temp vertexList
-  vertexList *vl = (vertexList *)malloc(sizeof(vertexList));
+  vertexList *vl = new vertexList;
   vertexList *init = vl;
 
   // Init variables
@@ -236,7 +236,7 @@ static int lua_loadobj(lua_State *L) {
       init_val++;
     end_vert = strstr(init_val, "\n");
     if (magics_idx == 0)
-      res = (vertex *)malloc(sizeof(vertex));
+      res = new vertex;
     end_val = strstr(init_val, " ");
     vert_args = (float *)res; // Hacky way to iterate in vertex struct
     while (init_val < end_vert) {
@@ -255,7 +255,7 @@ static int lua_loadobj(lua_State *L) {
     // Update vertexList struct
     if (magics_idx == 0) {
       vl->vert = res;
-      vl->next = (vertexList *)malloc(sizeof(vertexList));
+      vl->next = new vertexList;
     }
     old_vl = vl;
     vl = vl->next;
@@ -264,12 +264,12 @@ static int lua_loadobj(lua_State *L) {
       vl->next = NULL;
     } else {
       if (vl == NULL) {
-        old_vl->next = (vertexList *)malloc(sizeof(vertexList));
+        old_vl->next = new vertexList;
         vl = old_vl->next;
-        vl->vert = (vertex *)malloc(sizeof(vertex));
+        vl->vert = new vertex;
         vl->next = NULL;
       } else if (vl->vert == NULL)
-        vl->vert = (vertex *)malloc(sizeof(vertex));
+        vl->vert = new vertex;
       res = vl->vert;
     }
 
@@ -280,7 +280,7 @@ static int lua_loadobj(lua_State *L) {
 
   // Creating real vertexList
   ptr = strstr(str, "f ");
-  vertexList *faces = (vertexList *)malloc(sizeof(vertexList));
+  vertexList *faces = new vertexList;
   vertexList *initFaces = faces;
   faces->vert = NULL;
   faces->next = NULL;
@@ -302,7 +302,7 @@ static int lua_loadobj(lua_State *L) {
     while (f_idx < 3) {
 
       // Allocating new vertex
-      faces->vert = (vertex *)malloc(sizeof(vertex));
+      faces->vert = new vertex;
 
       // Extracting x,y,z
       ptr2 = strstr(ptr, "/");
@@ -363,7 +363,7 @@ static int lua_loadobj(lua_State *L) {
 
       // Setting values for next vertex
       ptr = ptr2;
-      faces->next = (vertexList *)malloc(sizeof(vertexList));
+      faces->next = new vertexList;
       faces = faces->next;
       faces->next = NULL;
       faces->vert = NULL;
@@ -375,13 +375,13 @@ static int lua_loadobj(lua_State *L) {
   }
 
   // Freeing temp vertexList and allocated file
-  free(content);
+  delete[] content;
   vertexList *tmp_init;
   while (init != NULL) {
     tmp_init = init;
-    free(init->vert);
+    delete[] init->vert;
     init = init->next;
-    free(tmp_init);
+    delete[] tmp_init;
   }
 
   // Create the VBO (vertex buffer object)
@@ -391,8 +391,8 @@ static int lua_loadobj(lua_State *L) {
     tmp_init = initFaces;
     memcpy(&vbo_data[i * sizeof(vertex)], initFaces->vert, sizeof(vertex));
     initFaces = initFaces->next;
-    free(tmp_init->vert);
-    free(tmp_init);
+    delete[] tmp_init->vert;
+    delete[] tmp_init;
   }
 
   // Setting texture
@@ -400,8 +400,8 @@ static int lua_loadobj(lua_State *L) {
   C3D_TexInit(texture, bitmap->width, bitmap->height, GPU_RGBA8);
   C3D_TexUpload(texture, bitmap->pixels);
   C3D_TexSetFilter(texture, GPU_LINEAR, GPU_NEAREST);
-  free(bitmap->pixels);
-  free(bitmap);
+  delete[] bitmap->pixels;
+  delete[] bitmap;
   linearFree(tmp2);
 
   // Set object material attributes
@@ -414,7 +414,7 @@ static int lua_loadobj(lua_State *L) {
   }};
 
   // Create a model object and push it into Lua stack
-  model *res_m = (model *)malloc(sizeof(model));
+  model *res_m = new model;
   res_m->vertex_count = len;
   res_m->vbo_data = vbo_data;
   res_m->magic = 0xC00FFEEE;
@@ -584,15 +584,15 @@ static int lua_useTexture(lua_State *L) {
 
   // Flipping texture
   u8 *flipped =
-      (u8 *)malloc(bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3));
+      new u8[bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3)];
   flipped = flipBitmap(flipped, bitmap);
-  free(bitmap->pixels);
+  delete[] bitmap->pixels;
   bitmap->pixels = flipped;
 
   // Converting 24bpp texture to a 32bpp ones
   int length = (bitmap->width * bitmap->height) << 2;
   if (bitmap->bitperpixel == 24) {
-    u8 *real_pixels = (u8 *)malloc(length);
+    u8 *real_pixels = new u8[length];
     int i = 0;
     int z = 0;
     while (i < length) {
@@ -603,7 +603,7 @@ static int lua_useTexture(lua_State *L) {
       i = i + 4;
       z = z + 3;
     }
-    free(bitmap->pixels);
+    delete[] bitmap->pixels;
     bitmap->pixels = real_pixels;
   }
 
@@ -628,8 +628,8 @@ static int lua_useTexture(lua_State *L) {
   C3D_TexInit(mdl->texture, bitmap->width, bitmap->height, GPU_RGBA8);
   C3D_TexUpload(mdl->texture, bitmap->pixels);
   C3D_TexSetFilter(mdl->texture, GPU_LINEAR, GPU_NEAREST);
-  free(bitmap->pixels);
-  free(bitmap);
+  delete[] bitmap->pixels;
+  delete[] bitmap;
   linearFree(tmp2);
 
   return 0;
@@ -702,15 +702,15 @@ static int lua_loadModel(lua_State *L) {
 
   // Flipping texture
   u8 *flipped =
-      (u8 *)malloc(bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3));
+      new u8[bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3)];
   flipped = flipBitmap(flipped, bitmap);
-  free(bitmap->pixels);
+  delete[] bitmap->pixels;
   bitmap->pixels = flipped;
 
   // Converting 24bpp texture to a 32bpp ones
   int length = (bitmap->width * bitmap->height) << 2;
   if (bitmap->bitperpixel == 24) {
-    u8 *real_pixels = (u8 *)malloc(length);
+    u8 *real_pixels = new u8[length];
     int i = 0;
     int z = 0;
     while (i < length) {
@@ -721,7 +721,7 @@ static int lua_loadModel(lua_State *L) {
       i = i + 4;
       z = z + 3;
     }
-    free(bitmap->pixels);
+    delete[] bitmap->pixels;
     bitmap->pixels = real_pixels;
   }
 
@@ -758,8 +758,8 @@ static int lua_loadModel(lua_State *L) {
   C3D_TexInit(texture, bitmap->width, bitmap->height, GPU_RGBA8);
   C3D_TexUpload(texture, bitmap->pixels);
   C3D_TexSetFilter(texture, GPU_LINEAR, GPU_NEAREST);
-  free(bitmap->pixels);
-  free(bitmap);
+  delete[] bitmap->pixels;
+  delete[] bitmap;
   linearFree(tmp2);
 
   // Set object material attributes
@@ -772,7 +772,7 @@ static int lua_loadModel(lua_State *L) {
   }};
 
   // Create a model object and push it into Lua stack
-  model *res = (model *)malloc(sizeof(model));
+  model *res = new model;
   res->vertex_count = len;
   res->vbo_data = vbo_data;
   res->magic = 0xC00FFEEE;
@@ -853,7 +853,7 @@ static int lua_unloadModel(lua_State *L) {
   C3D_TexDelete(object->texture);
   linearFree(object->texture);
   linearFree(object->material);
-  free(object);
+  delete[] object;
   return 0;
 }
 
@@ -933,7 +933,7 @@ static int lua_newcolor(lua_State *L) {
   float b = luaL_checknumber(L, 3);
   float a = luaL_checknumber(L, 4);
 
-  color *res = (color *)malloc(sizeof(color));
+  color *res = new color;
   res->r = r;
   res->g = g;
   res->b = b;
@@ -968,7 +968,7 @@ static int lua_convert(lua_State *L) {
     return luaL_error(L, "wrong number of arguments");
 #endif
   u32 colour = luaL_checkinteger(L, 1);
-  color *res = (color *)malloc(sizeof(color));
+  color *res = new color;
   int2float(colour, &res->r, &res->g, &res->b, &res->a);
   res->magic = 0xC0C0C0C0;
   lua_pushinteger(L, (u32)res);

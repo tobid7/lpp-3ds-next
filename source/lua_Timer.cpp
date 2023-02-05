@@ -17,7 +17,7 @@ static int lua_newT(lua_State *L) {
   int argc = lua_gettop(L);
   if (argc != 0)
     return luaL_error(L, "wrong number of arguments.");
-  Timer *new_timer = (Timer *)malloc(sizeof(Timer));
+  Timer *new_timer = new Timer;
   new_timer->tick = osGetTime();
   new_timer->magic = 0x4C544D52;
   new_timer->isPlaying = true;

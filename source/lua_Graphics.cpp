@@ -285,7 +285,7 @@ static int lua_loadimg(lua_State *L) {
 #endif
   if (bitmap->bitperpixel == 24) {
     int length = (bitmap->width * bitmap->height) << 2;
-    u8 *real_pixels = (u8 *)malloc(length);
+    u8 *real_pixels = new u8[length];
     int i = 0;
     int z = 0;
     while (i < length) {
@@ -296,20 +296,20 @@ static int lua_loadimg(lua_State *L) {
       i = i + 4;
       z = z + 3;
     }
-    free(bitmap->pixels);
+    delete[] bitmap->pixels;
     bitmap->pixels = real_pixels;
   }
   C2D_Image ret =
       C2DH::LoadTextureMem8888(bitmap->pixels, bitmap->width, bitmap->height);
   C2D_Image *tex = new C2D_Image;
   tex = &ret;
-  gpu_text *result = (gpu_text *)malloc(sizeof(gpu_text));
+  gpu_text *result = new gpu_text;
   result->magic = 0x4C545854;
   result->tex = tex;
   result->width = bitmap->width;
   result->height = bitmap->height;
-  free(bitmap->pixels);
-  free(bitmap);
+  delete[] bitmap->pixels;
+  delete[] bitmap;
   lua_pushinteger(L, (u32)(result));
   return 1;
 }
@@ -327,11 +327,11 @@ static int lua_convert(lua_State *L) {
 #endif
   u8 *real_pixels;
   u8 *flipped =
-      (u8 *)malloc(bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3));
+      new u8[bitmap->width * bitmap->height * (bitmap->bitperpixel >> 3)];
   flipped = flipBitmap(flipped, bitmap);
   int length = (bitmap->width * bitmap->height) << 2;
   if (bitmap->bitperpixel == 24) {
-    real_pixels = (u8 *)malloc(length);
+    real_pixels = new u8[length];
     int i = 0;
     int z = 0;
     while (i < length) {
@@ -357,12 +357,12 @@ static int lua_convert(lua_State *L) {
       C2DH::LoadTextureMem8888(bitmap->pixels, bitmap->width, bitmap->height);
   C2D_Image *tex = new C2D_Image;
   tex = &ret;
-  gpu_text *result = (gpu_text *)malloc(sizeof(gpu_text));
+  gpu_text *result = new gpu_text;
   result->magic = 0x4C545854;
   result->tex = tex;
   result->width = bitmap->width;
   result->height = bitmap->height;
-  free(real_pixels);
+  delete[] real_pixels;
   lua_pushinteger(L, (u32)(result));
   return 1;
 }
@@ -541,8 +541,8 @@ static int lua_free(lua_State *L) {
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
   C3D_TexDelete(texture->tex->tex);
-  delete texture->tex;
-  free(texture);
+  delete[] texture->tex;
+  delete[] texture;
   return 0;
 }
 

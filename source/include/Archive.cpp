@@ -103,13 +103,13 @@ typedef struct {
 } _zip;
 
 void *MallocPatch(int size) {
-  void *ptr = malloc(size);
+  void *ptr = new char[size];
   return ptr;
 }
 
 void FreePatch(void *ptr) {
   if (ptr != NULL)
-    free(ptr);
+    delete[] ptr;
 }
 
 static int ZitByte(FILE *file, int *pi) {

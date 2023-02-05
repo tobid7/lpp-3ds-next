@@ -201,7 +201,7 @@ static int lua_getfh(lua_State *L) {
     return luaL_error(L, "wrong number of arguments.");
 #endif
   Handle hdl = luaL_checkinteger(L, 1);
-  fileStream *result = (fileStream *)malloc(sizeof(fileStream));
+  fileStream *result = new fileStream;
   result->isRomfs = false;
   result->handle = (u32)hdl;
   result->magic = 0xBEEFDEAD;
@@ -216,7 +216,7 @@ static int lua_alloc(lua_State *L) {
     return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 size = (u32)luaL_checkinteger(L, 1);
-  u8 *memblock = (u8 *)malloc(size);
+  u8 *memblock = new u8[size];
   lua_pushinteger(L, (u32)memblock);
   return 1;
 }
@@ -240,7 +240,7 @@ static int lua_free(lua_State *L) {
     return luaL_error(L, "wrong number of arguments.");
 #endif
   void *offset = (void *)luaL_checkinteger(L, 1);
-  free(offset);
+  delete[] offset;
   return 0;
 }
 

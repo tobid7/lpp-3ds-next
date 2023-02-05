@@ -234,7 +234,7 @@ bool Image::saveToMemory(std::vector<unsigned char> &out_buffer) {
     out_buffer[i] = buffer[i];
   }
 
-  free(buffer);
+  delete[] buffer;
 
   return true;
 }

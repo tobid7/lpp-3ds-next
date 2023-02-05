@@ -124,7 +124,7 @@ static int lua_download(lua_State *L) {
     httpcSetSSLOpt(&context, SSLCOPT_DisableVerify);
 
     if (headers != NULL) {
-      char *tokenheader = (char *)malloc(strlen(headers) + 1);
+      char *tokenheader = new char[strlen(headers) + 1];
       strcpy(tokenheader, headers);
       char *toker = tokenheader;
       char *headername = NULL;
@@ -141,7 +141,7 @@ static int lua_download(lua_State *L) {
         httpcAddRequestHeaderField(&context, headername, headervalue);
         toker = NULL;
       } while (headername != NULL && headervalue != NULL);
-      free(tokenheader);
+      delete[] tokenheader;
     }
 
     if (useMethod == HTTPC_METHOD_POST && postdata != NULL) {
@@ -157,7 +157,7 @@ static int lua_download(lua_State *L) {
       if (statuscode == 200) {
         u32 readSize = 0;
         long int bytesWritten = 0;
-        u8 *buf = (u8 *)malloc(0x1000);
+        u8 *buf = new u8[0x1000];
         memset(buf, 0, 0x1000);
         FS_ArchiveID a_id = ARCHIVE_SDMC;
         Handle fileHandle;
@@ -175,7 +175,7 @@ static int lua_download(lua_State *L) {
 
         FSFILE_Close(fileHandle);
         svcCloseHandle(fileHandle);
-        free(buf);
+        delete[] buf;
       }
 #ifndef SKIP_ERROR_HANDLING
     }
@@ -223,7 +223,7 @@ static int lua_downstring(lua_State *L) {
     httpcSetSSLOpt(&context, SSLCOPT_DisableVerify);
 
     if (headers != NULL) {
-      char *tokenheader = (char *)malloc(strlen(headers) + 1);
+      char *tokenheader = new char[strlen(headers) + 1];
       strcpy(tokenheader, headers);
       char *toker = tokenheader;
       char *headername = NULL;
@@ -240,7 +240,7 @@ static int lua_downstring(lua_State *L) {
         httpcAddRequestHeaderField(&context, headername, headervalue);
         toker = NULL;
       } while (headername != NULL && headervalue != NULL);
-      free(tokenheader);
+      delete[] tokenheader;
     }
 
     if (useMethod == HTTPC_METHOD_POST && postdata != NULL) {
@@ -255,7 +255,7 @@ static int lua_downstring(lua_State *L) {
       u32 readSize = 0;
       httpcGetResponseStatusCode(&context, &statuscode);
       if (statuscode == 200) {
-        unsigned char *buffer = (unsigned char *)malloc(0x1000);
+        unsigned char *buffer = new unsigned char[0x1000];
         do {
           ret = httpcDownloadData(&context, buffer + contentsize, 0x1000,
                                   &readSize);
@@ -266,7 +266,7 @@ static int lua_downstring(lua_State *L) {
         buffer = (unsigned char *)realloc(buffer, contentsize + 1);
         buffer[contentsize] = 0;
         lua_pushlstring(L, (const char *)buffer, contentsize);
-        free(buffer);
+        delete[] buffer;
       }
 #ifndef SKIP_ERROR_HANDLING
     }
@@ -305,7 +305,7 @@ static int lua_sendmail(lua_State *L) { // BETA func
   int nsm = SpaceCounter(mex);
   req_size = req_size + (nss << 1) + (nsm << 1) + strlen(subj) + strlen(mex) +
              strlen(to);
-  char *url = (char *)malloc(req_size);
+  char *url = new char[req_size];
   strcpy(url, "http://rinnegatamante.netsons.org/tmp_mail_lpp_beta.php?t=");
   strcat(url, to);
   strcat(url, "&s=");
@@ -359,7 +359,7 @@ static int lua_sendmail(lua_State *L) { // BETA func
     u8 response;
     httpcDownloadData(&context, &response, contentsize, NULL);
     lua_pushboolean(L, response);
-    free(url);
+    delete[] url;
 #ifndef SKIP_ERROR_HANDLING
   } else
     luaL_error(L, "error opening url");
@@ -415,7 +415,7 @@ static int lua_createServerSocket(lua_State *L) {
   if (argc == 2)
     type = luaL_checkinteger(L, 2);
 
-  Socket *my_socket = (Socket *)malloc(sizeof(Socket));
+  Socket *my_socket = new Socket;
   my_socket->serverSocket = true;
 
   if (type == IPPROTO_TCP)
@@ -492,7 +492,7 @@ static int lua_recv(lua_State *L) {
     return luaL_error(L, "recv not allowed for server sockets.");
 #endif
 
-  char *data = (char *)malloc(size);
+  char *data = new char[size];
   int count = 0;
   if (my_socket->isSSL)
     count = sslcRead(&my_socket->sslc_context, data, size, false);
@@ -502,7 +502,7 @@ static int lua_recv(lua_State *L) {
     lua_pushlstring(L, data, count);
   else
     lua_pushstring(L, "");
-  free(data);
+  delete[] data;
   return 1;
 }
 
@@ -555,7 +555,7 @@ static int lua_connect(lua_State *L) {
   sprintf(port_str, "%i", port);
 
   // Allocating Socket memblock
-  Socket *my_socket = (Socket *)malloc(sizeof(Socket));
+  Socket *my_socket = new Socket;
   my_socket->serverSocket = false;
   my_socket->magic = 0xDEADDEAD;
   my_socket->isSSL = isSSL;
@@ -567,7 +567,7 @@ static int lua_connect(lua_State *L) {
     my_socket->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #ifndef SKIP_ERROR_HANDLING
   if (my_socket->sock < 0) {
-    free(my_socket);
+    delete[] my_socket;
     return luaL_error(L, "Failed creating socket.");
   }
 #endif
@@ -592,7 +592,7 @@ static int lua_connect(lua_State *L) {
 #ifndef SKIP_ERROR_HANDLING
   if (resaddr_cur == NULL) {
     closesocket(my_socket->sock);
-    free(my_socket);
+    delete[] my_socket;
     return luaL_error(L, "Failed connecting to the server.");
   }
 #endif
@@ -604,7 +604,7 @@ static int lua_connect(lua_State *L) {
 #ifndef SKIP_ERROR_HANDLING
     if (R_FAILED(ret)) {
       closesocket(my_socket->sock);
-      free(my_socket);
+      delete[] my_socket;
       return luaL_error(L, "Failed creating SSL context.");
     }
 #endif
@@ -614,7 +614,7 @@ static int lua_connect(lua_State *L) {
 #ifndef SKIP_ERROR_HANDLING
     if (R_FAILED(ret)) {
       closesocket(my_socket->sock);
-      free(my_socket);
+      delete[] my_socket;
       return luaL_error(L, "SSL connection failed.");
     }
 #endif
@@ -665,10 +665,10 @@ static int lua_addCert(lua_State *L) {
   u64 cert_size;
   u32 bytesRead;
   FS_GetSize(&fileHandle, &cert_size);
-  u8 *cert = (u8 *)malloc(cert_size);
+  u8 *cert = new u8[cert_size];
   FS_Read(&fileHandle, &bytesRead, 0, cert, cert_size);
   sslcAddTrustedRootCA(RootCertChain_contexthandle, cert, cert_size, NULL);
-  free(cert);
+  delete[] cert;
   FS_Close(&fileHandle);
   return 0;
 }
@@ -696,7 +696,7 @@ static int lua_accept(lua_State *L) {
   if (sockClient <= 0)
     return 0;
 
-  Socket *incomingSocket = (Socket *)malloc(sizeof(Socket));
+  Socket *incomingSocket = new Socket;
   incomingSocket->serverSocket = 0;
   incomingSocket->sock = sockClient;
   incomingSocket->magic = 0xDEADDEAD;
@@ -724,7 +724,7 @@ static int lua_closeSock(lua_State *L) {
   if (my_socket->isSSL)
     sslcDestroyContext(&my_socket->sslc_context);
   closesocket(my_socket->sock);
-  free(my_socket);
+  delete[] my_socket;
   return 0;
 }
 

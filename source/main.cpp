@@ -8,11 +8,45 @@
 #include <3ds.h>
 #include <ErrorHelper.hpp>
 #include <NDS.hpp>
+#include <memory.hpp>
 #include <stdio.h>
 #include <string.h>
 
 bool f_quit = false;
 bool catch_at = true;
+
+extern void create(ThreadFunc entrypoint);
+extern void destroy(void);
+
+std::string formatBytes(int bytes) {
+  char out[32];
+
+  if (bytes == 1)
+    snprintf(out, sizeof(out), "%d b", bytes);
+
+  else if (bytes < 1024)
+    snprintf(out, sizeof(out), "%d b", bytes);
+
+  else if (bytes < 1024 * 1024)
+    snprintf(out, sizeof(out), "%.1f kb", (float)bytes / 1024);
+
+  else if (bytes < 1024 * 1024 * 1024)
+    snprintf(out, sizeof(out), "%.1f mb", (float)bytes / 1024 / 1024);
+
+  else
+    snprintf(out, sizeof(out), "%.1f gb", (float)bytes / 1024 / 1024 / 1024);
+
+  return out;
+}
+
+static void MemThrd() {
+  while (!f_quit) {
+    std::cout << "C: " << formatBytes(nlc::Memory::GetCurrent())
+              << " A: " << formatBytes(nlc::Memory::GetTotalAllocated())
+              << " F: " << formatBytes(nlc::Memory::GetTotalFreed()) << "\r";
+    std::cout.flush();
+  }
+}
 
 extern void nsocExit();
 
@@ -22,6 +56,7 @@ void InitLppServ() {
   cfguInit();
   romfsInit();
   consoleInit(GFX_BOTTOM, NULL);
+  create((ThreadFunc)MemThrd);
   // nds::Init();
 }
 
@@ -34,6 +69,7 @@ void ExitLppServ() {
       }
     }
   }
+  destroy();
   f_quit = true;
   aptExit();
   cfguExit();
