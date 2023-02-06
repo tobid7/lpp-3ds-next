@@ -26,6 +26,9 @@ static void InitLibraries(lua_State *LState) {
   luaScreen_init(LState);
   luaGraphics_init(LState);
   luaRender_init(LState);
+  luaKeyboard_init(LState);
+  luaMic_init(LState);
+  luaCamera_init(LState);
 }
 
 void Run(std::string path) {

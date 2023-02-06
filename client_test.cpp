@@ -1,10 +1,15 @@
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <chrono>
+#include <cstring>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 
-#include <iostream>
+const char *ip = "localhost";
+int port = 8080;
 
 /////////////////////
 struct wellc {
@@ -30,48 +35,44 @@ void DataOut(dbg_d dbg) {
   std::cout.flush();
 }
 
-int main() {
-  const char *ip = "locallhost";
-  int port = 8080;
-  int e;
-
-  int sockfd;
-  struct sockaddr_in server_addr;
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    perror("[-]Error in socket");
-    exit(1);
+void clientThread() {
+  int client_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (client_socket == -1) {
+    std::cerr << "[-]Could not create socket";
+    return;
   }
   printf("[+]Server socket created successfully.\n");
 
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = port;
-  server_addr.sin_addr.s_addr = inet_addr(ip);
+  sockaddr_in server_address;
+  server_address.sin_family = AF_INET;
+  server_address.sin_port = htons(port);
+  inet_pton(AF_INET, ip, &server_address.sin_addr);
 
-  e = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-  if (e == -1) {
-    perror("[-]Error in socket");
-    exit(1);
+  if (connect(client_socket, (sockaddr *)&server_address,
+              sizeof(server_address)) < 0) {
+    std::cerr << "[-]Connect failed" << std::endl;
+    return;
   }
+
   printf("[+]Connected to Server.\n");
 
+  dbg_d data;
   while (true) {
-    wellc wlc;
-    wlc.mgk = mgkwelc;
-    wlc.cmd = 1;
-    send(sockfd, &wlc, sizeof(wellc), 0);
-    usleep(1000000);
-    dbg_d ret;
-    recv(sockfd, &ret, sizeof(dbg_d), 0);
-    if (ret.mgk != mgkdbg)
-      break;
-    DataOut(ret);
-    usleep(1000000);
-  }
+    int bytesReceived = recv(client_socket, &data, sizeof(dbg_d), 0);
+    if (bytesReceived <= 0) {
+      std::cerr << "[-]Receive failed" << std::endl;
+      return;
+    }
 
-  printf("[+]Closing the connection.\n");
-  close(sockfd);
+    DataOut(data);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+}
+
+int main() {
+  std::thread thrd(clientThread);
+
+  thrd.join();
 
   return 0;
 }

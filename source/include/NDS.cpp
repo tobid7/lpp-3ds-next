@@ -46,11 +46,6 @@ static u32 *SOC_buffer = NULL;
 const char *ip = "127.0.0.1";
 int port = 8080;
 
-int sockfd, new_sock;
-int e;
-struct sockaddr_in server_addr, new_addr;
-socklen_t addr_size;
-
 void nsocExit() {
   printf("[+]waiting for socExit...\n");
   thrd[0] = false;
@@ -70,29 +65,6 @@ void nsocInit() {
   if ((ret = socInit(SOC_buffer, SOC_BUFFERSIZE)) != 0) {
     printf("[-]socInit: 0x%08X\n", (unsigned int)ret);
   }
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    perror("[-]Error in socket");
-
-    return;
-  }
-  printf("[+]Server socket created successfully.\n");
-
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = port;
-  server_addr.sin_addr.s_addr = gethostid();
-
-  e = bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-  if (e < 0) {
-    perror("[-]Error in bind");
-  }
-  printf("[+]Binding successfull.\n");
-  char rip[52];
-  u8 *addr = (u8 *)&server_addr.sin_addr.s_addr;
-  sprintf(rip, "%hhu.%hhu.%hhu.%hhu", addr[0], addr[1], addr[2], addr[3]);
-  printf("[+]Ip: %s Port: %d\n", rip, server_addr.sin_port);
-  thrd = new bool;
-  thrd[0] = true;
 }
 
 ///////////////
@@ -115,56 +87,56 @@ uint32_t mgkdbg = 0x54d75a45;
 ///////////////
 
 void nsocLoop() {
-  // Set socket non blocking so we can still read input to exit
-  fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFL, 0) | O_NONBLOCK);
-  if (int ret = listen(sockfd, 5) == 0) {
-    printf("[+]Listening....\n");
-  } else {
-    printf("[-]Error in listening\n");
-    printf("[-]code: %d %s\n", errno, strerror(errno));
-    close(sockfd);
-    close(e);
-    sockfd = -1;
-    e = -1;
-    printf("[+]Force Quit Thread...\n");
+  int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_socket == -1) {
+    std::cerr << "Could not create socket" << std::endl;
+    return;
   }
 
-  while (true) {
-    addr_size = sizeof(new_addr);
-    new_sock = accept(sockfd, (struct sockaddr *)&new_addr, &addr_size);
+  int opt = 1;
+  setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    if (new_sock < 0) {
-      if (errno != EAGAIN) {
-        printf("[-]accept: %d %s\n", errno, strerror(errno));
-        break;
-      }
-    } else {
-      // set client socket to blocking to simplify sending data back
-      fcntl(new_sock, F_SETFL, fcntl(new_sock, F_GETFL, 0) & ~O_NONBLOCK);
-      printf("[+]Connecting port %d from %s\n", new_addr.sin_port,
-             inet_ntoa(new_addr.sin_addr));
-    }
+  sockaddr_in address;
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = gethostid();
+  address.sin_port = htons(port);
 
-    if (!thrd[0]) {
-      printf("[+]Force Quit Thread...\n");
-      close(sockfd);
-      close(e);
-      sockfd = -1;
-      e = -1;
-      break;
+  if (bind(server_socket, (sockaddr *)&address, sizeof(address)) < 0) {
+    std::cerr << "Bind failed" << std::endl;
+    return;
+  }
+
+  // Set socket non blocking so we can still read input to exit
+  fcntl(server_socket, F_SETFL, fcntl(server_socket, F_GETFL, 0) | O_NONBLOCK);
+
+  if (listen(server_socket, 5) == 0) {
+    printf("[+]Listening...\n");
+  } else {
+    std::cerr << "[-]Listen failed" << std::endl;
+    return;
+  }
+
+  sockaddr_in client_address;
+  u32 clilen = sizeof(client_address);
+  int client_socket = -1;
+
+  thrd[0] = true;
+  while (thrd[0]) {
+    client_socket = accept(server_socket, (sockaddr *)&client_address, &clilen);
+    if (client_socket < 0) {
+      std::cerr << "[-]Accept failed: " << strerror(errno) << std::endl;
+      return;
+    } else { // set client socket to blocking to simplify sending data back
+      fcntl(client_socket, F_SETFL,
+            fcntl(client_socket, F_GETFL, 0) & ~O_NONBLOCK);
+      printf("[+]Connected to Client!\n");
     }
-    wellc wlc;
-    int rl = recv(new_sock, &wlc, sizeof(wellc), 0);
-    if (wlc.mgk != mgkwelc) {
-      printf("[-]Broken Packet\n");
-    }
-    if (wlc.cmd == 1) {
-      dbg_d dbg;
-      dbg.mgk = mgkdbg;
-      dbg.usg_cpu = C3D_GetProcessingTime();
-      send(new_sock, &dbg, sizeof(dbg_d), 0);
-    }
-    svcSleepThread(1000000);
+    // Dummy-Daten senden
+    dbg_d data;
+    data.mgk = mgkdbg;
+    data.usg_cpu = C3D_GetProcessingTime();
+    send(client_socket, &data, sizeof(data), 0);
+    svcSleepThread(1000000000);
   }
 
   return;

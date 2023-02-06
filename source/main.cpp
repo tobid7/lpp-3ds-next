@@ -14,6 +14,7 @@
 
 bool f_quit = false;
 bool catch_at = true;
+bool csndAccess = false;
 
 extern void create(ThreadFunc entrypoint);
 extern void destroy(void);
@@ -55,8 +56,8 @@ void InitLppServ() {
   aptInit();
   cfguInit();
   romfsInit();
-  consoleInit(GFX_BOTTOM, NULL);
-  create((ThreadFunc)MemThrd);
+  // consoleInit(GFX_BOTTOM, NULL);
+  // create((ThreadFunc)MemThrd);
   // nds::Init();
 }
 
@@ -94,6 +95,7 @@ int main(int argc, char **argv) {
   ErrorHelper::SetupDirectories();
   sprintf(cur_dir, "sdmc:/");
   Run("romfs:/index.lua");
+  exit(0);
   // return 0; // Just caused by all the fnc
   //           // not contain return value pain lol
 }
