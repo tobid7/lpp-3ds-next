@@ -75,7 +75,7 @@ static int lua_refresh(lua_State *L) {
     eye = GFX_LEFT;
   else
     eye = GFX_RIGHT;
-  // C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+  C3D_FrameBegin(0);
   if (eye == GFX_RIGHT && my_screen == GFX_TOP)
     C2D_SceneBegin(t_targets[2]);
   else if (eye == GFX_LEFT && my_screen == GFX_TOP)
@@ -91,7 +91,7 @@ static int lua_end(lua_State *L) {
   if (argc != 0)
     return luaL_error(L, "wrong number of arguments");
 #endif
-  // C3D_FrameEnd(0);
+  C3D_FrameEnd(0);
   return 0;
 }
 

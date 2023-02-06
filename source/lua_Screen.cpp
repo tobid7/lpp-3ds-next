@@ -413,8 +413,8 @@ static int lua_flip(lua_State *L) {
   if (argc != 0)
     return luaL_error(L, "wrong number of arguments");
 #endif
-  if (c3d_Frame_en)
-    C3D_FrameEnd(0);
+  // if (c3d_Frame_en)
+  // C3D_FrameEnd(0);
   gfxSwapBuffers();
   return 0;
 }
@@ -426,8 +426,8 @@ static int lua_refresh(lua_State *L) {
     return luaL_error(L, "wrong number of arguments");
 #endif
   RefreshScreen();
-  if (c3d_Frame_en)
-    C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+  // if (c3d_Frame_en)
+  // C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
   return 0;
 }
 
