@@ -11,6 +11,7 @@
 #include <memory.hpp>
 #include <stdio.h>
 #include <string.h>
+#include <future>
 
 bool f_quit = false;
 bool catch_at = true;
@@ -90,11 +91,17 @@ bool CIA_MODE;
 bool isCSND;
 char cur_dir[256];
 
+void Prnt()
+{
+  std::cout << "Assync lol" << std::endl;
+}
+
 int main(int argc, char **argv) {
   init_fnc(InitLppServ, ExitLppServ);
   ErrorHelper::SetupDirectories();
   sprintf(cur_dir, "sdmc:/");
   Run("romfs:/index.lua");
+
   exit(0);
   // return 0; // Just caused by all the fnc
   //           // not contain return value pain lol
