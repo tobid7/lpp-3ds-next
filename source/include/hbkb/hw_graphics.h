@@ -11,14 +11,14 @@
 #include <3ds.h>
 
 class HW_Graphics {
-public:
+ public:
   HW_Graphics();
   virtual ~HW_Graphics();
 
   void DrawKeyboard(u8 &KeyboadState, s16 &T_X, s16 &T_Y, bool &isShift,
                     bool &isCaps, u8 &Key);
 
-private:
+ private:
   void DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps);
 
   // Smealum Stuff

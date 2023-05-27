@@ -5,9 +5,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <3ds.h>
+
 #include "stb_image_write.h"
 
-#include <3ds.h>
 
 Image::Image() {
   m_width = 0;
@@ -47,8 +48,7 @@ bool Image::loadFromFile(const std::string &filename) {
   int loaded_height = 0;
   unsigned char *loaded_buffer =
       stbi_load(filename.c_str(), &loaded_width, &loaded_height, 0, 4);
-  if (!loaded_buffer || loaded_width == 0 || loaded_height == 0)
-    return false;
+  if (!loaded_buffer || loaded_width == 0 || loaded_height == 0) return false;
 
   m_width = loaded_width;
   m_height = loaded_height;
@@ -63,15 +63,13 @@ bool Image::loadFromFile(const std::string &filename) {
 }
 
 bool Image::loadFromMemory(const std::vector<unsigned char> &buffer) {
-  if (buffer.size() == 0)
-    return false;
+  if (buffer.size() == 0) return false;
   return loadFromMemory(&buffer[0], buffer.size());
 }
 
 bool Image::loadFromMemory(const unsigned char *buffer,
                            unsigned int buffer_size) {
-  if (!buffer || buffer_size == 0)
-    return false;
+  if (!buffer || buffer_size == 0) return false;
 
   int loaded_width = 0;
   int loaded_height = 0;
@@ -79,8 +77,7 @@ bool Image::loadFromMemory(const unsigned char *buffer,
   unsigned char *loaded_buffer = stbi_load_from_memory(
       buffer, buffer_size, &loaded_width, &loaded_height, 0, 4);
 
-  if (!loaded_buffer || loaded_width == 0 || loaded_height == 0)
-    return false;
+  if (!loaded_buffer || loaded_width == 0 || loaded_height == 0) return false;
 
   m_width = loaded_width;
   m_height = loaded_height;
@@ -95,8 +92,7 @@ bool Image::loadFromMemory(const unsigned char *buffer,
 }
 
 void Image::putPixel(int x, int y, Color color) {
-  if (x < 0 || y < 0 || x >= m_width || y >= m_height)
-    return;
+  if (x < 0 || y < 0 || x >= m_width || y >= m_height) return;
 
   unsigned int index = x + y * m_width;
 
@@ -139,15 +135,13 @@ bool Image::isLoaded() const {
 }
 
 unsigned char *Image::getPixelsPointer() {
-  if (!isLoaded())
-    return 0;
+  if (!isLoaded()) return 0;
 
   return &m_pixels[0];
 }
 
 void Image::draw(int x, int y, bool top_screen, bool side) {
-  if (!isLoaded())
-    return;
+  if (!isLoaded()) return;
 
   u16 buffer_width = 0;
   u16 buffer_height = 0;
@@ -193,28 +187,26 @@ void Image::draw(int x, int y, bool top_screen, bool side) {
 
 bool Image::saveToFile(const std::string &filename, Format format) {
   switch (format) {
-  case Format_Png:
-    return stbi_write_png(filename.c_str(), getWidth(), getHeight(), 4,
-                          getPixelsPointer(), getWidth());
-  case Format_Bmp:
-    return stbi_write_bmp(filename.c_str(), getWidth(), getHeight(), 4,
-                          getPixelsPointer());
-  default:
-    return stbi_write_tga(filename.c_str(), getWidth(), getHeight(), 4,
-                          getPixelsPointer());
+    case Format_Png:
+      return stbi_write_png(filename.c_str(), getWidth(), getHeight(), 4,
+                            getPixelsPointer(), getWidth());
+    case Format_Bmp:
+      return stbi_write_bmp(filename.c_str(), getWidth(), getHeight(), 4,
+                            getPixelsPointer());
+    default:
+      return stbi_write_tga(filename.c_str(), getWidth(), getHeight(), 4,
+                            getPixelsPointer());
   }
 }
 
 bool Image::saveToMemory(unsigned char **buffer, unsigned int *buffer_size) {
-  if (!buffer || !buffer_size)
-    return false;
+  if (!buffer || !buffer_size) return false;
 
   int out_len = 0;
   *buffer = stbi_write_png_to_mem(getPixelsPointer(), getWidth(), getWidth(),
                                   getHeight(), 4, &out_len);
 
-  if (!*buffer)
-    return false;
+  if (!*buffer) return false;
 
   *buffer_size = out_len;
 
@@ -225,8 +217,7 @@ bool Image::saveToMemory(std::vector<unsigned char> &out_buffer) {
   unsigned char *buffer = 0;
   unsigned int buffer_size = 0;
 
-  if (!saveToMemory(&buffer, &buffer_size))
-    return false;
+  if (!saveToMemory(&buffer, &buffer_size)) return false;
 
   out_buffer.resize(buffer_size);
 

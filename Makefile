@@ -66,7 +66,7 @@ VERSION_MICRO := 0
 #---------------------------------------------------------------------------------
 TARGET		:=	lpp-3ds-next
 BUILD		:=	build
-SOURCES		:=	source source/include source/include/ftp source/include/ttf source/include/lodepng source/include/hbkb
+SOURCES		:=	source source/include source/include/ftp source/include/ttf source/include/lodepng source/include/hbkb source/include/nanovg
 DATA		:=	data
 INCLUDES	:=	source libs/include/lua source/include source/include/ftp source/include/ttf source/include/lodepng source/include/hbkb
 GRAPHICS	:=	gfx

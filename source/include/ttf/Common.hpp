@@ -13,4 +13,4 @@
 
 #define PLATFORM_3DS
 
-#endif // COMMON_HPP_INC
+#endif  // COMMON_HPP_INC

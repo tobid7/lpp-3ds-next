@@ -69,10 +69,12 @@
 #define HBKB_H_
 
 #include <3ds.h>
+
 #include <string>
 
+
 class HB_Keyboard {
-public:
+ public:
   HB_Keyboard();
   virtual ~HB_Keyboard();
 
@@ -92,7 +94,7 @@ public:
   u8 KeyboardState;
   u8 CurrentKey;
 
-private:
+ private:
   void KeyInteraction(u8 &Key);
   void ChangeString(u8 &Key);
   void GFXBufferInteraction();

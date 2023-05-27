@@ -6,4 +6,4 @@
 namespace ErrorHelper {
 void SetupDirectories();
 void WriteErr(std::string msg);
-} // namespace ErrorHelper
+}  // namespace ErrorHelper

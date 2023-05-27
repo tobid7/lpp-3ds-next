@@ -4,13 +4,14 @@
 #ifndef FONT_HPP_INC
 #define FONT_HPP_INC
 
+#include <cstring>
+
 #include "Common.hpp"
 #include "Image.hpp"
 #include "stb_truetype.h"
-#include <cstring>
 
 class Font {
-public:
+ public:
   Font();
 
   Font(const std::string &filename);
@@ -50,9 +51,9 @@ public:
 
   static std::wstring utf8_to_UCS2(char *code);
 
-private:
+ private:
   stbtt_fontinfo m_info;
   float m_scale;
 };
 
-#endif // FONT_HPP_INC
+#endif  // FONT_HPP_INC

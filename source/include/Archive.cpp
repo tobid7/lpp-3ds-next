@@ -30,7 +30,7 @@ extern "C" {
 #define _ZIP_CRC_ERROR (-105)
 
 #define CRC32(c, b) ((*(crc32tab + (((int)(c) ^ (b)) & 0xff))) ^ ((c) >> 8))
-#define zdecode(pkeys, crc32tab, c)                                            \
+#define zdecode(pkeys, crc32tab, c) \
   (ZipUpdateKeys(pkeys, crc32tab, c ^= ZipDecryptByte(pkeys, crc32tab)))
 #define _ZIP_BUF_READ_COMMENT (0x400)
 
@@ -108,8 +108,7 @@ void *MallocPatch(int size) {
 }
 
 void FreePatch(void *ptr) {
-  if (ptr != NULL)
-    delete[] ptr;
+  if (ptr != NULL) delete[] ptr;
 }
 
 static int ZitByte(FILE *file, int *pi) {
@@ -136,8 +135,7 @@ static int ZitShort(FILE *file, unsigned long *px) {
   err = ZitByte(file, &i);
   x = (unsigned long)i;
 
-  if (err == _ZIP_OK)
-    err = ZitByte(file, &i);
+  if (err == _ZIP_OK) err = ZitByte(file, &i);
 
   x += ((unsigned long)i) << 8;
 
@@ -157,18 +155,15 @@ static int ZitLong(FILE *file, unsigned long *px) {
   err = ZitByte(file, &i);
   x = (unsigned long)i;
 
-  if (err == _ZIP_OK)
-    err = ZitByte(file, &i);
+  if (err == _ZIP_OK) err = ZitByte(file, &i);
 
   x += ((unsigned long)i) << 8;
 
-  if (err == _ZIP_OK)
-    err = ZitByte(file, &i);
+  if (err == _ZIP_OK) err = ZitByte(file, &i);
 
   x += ((unsigned long)i) << 16;
 
-  if (err == _ZIP_OK)
-    err = ZitByte(file, &i);
+  if (err == _ZIP_OK) err = ZitByte(file, &i);
 
   x += ((unsigned long)i) << 24;
 
@@ -223,18 +218,15 @@ static unsigned long ZipLocateCentralDir(FILE *file) {
   unsigned long umaxback = 0xffff;
   unsigned long uposfound = 0;
 
-  if (fseek(file, 0, SEEK_END) != 0)
-    return 0;
+  if (fseek(file, 0, SEEK_END) != 0) return 0;
 
   usizefile = ftell(file);
 
-  if (umaxback > usizefile)
-    umaxback = usizefile;
+  if (umaxback > usizefile) umaxback = usizefile;
 
   buf = (unsigned char *)MallocPatch(_ZIP_BUF_READ_COMMENT + 4);
 
-  if (buf == NULL)
-    return 0;
+  if (buf == NULL) return 0;
 
   ubackread = 4;
 
@@ -253,11 +245,9 @@ static unsigned long ZipLocateCentralDir(FILE *file) {
                     ? (_ZIP_BUF_READ_COMMENT + 4)
                     : (usizefile - ureadpos);
 
-    if (fseek(file, ureadpos, SEEK_SET) != 0)
-      break;
+    if (fseek(file, ureadpos, SEEK_SET) != 0) break;
 
-    if (fread(buf, (unsigned int)ureadsize, 1, file) != 1)
-      break;
+    if (fread(buf, (unsigned int)ureadsize, 1, file) != 1) break;
 
     for (i = (int)ureadsize - 3; (i--) > 0;)
 
@@ -267,8 +257,7 @@ static unsigned long ZipLocateCentralDir(FILE *file) {
         break;
       }
 
-    if (uposfound != 0)
-      break;
+    if (uposfound != 0) break;
   }
 
   FreePatch(buf);
@@ -276,12 +265,11 @@ static unsigned long ZipLocateCentralDir(FILE *file) {
   return uposfound;
 }
 
-static int
-ZitZipFileInfoInternal(Zip *file, zipFileInfo *pfileinfo,
-                       zipFileInternalInfo *pfileinfointernal, char *filename,
-                       unsigned long filenamebuffersize, void *extrafield,
-                       unsigned long extrafieldbuffersize, char *comment,
-                       unsigned long commentbuffersize) {
+static int ZitZipFileInfoInternal(
+    Zip *file, zipFileInfo *pfileinfo, zipFileInternalInfo *pfileinfointernal,
+    char *filename, unsigned long filenamebuffersize, void *extrafield,
+    unsigned long extrafieldbuffersize, char *comment,
+    unsigned long commentbuffersize) {
   _zip *s;
   zipFileInfo fileinfo;
   zipFileInternalInfo fileinfointernal;
@@ -289,8 +277,7 @@ ZitZipFileInfoInternal(Zip *file, zipFileInfo *pfileinfo,
   unsigned long umagic;
   long lseek = 0;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
 
@@ -304,47 +291,35 @@ ZitZipFileInfoInternal(Zip *file, zipFileInfo *pfileinfo,
       err = _ZIP_BAD_FILE;
   }
 
-  if (ZitShort(s->file, &fileinfo.version) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.version) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.versionneeded) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.versionneeded) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.flag) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.flag) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if (ZitShort(s->file, &fileinfo.compressionmethod) != _ZIP_OK)
     err = _ZIP_ERRNO;
 
-  if (ZitLong(s->file, &fileinfo.dosdate) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &fileinfo.dosdate) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitLong(s->file, &fileinfo.crc) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &fileinfo.crc) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitLong(s->file, &fileinfo.compressedsize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &fileinfo.compressedsize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitLong(s->file, &fileinfo.uncompressedsize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &fileinfo.uncompressedsize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.filenamesize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.filenamesize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.fileextrasize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.fileextrasize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.filecommentsize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.filecommentsize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &fileinfo.disknumstart) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &fileinfo.disknumstart) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if (ZitShort(s->file, &fileinfo.internalfileattr) != _ZIP_OK)
     err = _ZIP_ERRNO;
 
-  if (ZitLong(s->file, &fileinfo.externalfileattr) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &fileinfo.externalfileattr) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if (ZitLong(s->file, &fileinfointernal.currentfileoffset) != _ZIP_OK)
     err = _ZIP_ERRNO;
@@ -417,8 +392,7 @@ ZitZipFileInfoInternal(Zip *file, zipFileInfo *pfileinfo,
   } else
     lseek += fileinfo.filecommentsize;
 
-  if ((err == _ZIP_OK) && (pfileinfo != NULL))
-    *pfileinfo = fileinfo;
+  if ((err == _ZIP_OK) && (pfileinfo != NULL)) *pfileinfo = fileinfo;
 
   if ((err == _ZIP_OK) && (pfileinfointernal != NULL))
     *pfileinfointernal = fileinfointernal;
@@ -429,8 +403,7 @@ ZitZipFileInfoInternal(Zip *file, zipFileInfo *pfileinfo,
 static int ZitGlobalInfo(Zip *file, zipGlobalInfo *zipinfo) {
   _zip *s;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
 
@@ -444,8 +417,7 @@ static int ZipGotoFirstFile(Zip *file) {
 
   _zip *s;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
   s->posincentraldir = s->centraldiroffset;
@@ -464,14 +436,12 @@ static int ZipCloseCurrentFile(Zip *file) {
   _zip *s;
   zipFileInfoInternal *pfileinzipreadinfo;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
   pfileinzipreadinfo = s->currentzipfileinfo;
 
-  if (pfileinzipreadinfo == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (pfileinzipreadinfo == NULL) return _ZIP_PARAM_ERROR;
 
   if (pfileinzipreadinfo->restreaduncompressed == 0) {
     if (pfileinzipreadinfo->crc32 != pfileinzipreadinfo->crc32wait)
@@ -507,16 +477,13 @@ static int ZipGotoNextFile(Zip *file) {
   _zip *s;
   int err;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
 
-  if (!s->currentfileok)
-    return _ZIP_EOF_LIST;
+  if (!s->currentfileok) return _ZIP_EOF_LIST;
 
-  if (s->numfile + 1 == s->gi.countentries)
-    return _ZIP_EOF_LIST;
+  if (s->numfile + 1 == s->gi.countentries) return _ZIP_EOF_LIST;
 
   s->posincentraldir +=
       _ZIP_CENTRALDIR_ITEM_SIZE + s->currentfileinfo.filenamesize +
@@ -541,16 +508,13 @@ static int ZipLocateFile(Zip *file, const char *filename, int casesensitive) {
   unsigned long numfilesaved;
   unsigned long posincentraldirsaved;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
-  if (strlen(filename) >= _ZIP_MAX_FILENAME_SIZE)
-    return _ZIP_PARAM_ERROR;
+  if (strlen(filename) >= _ZIP_MAX_FILENAME_SIZE) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
 
-  if (!s->currentfileok)
-    return _ZIP_EOF_LIST;
+  if (!s->currentfileok) return _ZIP_EOF_LIST;
 
   numfilesaved = s->numfile;
   posincentraldirsaved = s->posincentraldir;
@@ -563,8 +527,7 @@ static int ZipLocateFile(Zip *file, const char *filename, int casesensitive) {
     ZitCurrentFileInfo(file, NULL, currentfilename, sizeof(currentfilename) - 1,
                        NULL, 0, NULL, 0);
 
-    if (strcmp(currentfilename, filename) == 0)
-      return _ZIP_OK;
+    if (strcmp(currentfilename, filename) == 0) return _ZIP_OK;
 
     err = ZipGotoNextFile(file);
   }
@@ -575,10 +538,9 @@ static int ZipLocateFile(Zip *file, const char *filename, int casesensitive) {
   return err;
 }
 
-static int
-ZipCheckCurrentFileCoherencyHeader(_zip *s, unsigned int *pisizevar,
-                                   unsigned long *poffsetstaticextrafield,
-                                   unsigned int *psizestaticextrafield) {
+static int ZipCheckCurrentFileCoherencyHeader(
+    _zip *s, unsigned int *pisizevar, unsigned long *poffsetstaticextrafield,
+    unsigned int *psizestaticextrafield) {
   unsigned long umagic, udata, uflags;
   unsigned long filenamesize;
   unsigned long sizeextrafield;
@@ -600,11 +562,9 @@ ZipCheckCurrentFileCoherencyHeader(_zip *s, unsigned int *pisizevar,
       err = _ZIP_BAD_FILE;
   }
 
-  if (ZitShort(s->file, &udata) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &udata) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(s->file, &uflags) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &uflags) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if (ZitShort(s->file, &udata) != _ZIP_OK)
     err = _ZIP_ERRNO;
@@ -615,8 +575,7 @@ ZipCheckCurrentFileCoherencyHeader(_zip *s, unsigned int *pisizevar,
       (s->currentfileinfo.compressionmethod != Z_DEFLATED))
     err = _ZIP_BAD_FILE;
 
-  if (ZitLong(s->file, &udata) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(s->file, &udata) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if (ZitLong(s->file, &udata) != _ZIP_OK)
     err = _ZIP_ERRNO;
@@ -644,8 +603,7 @@ ZipCheckCurrentFileCoherencyHeader(_zip *s, unsigned int *pisizevar,
 
   *pisizevar += (unsigned int)filenamesize;
 
-  if (ZitShort(s->file, &sizeextrafield) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(s->file, &sizeextrafield) != _ZIP_OK) err = _ZIP_ERRNO;
 
   *poffsetstaticextrafield = s->currentfileinfointernal.currentfileoffset +
                              _ZIP_LOCALHEADER_SIZE + filenamesize;
@@ -666,16 +624,13 @@ static int ZipOpenCurrentFile(Zip *file, const char *password) {
 
   char source[12];
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
 
-  if (!s->currentfileok)
-    return _ZIP_PARAM_ERROR;
+  if (!s->currentfileok) return _ZIP_PARAM_ERROR;
 
-  if (s->currentzipfileinfo != NULL)
-    ZipCloseCurrentFile(file);
+  if (s->currentzipfileinfo != NULL) ZipCloseCurrentFile(file);
 
   if (ZipCheckCurrentFileCoherencyHeader(s, &isizevar, &localextrafieldoffset,
                                          &localextrafieldsize) != _ZIP_OK)
@@ -684,8 +639,7 @@ static int ZipOpenCurrentFile(Zip *file, const char *password) {
   pfileinzipreadinfo =
       (zipFileInfoInternal *)MallocPatch(sizeof(zipFileInfoInternal));
 
-  if (pfileinzipreadinfo == NULL)
-    return _ZIP_INTERNAL_ERROR;
+  if (pfileinzipreadinfo == NULL) return _ZIP_INTERNAL_ERROR;
 
   pfileinzipreadinfo->buffer = (char *)MallocPatch(_ZIP_BUFFER_SIZE);
   pfileinzipreadinfo->localextrafieldoffset = localextrafieldoffset;
@@ -720,8 +674,7 @@ static int ZipOpenCurrentFile(Zip *file, const char *password) {
 
     err = inflateInit2(&pfileinzipreadinfo->stream, -MAX_WBITS);
 
-    if (err == Z_OK)
-      pfileinzipreadinfo->streaminitialised = 1;
+    if (err == Z_OK) pfileinzipreadinfo->streaminitialised = 1;
   }
 
   pfileinzipreadinfo->restreadcompressed = s->currentfileinfo.compressedsize;
@@ -757,8 +710,7 @@ static int ZipOpenCurrentFile(Zip *file, const char *password) {
       return _ZIP_INTERNAL_ERROR;
     }
 
-    for (i = 0; i < 12; i++)
-      zdecode(s->keys, s->crc32tab, source[i]);
+    for (i = 0; i < 12; i++) zdecode(s->keys, s->crc32tab, source[i]);
 
     s->currentzipfileinfo->posinzip += 12;
     s->encrypted = 1;
@@ -773,20 +725,16 @@ static int ZipReadCurrentFile(Zip *file, void *buf, unsigned int len) {
   _zip *s;
   zipFileInfoInternal *pfileinzipreadinfo;
 
-  if (file == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (file == NULL) return _ZIP_PARAM_ERROR;
 
   s = (_zip *)file;
   pfileinzipreadinfo = s->currentzipfileinfo;
 
-  if (pfileinzipreadinfo == NULL)
-    return _ZIP_PARAM_ERROR;
+  if (pfileinzipreadinfo == NULL) return _ZIP_PARAM_ERROR;
 
-  if ((pfileinzipreadinfo->buffer == NULL))
-    return _ZIP_EOF_LIST;
+  if ((pfileinzipreadinfo->buffer == NULL)) return _ZIP_EOF_LIST;
 
-  if (len == 0)
-    return 0;
+  if (len == 0) return 0;
 
   pfileinzipreadinfo->stream.next_out = (Bytef *)buf;
 
@@ -804,13 +752,12 @@ static int ZipReadCurrentFile(Zip *file, void *buf, unsigned int len) {
       if (pfileinzipreadinfo->restreadcompressed < ureadthis)
         ureadthis = (unsigned int)pfileinzipreadinfo->restreadcompressed;
 
-      if (ureadthis == 0)
-        return _ZIP_EOF;
+      if (ureadthis == 0) return _ZIP_EOF;
 
-      if (fseek(pfileinzipreadinfo->file,
-                pfileinzipreadinfo->posinzip +
-                    pfileinzipreadinfo->bytebeforezip,
-                SEEK_SET) != 0)
+      if (fseek(
+              pfileinzipreadinfo->file,
+              pfileinzipreadinfo->posinzip + pfileinzipreadinfo->bytebeforezip,
+              SEEK_SET) != 0)
         return _ZIP_ERRNO;
 
       if (fread(pfileinzipreadinfo->buffer, ureadthis, 1,
@@ -881,16 +828,13 @@ static int ZipReadCurrentFile(Zip *file, void *buf, unsigned int len) {
 
       iread += (unsigned int)(utotaloutafter - utotaloutbefore);
 
-      if (err == Z_STREAM_END)
-        return (iread == 0) ? _ZIP_EOF : iread;
+      if (err == Z_STREAM_END) return (iread == 0) ? _ZIP_EOF : iread;
 
-      if (err != Z_OK)
-        break;
+      if (err != Z_OK) break;
     }
   }
 
-  if (err == Z_OK)
-    return iread;
+  if (err == Z_OK) return iread;
 
   return err;
 }
@@ -910,44 +854,33 @@ Zip *ZipOpen(const char *filename) {
 
   file = fopen(filename, "rb");
 
-  if (file == NULL)
-    return NULL;
+  if (file == NULL) return NULL;
 
   centralpos = ZipLocateCentralDir(file);
 
-  if (centralpos == 0)
-    err = _ZIP_ERRNO;
+  if (centralpos == 0) err = _ZIP_ERRNO;
 
-  if (fseek(file, centralpos, SEEK_SET) != 0)
-    err = _ZIP_ERRNO;
+  if (fseek(file, centralpos, SEEK_SET) != 0) err = _ZIP_ERRNO;
 
-  if (ZitLong(file, &ul) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(file, &ul) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(file, &numberdisk) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(file, &numberdisk) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(file, &numberdiskwithCD) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(file, &numberdiskwithCD) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(file, &us.gi.countentries) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(file, &us.gi.countentries) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(file, &numberentryCD) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(file, &numberentryCD) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if ((numberentryCD != us.gi.countentries) || (numberdiskwithCD != 0) ||
       (numberdisk != 0))
     err = _ZIP_BAD_FILE;
 
-  if (ZitLong(file, &us.centraldirsize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(file, &us.centraldirsize) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitLong(file, &us.centraldiroffset) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitLong(file, &us.centraldiroffset) != _ZIP_OK) err = _ZIP_ERRNO;
 
-  if (ZitShort(file, &us.gi.commentsize) != _ZIP_OK)
-    err = _ZIP_ERRNO;
+  if (ZitShort(file, &us.gi.commentsize) != _ZIP_OK) err = _ZIP_ERRNO;
 
   if ((centralpos < us.centraldiroffset + us.centraldirsize) &&
       (err == _ZIP_OK))
@@ -976,13 +909,11 @@ Zip *ZipOpen(const char *filename) {
 int ZipClose(Zip *zip) {
   _zip *s;
 
-  if (zip == NULL)
-    return 0;
+  if (zip == NULL) return 0;
 
   s = (_zip *)zip;
 
-  if (s->currentzipfileinfo != NULL)
-    ZipCloseCurrentFile(zip);
+  if (s->currentzipfileinfo != NULL) ZipCloseCurrentFile(zip);
 
   fclose(s->file);
 
@@ -1024,8 +955,7 @@ int ZipExtractCurrentFile(Zip *zip, int *nopath, const char *password) {
   p = filenameWithoutPath = filenameinzip;
 
   while ((*p) != '\0') {
-    if (((*p) == '/') || ((*p) == '\\'))
-      filenameWithoutPath = p + 1;
+    if (((*p) == '/') || ((*p) == '\\')) filenameWithoutPath = p + 1;
 
     p++;
   }
@@ -1045,8 +975,7 @@ int ZipExtractCurrentFile(Zip *zip, int *nopath, const char *password) {
 
     err = ZipOpenCurrentFile(zip, password);
 
-    if (err != _ZIP_OK)
-      printf("Error with zipfile in ZipOpenCurrentFile\n");
+    if (err != _ZIP_OK) printf("Error with zipfile in ZipOpenCurrentFile\n");
 
     fout = fopen(writeFilename, "wb");
 
@@ -1059,14 +988,12 @@ int ZipExtractCurrentFile(Zip *zip, int *nopath, const char *password) {
       fout = fopen(writeFilename, "wb");
     }
 
-    if (fout == NULL)
-      printf("Error opening file\n");
+    if (fout == NULL) printf("Error opening file\n");
 
     void *extractBuffer = buffer;
     unsigned int remainingSize = buffersize;
 
     do {
-
       err = ZipReadCurrentFile(zip, extractBuffer, remainingSize);
 
       if (err < 0) {
@@ -1092,12 +1019,10 @@ int ZipExtractCurrentFile(Zip *zip, int *nopath, const char *password) {
 
     err = ZipCloseCurrentFile(zip);
 
-    if (err != _ZIP_OK)
-      printf("Error with zipfile in ZipCloseCurrentFile\n");
+    if (err != _ZIP_OK) printf("Error with zipfile in ZipCloseCurrentFile\n");
   }
 
-  if (buffer)
-    FreePatch(buffer);
+  if (buffer) FreePatch(buffer);
 
   return err;
 }
@@ -1111,18 +1036,15 @@ int ZipExtract(Zip *zip, const char *password) {
 
   err = ZitGlobalInfo(zip, &gi);
 
-  if (err != _ZIP_OK)
-    printf("Error with zipfile in ZitGlobalInfo\n");
+  if (err != _ZIP_OK) printf("Error with zipfile in ZitGlobalInfo\n");
 
   for (i = 0; i < gi.countentries; i++) {
-    if (ZipExtractCurrentFile(zip, &nopath, password) != _ZIP_OK)
-      break;
+    if (ZipExtractCurrentFile(zip, &nopath, password) != _ZIP_OK) break;
 
     if ((i + 1) < gi.countentries) {
       err = ZipGotoNextFile(zip);
 
-      if (err != _ZIP_OK)
-        printf("Error with zipfile in ZipGotoNextFile\n");
+      if (err != _ZIP_OK) printf("Error with zipfile in ZipGotoNextFile\n");
     }
   }
 
@@ -1135,8 +1057,7 @@ ZipFile *ZipFileRead(Zip *zip, const char *filename, const char *password) {
 
   ZipFile *zipfile = (ZipFile *)MallocPatch(sizeof(ZipFile));
 
-  if (!zipfile)
-    return NULL;
+  if (!zipfile) return NULL;
 
   if (ZipLocateFile(zip, filename, 0) != 0) {
     FreePatch(zipfile);
@@ -1207,11 +1128,9 @@ ZipFile *ZipFileRead(Zip *zip, const char *filename, const char *password) {
 }
 
 void ZipFileFree(ZipFile *file) {
-  if (file->data)
-    FreePatch(file->data);
+  if (file->data) FreePatch(file->data);
 
-  if (file)
-    FreePatch(file);
+  if (file) FreePatch(file);
 }
 
 #ifdef __cplusplus

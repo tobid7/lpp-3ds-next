@@ -1,9 +1,11 @@
+#include <3ds.h>
+#include <string.h>
+
 #include "Graphics.hpp"
 #include "luaplayer.hpp"
 #include "utils.h"
 #include "vshader_shbin.h"
-#include <3ds.h>
-#include <string.h>
+
 
 u32 CLEAR_COLOR = 0x68B0D8FF;
 float light_r = 1.0f;
@@ -14,10 +16,10 @@ float light_x = 0.0f;
 float light_y = 0.0f;
 float light_z = -1.0f;
 
-#define DISPLAY_TRANSFER_FLAGS                                                 \
-  (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) |                       \
-   GX_TRANSFER_RAW_COPY(0) | GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) |    \
-   GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) |                              \
+#define DISPLAY_TRANSFER_FLAGS                                              \
+  (GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) |                    \
+   GX_TRANSFER_RAW_COPY(0) | GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
+   GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) |                           \
    GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 static DVLB_s *vshader_dvlb;
@@ -30,8 +32,7 @@ static C3D_RenderTarget *targets[3];
 static int lua_newVertex(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 8)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 8) return luaL_error(L, "wrong number of arguments");
 #endif
   vertex *res = new vertex;
   res->x = luaL_checknumber(L, 1);
@@ -49,11 +50,10 @@ static int lua_newVertex(lua_State *L) {
 static int lua_loadobj(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 6)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 6) return luaL_error(L, "wrong number of arguments");
 #endif
-  const char *file_tbo = luaL_checkstring(L, 1); // Model filename
-  const char *text = luaL_checkstring(L, 2);     // Texture filename
+  const char *file_tbo = luaL_checkstring(L, 1);  // Model filename
+  const char *text = luaL_checkstring(L, 2);      // Texture filename
   color *ambient = (color *)luaL_checkinteger(L, 3);
   color *diffuse = (color *)luaL_checkinteger(L, 4);
   color *specular = (color *)luaL_checkinteger(L, 5);
@@ -76,8 +76,7 @@ static int lua_loadobj(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -87,8 +86,7 @@ static int lua_loadobj(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -96,8 +94,7 @@ static int lua_loadobj(lua_State *L) {
   if (magic == 0x5089) {
     FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
     FS_Close(&fileHandle);
-    if (long_magic == 0x0A1A0A0D474E5089)
-      bitmap = decodePNGfile(text);
+    if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
     FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
@@ -106,8 +103,7 @@ static int lua_loadobj(lua_State *L) {
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
-  if (!bitmap)
-    return luaL_error(L, "Error loading image");
+  if (!bitmap) return luaL_error(L, "Error loading image");
 #endif
 
   // Flipping texture
@@ -140,7 +136,6 @@ static int lua_loadobj(lua_State *L) {
   int i, j;
   for (j = 0; j < bitmap->height; j++) {
     for (i = 0; i < bitmap->width; i++) {
-
       u32 coarse_y = j & ~7;
       u32 dst_offset =
           get_morton_offset(i, j, 4) + ((coarse_y * bitmap->width) << 2);
@@ -157,8 +152,7 @@ static int lua_loadobj(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(file_tbo, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -168,8 +162,7 @@ static int lua_loadobj(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "error opening file");
+    if (ret) return luaL_error(L, "error opening file");
 #endif
   }
 
@@ -205,7 +198,6 @@ static int lua_loadobj(lua_State *L) {
 
   // Vertices extraction
   for (;;) {
-
     // Check if a magic change is needed
     while (ptr == NULL) {
       if (magics_idx < 2) {
@@ -218,8 +210,7 @@ static int lua_loadobj(lua_State *L) {
         break;
       }
     }
-    if (skip)
-      break;
+    if (skip) break;
 
     // Extract vertex
     if (magics_idx == 0)
@@ -232,23 +223,19 @@ static int lua_loadobj(lua_State *L) {
       init_val = ptr + 2;
     else
       init_val = ptr + 3;
-    while (init_val[0] == ' ')
-      init_val++;
+    while (init_val[0] == ' ') init_val++;
     end_vert = strstr(init_val, "\n");
-    if (magics_idx == 0)
-      res = new vertex;
+    if (magics_idx == 0) res = new vertex;
     end_val = strstr(init_val, " ");
-    vert_args = (float *)res; // Hacky way to iterate in vertex struct
+    vert_args = (float *)res;  // Hacky way to iterate in vertex struct
     while (init_val < end_vert) {
-      if (end_val > end_vert)
-        end_val = end_vert;
+      if (end_val > end_vert) end_val = end_vert;
       strncpy(float_val, init_val, end_val - init_val);
       float_val[end_val - init_val] = 0;
       vert_args[idx] = atof(float_val);
       idx++;
       init_val = end_val + 1;
-      while (init_val[0] == ' ')
-        init_val++;
+      while (init_val[0] == ' ') init_val++;
       end_val = strstr(init_val, " ");
     }
 
@@ -293,14 +280,12 @@ static int lua_loadobj(lua_State *L) {
 
   // Faces extraction
   while (ptr != NULL) {
-
     // Skipping padding
     ptr += 2;
 
     // Extracting face info
     f_idx = 0;
     while (f_idx < 3) {
-
       // Allocating new vertex
       faces->vert = new vertex;
 
@@ -345,8 +330,7 @@ static int lua_loadobj(lua_State *L) {
         ptr2 = strstr(ptr, " ");
       else {
         ptr2 = strstr(ptr, "\n");
-        if (ptr2 == NULL)
-          ptr2 = content + size;
+        if (ptr2 == NULL) ptr2 = content + size;
       }
       strncpy(val, ptr, ptr2 - ptr);
       val[ptr2 - ptr] = 0;
@@ -407,10 +391,10 @@ static int lua_loadobj(lua_State *L) {
   // Set object material attributes
   C3D_Mtx *material = (C3D_Mtx *)linearAlloc(sizeof(C3D_Mtx));
   *material = {{
-      {{0.0f, ambient->r, ambient->g, ambient->b}},    // Ambient
-      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},    // Diffuse
-      {{0.0f, specular->r, specular->g, specular->b}}, // Specular
-      {{emission, 0.0f, 0.0f, 0.0f}},                  // Emission
+      {{0.0f, ambient->r, ambient->g, ambient->b}},     // Ambient
+      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},     // Diffuse
+      {{0.0f, specular->r, specular->g, specular->b}},  // Specular
+      {{emission, 0.0f, 0.0f, 0.0f}},                   // Emission
   }};
 
   // Create a model object and push it into Lua stack
@@ -427,8 +411,7 @@ static int lua_loadobj(lua_State *L) {
 static int lua_init(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 w = luaL_checkinteger(L, 1);
   u32 h = luaL_checkinteger(L, 2);
@@ -477,9 +460,9 @@ static int lua_init(lua_State *L) {
   // Configure attributes for use with the vertex shader
   C3D_AttrInfo *attrInfo = C3D_GetAttrInfo();
   AttrInfo_Init(attrInfo);
-  AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3); // v0=position
-  AttrInfo_AddLoader(attrInfo, 1, GPU_FLOAT, 2); // v1=texcoord
-  AttrInfo_AddLoader(attrInfo, 2, GPU_FLOAT, 3); // v2=normal
+  AttrInfo_AddLoader(attrInfo, 0, GPU_FLOAT, 3);  // v0=position
+  AttrInfo_AddLoader(attrInfo, 1, GPU_FLOAT, 2);  // v1=texcoord
+  AttrInfo_AddLoader(attrInfo, 2, GPU_FLOAT, 3);  // v2=normal
 
   // Compute the projection matrix
   Mtx_PerspTilt(&projection, 80.0f * M_PI / 180.0f, float(w) / float(h), 0.01f,
@@ -491,8 +474,7 @@ static int lua_init(lua_State *L) {
 static int lua_useMaterial(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5) return luaL_error(L, "wrong number of arguments");
 #endif
   model *mdl = (model *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -514,10 +496,10 @@ static int lua_useMaterial(lua_State *L) {
 
   // Set object material attributes
   *mdl->material = {{
-      {{0.0f, ambient->r, ambient->g, ambient->b}},    // Ambient
-      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},    // Diffuse
-      {{0.0f, specular->r, specular->g, specular->b}}, // Specular
-      {{emission, 0.0f, 0.0f, 0.0f}},                  // Emission
+      {{0.0f, ambient->r, ambient->g, ambient->b}},     // Ambient
+      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},     // Diffuse
+      {{0.0f, specular->r, specular->g, specular->b}},  // Specular
+      {{emission, 0.0f, 0.0f, 0.0f}},                   // Emission
   }};
 
   return 0;
@@ -526,8 +508,7 @@ static int lua_useMaterial(lua_State *L) {
 static int lua_useTexture(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   model *mdl = (model *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -548,8 +529,7 @@ static int lua_useTexture(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -559,8 +539,7 @@ static int lua_useTexture(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -568,8 +547,7 @@ static int lua_useTexture(lua_State *L) {
   if (magic == 0x5089) {
     FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
     FS_Close(&fileHandle);
-    if (long_magic == 0x0A1A0A0D474E5089)
-      bitmap = decodePNGfile(text);
+    if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
     FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
@@ -578,8 +556,7 @@ static int lua_useTexture(lua_State *L) {
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
-  if (!bitmap)
-    return luaL_error(L, "Error loading image");
+  if (!bitmap) return luaL_error(L, "Error loading image");
 #endif
 
   // Flipping texture
@@ -612,7 +589,6 @@ static int lua_useTexture(lua_State *L) {
   int i, j;
   for (j = 0; j < bitmap->height; j++) {
     for (i = 0; i < bitmap->width; i++) {
-
       u32 coarse_y = j & ~7;
       u32 dst_offset =
           get_morton_offset(i, j, 4) + ((coarse_y * bitmap->width) << 2);
@@ -638,8 +614,7 @@ static int lua_useTexture(lua_State *L) {
 static int lua_loadModel(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 6)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 6) return luaL_error(L, "wrong number of arguments");
 #endif
   luaL_checktype(L, 1, LUA_TTABLE);
   int len = lua_rawlen(L, 1);
@@ -666,8 +641,7 @@ static int lua_loadModel(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -677,8 +651,7 @@ static int lua_loadModel(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -686,8 +659,7 @@ static int lua_loadModel(lua_State *L) {
   if (magic == 0x5089) {
     FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
     FS_Close(&fileHandle);
-    if (long_magic == 0x0A1A0A0D474E5089)
-      bitmap = decodePNGfile(text);
+    if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
     FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
@@ -696,8 +668,7 @@ static int lua_loadModel(lua_State *L) {
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
-  if (!bitmap)
-    return luaL_error(L, "Error loading image");
+  if (!bitmap) return luaL_error(L, "Error loading image");
 #endif
 
   // Flipping texture
@@ -730,7 +701,6 @@ static int lua_loadModel(lua_State *L) {
   int i, j;
   for (j = 0; j < bitmap->height; j++) {
     for (i = 0; i < bitmap->width; i++) {
-
       u32 coarse_y = j & ~7;
       u32 dst_offset = get_morton_offset(i, j, 4) + (coarse_y * bitmap->width)
                        << 2;
@@ -765,10 +735,10 @@ static int lua_loadModel(lua_State *L) {
   // Set object material attributes
   C3D_Mtx *material = (C3D_Mtx *)linearAlloc(sizeof(C3D_Mtx));
   *material = {{
-      {{0.0f, ambient->r, ambient->g, ambient->b}},    // Ambient
-      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},    // Diffuse
-      {{0.0f, specular->r, specular->g, specular->b}}, // Specular
-      {{emission, 0.0f, 0.0f, 0.0f}},                  // Emission
+      {{0.0f, ambient->r, ambient->g, ambient->b}},     // Ambient
+      {{0.0f, diffuse->r, diffuse->g, diffuse->b}},     // Diffuse
+      {{0.0f, specular->r, specular->g, specular->b}},  // Specular
+      {{emission, 0.0f, 0.0f, 0.0f}},                   // Emission
   }};
 
   // Create a model object and push it into Lua stack
@@ -786,13 +756,11 @@ static int lua_loadModel(lua_State *L) {
 static int lua_initblend(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2 && argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2 && argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 screen = luaL_checkinteger(L, 1);
   u32 side = 0;
-  if (argc == 2)
-    side = luaL_checkinteger(L, 2);
+  if (argc == 2) side = luaL_checkinteger(L, 2);
   u8 target_idx = 0;
   if (screen == 1)
     target_idx = 2;
@@ -816,8 +784,7 @@ static int lua_initblend(lua_State *L) {
 static int lua_lightdir(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -831,8 +798,7 @@ static int lua_lightdir(lua_State *L) {
 static int lua_termblend(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   C3D_FrameEnd(0);
   return 0;
@@ -841,8 +807,7 @@ static int lua_termblend(lua_State *L) {
 static int lua_unloadModel(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   model *object = (model *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -860,8 +825,7 @@ static int lua_unloadModel(lua_State *L) {
 static int lua_blend(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 6)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 6) return luaL_error(L, "wrong number of arguments");
 #endif
   model *object = (model *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -908,8 +872,7 @@ static int lua_blend(lua_State *L) {
 static int lua_term(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
 
   // Free the shader program
@@ -925,8 +888,7 @@ static int lua_term(lua_State *L) {
 static int lua_newcolor(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 4)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 4) return luaL_error(L, "wrong number of arguments");
 #endif
   float r = luaL_checknumber(L, 1);
   float g = luaL_checknumber(L, 2);
@@ -946,8 +908,7 @@ static int lua_newcolor(lua_State *L) {
 static int lua_setlightc(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   color *colour = (color *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -964,8 +925,7 @@ static int lua_setlightc(lua_State *L) {
 static int lua_convert(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 colour = luaL_checkinteger(L, 1);
   color *res = new color;

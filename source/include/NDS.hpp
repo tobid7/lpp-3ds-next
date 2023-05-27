@@ -8,4 +8,4 @@
 namespace nds {
 void Init();
 void Exit();
-} // namespace nds
+}  // namespace nds

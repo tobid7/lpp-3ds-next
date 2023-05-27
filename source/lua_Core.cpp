@@ -1,8 +1,10 @@
 #include <3ds.h>
+#include <utils.h>
+
 #include <audio.hpp>
 #include <cstring>
 #include <luaplayer.hpp>
-#include <utils.h>
+
 
 // Different kind of syscalls
 typedef Result (*func_1x)();
@@ -25,13 +27,13 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  func_3x_type1 callback_type1; // argsize 5 (1+4)
-  func_3x_type2 callback_type2; // argsize 9 (1+4(pointer)) since Lua doesn't
-                                // support 64bit integers natively
+  func_3x_type1 callback_type1;  // argsize 5 (1+4)
+  func_3x_type2 callback_type2;  // argsize 9 (1+4(pointer)) since Lua doesn't
+                                 // support 64bit integers natively
 } func_3x_db;
 typedef struct {
   const char *name;
-  func_9x_type1 callback_type1; // csndPlaysound-like calls
+  func_9x_type1 callback_type1;  // csndPlaysound-like calls
 } func_9x_db;
 
 Result exit_am() {
@@ -57,31 +59,30 @@ func_1x_db db_1x[] = {
 // One arg syscall
 func_2x_db db_2x[] = {
     // args size = 4
-    {"AM_CancelCIAInstall", (func_2x_type1)AM_CancelCIAInstall}, // 0
-    {"AM_FinishCiaInstall", (func_2x_type1)AM_FinishCiaInstall}, // 1
+    {"AM_CancelCIAInstall", (func_2x_type1)AM_CancelCIAInstall},  // 0
+    {"AM_FinishCiaInstall", (func_2x_type1)AM_FinishCiaInstall},  // 1
 };
 
 // Two args syscalls
 func_3x_db db_3x[] = {
     // type 1
-    {"AM_StartCiaInstall", (func_3x_type1)AM_StartCiaInstall}, // 0
-    {"AM_GetTitleCount", (func_3x_type1)AM_GetTitleCount},     // 1
+    {"AM_StartCiaInstall", (func_3x_type1)AM_StartCiaInstall},  // 0
+    {"AM_GetTitleCount", (func_3x_type1)AM_GetTitleCount},      // 1
     // type 2
-    {"AM_DeleteTitle", NULL, (func_3x_type2)AM_DeleteTitle},       // 2
-    {"AM_DeleteAppTitle", NULL, (func_3x_type2)AM_DeleteAppTitle}, // 3
+    {"AM_DeleteTitle", NULL, (func_3x_type2)AM_DeleteTitle},        // 2
+    {"AM_DeleteAppTitle", NULL, (func_3x_type2)AM_DeleteAppTitle},  // 3
 };
 
 // Two args syscalls
 func_9x_db db_9x[] = {
     // type 1
-    {"csndPlaysound", (func_9x_type1)csndPlaySound}, // 0
+    {"csndPlaysound", (func_9x_type1)csndPlaySound},  // 0
 };
 
 static int lua_service(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   const char *srv = luaL_checkstring(L, 1);
   Handle tmp;
@@ -97,8 +98,7 @@ static int lua_service(lua_State *L) {
 
   };
   for (int i = 0; i < 7; i++) {
-    if (strstr(srv, handle_list[i]) != NULL)
-      (restartService[i])();
+    if (strstr(srv, handle_list[i]) != NULL) (restartService[i])();
   }
 
   return 1;
@@ -107,8 +107,7 @@ static int lua_service(lua_State *L) {
 static int lua_execall(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc == 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc == 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   const char *call = luaL_checkstring(L, 1);
 
@@ -133,7 +132,6 @@ static int lua_execall(lua_State *L) {
     u32 known_syscalls = sizeof(db_3x) / sizeof(func_3x_db);
     for (int i = 0; i < (int)known_syscalls; i++) {
       if (strcmp(db_3x[i].name, call) == 0) {
-
         // Parsing arguments according to syscall
         if (i <= 1) {
           u8 arg1 = luaL_checkinteger(L, 2);
@@ -174,8 +172,7 @@ static int lua_execall(lua_State *L) {
 static int lua_readword(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 *word = (u32 *)luaL_checkinteger(L, 1);
   lua_pushinteger(L, *word);
@@ -185,8 +182,7 @@ static int lua_readword(lua_State *L) {
 static int lua_storeword(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 *offs = (u32 *)luaL_checkinteger(L, 1);
   u32 word = (u32)luaL_checkinteger(L, 2);
@@ -197,8 +193,7 @@ static int lua_storeword(lua_State *L) {
 static int lua_getfh(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   Handle hdl = luaL_checkinteger(L, 1);
   fileStream *result = new fileStream;
@@ -212,8 +207,7 @@ static int lua_getfh(lua_State *L) {
 static int lua_alloc(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 size = (u32)luaL_checkinteger(L, 1);
   u8 *memblock = new u8[size];
@@ -224,8 +218,7 @@ static int lua_alloc(lua_State *L) {
 static int lua_alloc2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 size = (u32)luaL_checkinteger(L, 1);
   u8 *memblock = (u8 *)linearAlloc(size);
@@ -236,8 +229,7 @@ static int lua_alloc2(lua_State *L) {
 static int lua_free(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   void *offset = (void *)luaL_checkinteger(L, 1);
   delete[] offset;
@@ -247,8 +239,7 @@ static int lua_free(lua_State *L) {
 static int lua_free2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   void *offset = (void *)luaL_checkinteger(L, 1);
   linearFree(offset);
@@ -258,8 +249,7 @@ static int lua_free2(lua_State *L) {
 static int lua_getraw(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   wav *block = (wav *)luaL_checkinteger(L, 1);
   if (block->magic == 0x4C534E44) {

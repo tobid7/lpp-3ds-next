@@ -5,10 +5,12 @@
  *      Author: jbr373
  */
 
+#include <3ds.h>
+
+#include <string>
+
 #include "hw_controls.h"
 
-#include <3ds.h>
-#include <string>
 
 enum Keys {
   HBKB_KEY_NONE = 0,
@@ -54,36 +56,36 @@ enum Keys {
   HBKB_KEY_SPACE = 63,
 
   // Special - Row 0
-  HBKB_KEY_SPECIAL_A = 66, // !
-  HBKB_KEY_SPECIAL_B = 67, // "
-  HBKB_KEY_SPECIAL_C = 68, // §
-  HBKB_KEY_SPECIAL_D = 69, // $
-  HBKB_KEY_SPECIAL_E = 70, // %
-  HBKB_KEY_SPECIAL_F = 71, // &
-  HBKB_KEY_SPECIAL_G = 72, // /
-  HBKB_KEY_SPECIAL_H = 73, // (
-  HBKB_KEY_SPECIAL_I = 74, // )
-  HBKB_KEY_SPECIAL_J = 75, // ?
+  HBKB_KEY_SPECIAL_A = 66,  // !
+  HBKB_KEY_SPECIAL_B = 67,  // "
+  HBKB_KEY_SPECIAL_C = 68,  // §
+  HBKB_KEY_SPECIAL_D = 69,  // $
+  HBKB_KEY_SPECIAL_E = 70,  // %
+  HBKB_KEY_SPECIAL_F = 71,  // &
+  HBKB_KEY_SPECIAL_G = 72,  // /
+  HBKB_KEY_SPECIAL_H = 73,  // (
+  HBKB_KEY_SPECIAL_I = 74,  // )
+  HBKB_KEY_SPECIAL_J = 75,  // ?
 
   // Special - Row 1
-  HBKB_KEY_SPECIAL_K = 76, // *
-  HBKB_KEY_SPECIAL_L = 77, // '
-  HBKB_KEY_SPECIAL_M = 78, // <
-  HBKB_KEY_SPECIAL_N = 79, // >
-  HBKB_KEY_SPECIAL_O = 80, // +
-  HBKB_KEY_SPECIAL_P = 81, // [
-  HBKB_KEY_SPECIAL_Q = 82, // ]
-  HBKB_KEY_SPECIAL_R = 83, // {
-  HBKB_KEY_SPECIAL_S = 84, // }
+  HBKB_KEY_SPECIAL_K = 76,  // *
+  HBKB_KEY_SPECIAL_L = 77,  // '
+  HBKB_KEY_SPECIAL_M = 78,  // <
+  HBKB_KEY_SPECIAL_N = 79,  // >
+  HBKB_KEY_SPECIAL_O = 80,  // +
+  HBKB_KEY_SPECIAL_P = 81,  // [
+  HBKB_KEY_SPECIAL_Q = 82,  // ]
+  HBKB_KEY_SPECIAL_R = 83,  // {
+  HBKB_KEY_SPECIAL_S = 84,  // }
 
   // Special - Row 2
-  HBKB_KEY_SPECIAL_T = 85, // ,
-  HBKB_KEY_SPECIAL_U = 86, // ;
-  HBKB_KEY_SPECIAL_V = 87, // .
-  HBKB_KEY_SPECIAL_W = 88, // :
-  HBKB_KEY_SPECIAL_X = 89, // -
-  HBKB_KEY_SPECIAL_Y = 90, // _
-  HBKB_KEY_SPECIAL_Z = 99, // =
+  HBKB_KEY_SPECIAL_T = 85,  // ,
+  HBKB_KEY_SPECIAL_U = 86,  // ;
+  HBKB_KEY_SPECIAL_V = 87,  // .
+  HBKB_KEY_SPECIAL_W = 88,  // :
+  HBKB_KEY_SPECIAL_X = 89,  // -
+  HBKB_KEY_SPECIAL_Y = 90,  // _
+  HBKB_KEY_SPECIAL_Z = 99,  // =
 
   HBKB_KEY_ENTER = 91,
   HBKB_KEY_BACK = 92,
@@ -105,7 +107,7 @@ HW_Controls::~HW_Controls() {}
 u8 HW_Controls::CheckPressedKey(s16 &T_X, s16 &T_Y, u8 &KeyboardState) {
   if (KeyboardState == STATE_SPECIAL)
     return CheckPressedKeySpecial(T_X, T_Y);
-  else if (KeyboardState == STATE_ABC) // Actually useless
+  else if (KeyboardState == STATE_ABC)  // Actually useless
     return CheckPressedKeyABC(T_X, T_Y);
   else
     return CheckPressedKeyABC(T_X, T_Y);
@@ -136,7 +138,7 @@ u8 HW_Controls::CheckPressedKeyABC(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_0;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 40 && T_Y < 81) // QWERTYUIOP
+  } else if (T_Y > 40 && T_Y < 81)  // QWERTYUIOP
   {
     if (T_X < 33)
       return HBKB_KEY_Q;
@@ -160,7 +162,7 @@ u8 HW_Controls::CheckPressedKeyABC(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_P;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 80 && T_Y < 121) // ASDFGHJKL
+  } else if (T_Y > 80 && T_Y < 121)  // ASDFGHJKL
   {
     if (T_X < 33)
       return HBKB_KEY_A;
@@ -181,13 +183,13 @@ u8 HW_Controls::CheckPressedKeyABC(s16 &T_X, s16 &T_Y) {
     else if (T_X > 256 && T_X < 289)
       return HBKB_KEY_L;
     else if (T_X > 288)
-      return HBKB_KEY_BACK; // Part of the Back Key is in tis Line
+      return HBKB_KEY_BACK;  // Part of the Back Key is in tis Line
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 120 && T_Y < 161) // ZXCVBNM
+  } else if (T_Y > 120 && T_Y < 161)  // ZXCVBNM
   {
     if (T_X < 65)
-      return HBKB_KEY_CHANGEKEYS; // Change to Special Characters
+      return HBKB_KEY_CHANGEKEYS;  // Change to Special Characters
     else if (T_X > 64 && T_X < 97)
       return HBKB_KEY_Z;
     else if (T_X > 96 && T_X < 129)
@@ -203,10 +205,10 @@ u8 HW_Controls::CheckPressedKeyABC(s16 &T_X, s16 &T_Y) {
     else if (T_X > 256 && T_X < 289)
       return HBKB_KEY_M;
     else if (T_X > 288)
-      return HBKB_KEY_BACK; // Second Part of Key Back
+      return HBKB_KEY_BACK;  // Second Part of Key Back
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 160 && T_Y < 201) // Caps, Spacebar, Shift
+  } else if (T_Y > 160 && T_Y < 201)  // Caps, Spacebar, Shift
   {
     if (T_X < 65)
       return HBKB_KEY_CAPS;
@@ -216,7 +218,7 @@ u8 HW_Controls::CheckPressedKeyABC(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_SHIFT;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 200) // OK / Cancel
+  } else if (T_Y > 200)  // OK / Cancel
   {
     if (T_X < 161)
       return HBKB_KEY_CANCEL;
@@ -251,7 +253,7 @@ u8 HW_Controls::CheckPressedKeySpecial(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_0;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 40 && T_Y < 81) // !"§$%&/()=
+  } else if (T_Y > 40 && T_Y < 81)  // !"§$%&/()=
   {
     if (T_X < 33)
       return HBKB_KEY_SPECIAL_A;
@@ -275,7 +277,7 @@ u8 HW_Controls::CheckPressedKeySpecial(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_SPECIAL_J;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 80 && T_Y < 121) // ASDFGHJKL
+  } else if (T_Y > 80 && T_Y < 121)  // ASDFGHJKL
   {
     if (T_X < 33)
       return HBKB_KEY_SPECIAL_K;
@@ -296,13 +298,13 @@ u8 HW_Controls::CheckPressedKeySpecial(s16 &T_X, s16 &T_Y) {
     else if (T_X > 256 && T_X < 289)
       return HBKB_KEY_SPECIAL_S;
     else if (T_X > 288)
-      return HBKB_KEY_BACK; // Part of the Back Key is in tis Line
+      return HBKB_KEY_BACK;  // Part of the Back Key is in tis Line
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 120 && T_Y < 161) // ZXCVBNM
+  } else if (T_Y > 120 && T_Y < 161)  // ZXCVBNM
   {
     if (T_X < 65)
-      return HBKB_KEY_CHANGEKEYS; // Change to ABC Characters
+      return HBKB_KEY_CHANGEKEYS;  // Change to ABC Characters
     else if (T_X > 64 && T_X < 97)
       return HBKB_KEY_SPECIAL_T;
     else if (T_X > 96 && T_X < 129)
@@ -318,10 +320,10 @@ u8 HW_Controls::CheckPressedKeySpecial(s16 &T_X, s16 &T_Y) {
     else if (T_X > 256 && T_X < 289)
       return HBKB_KEY_SPECIAL_Z;
     else if (T_X > 288)
-      return HBKB_KEY_BACK; // Second Part of Key Back
+      return HBKB_KEY_BACK;  // Second Part of Key Back
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 160 && T_Y < 201) // Caps, Spacebar, Shift
+  } else if (T_Y > 160 && T_Y < 201)  // Caps, Spacebar, Shift
   {
     if (T_X < 65)
       return HBKB_KEY_CAPS;
@@ -331,7 +333,7 @@ u8 HW_Controls::CheckPressedKeySpecial(s16 &T_X, s16 &T_Y) {
       return HBKB_KEY_SHIFT;
     else
       return HBKB_KEY_NONE;
-  } else if (T_Y > 200) // OK / Cancel
+  } else if (T_Y > 200)  // OK / Cancel
   {
     if (T_X < 161)
       return HBKB_KEY_CANCEL;

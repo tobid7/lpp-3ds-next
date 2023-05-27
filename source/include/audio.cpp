@@ -1,8 +1,10 @@
-#include "audio.hpp"
 #include <3ds.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "audio.hpp"
+
 
 bool audioChannels[32];
 
@@ -16,10 +18,8 @@ void My_CSND_playsound(u32 chn, u32 flags, u32 sampleRate, u32 *data0,
   int loopMode = (flags >> 10) & 3;
 
   if (encoding != CSND_ENCODING_PSG) {
-    if (data0)
-      paddr0 = osConvertVirtToPhys((void *)data0);
-    if (data1)
-      paddr1 = osConvertVirtToPhys((void *)data1);
+    if (data0) paddr0 = osConvertVirtToPhys((void *)data0);
+    if (data1) paddr1 = osConvertVirtToPhys((void *)data1);
 
     if (encoding == CSND_ENCODING_ADPCM) {
       int adpcmSample = ((s16 *)data0)[-2];
@@ -67,8 +67,7 @@ void populatePurgeTable(Music *songFile, ndspWaveBuf *waveBuf) {
     tmp->pointer = waveBuf;
     tmp->next == NULL;
   } else {
-    while (tmp->next != NULL)
-      tmp = tmp->next;
+    while (tmp->next != NULL) tmp = tmp->next;
     tmp->next = (PurgeTable *)(malloc(sizeof(PurgeTable)));
     tmp->next->pointer = waveBuf;
     tmp->next->next == NULL;

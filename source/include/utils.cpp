@@ -1,10 +1,12 @@
-#include "utils.h"
-#include "lua.hpp"
 #include <3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "lua.hpp"
+#include "utils.h"
+
 
 void FS_GetSize(fileStream *Handle, u64 *size) {
   if (Handle->isRomfs) {
@@ -37,18 +39,14 @@ void FS_Close(fileStream *Handle) {
 }
 
 void utf2ascii(char *dst, u16 *src) {
-  if (!src || !dst)
-    return;
-  while (*src)
-    *(dst++) = (*(src++)) & 0xFF;
+  if (!src || !dst) return;
+  while (*src) *(dst++) = (*(src++)) & 0xFF;
   *dst = 0x00;
 }
 
 void ascii2utf(u16 *dst, char *src) {
-  if (!src || !dst)
-    return;
-  while (*src)
-    *(dst++) = (*src++);
+  if (!src || !dst) return;
+  while (*src) *(dst++) = (*src++);
   *dst = 0x00;
 }
 
@@ -97,9 +95,9 @@ void RBswap(u32 *color) {
 
 // Grabbed from Citra Emulator (citra/src/video_core/utils.h)
 u32 morton_interleave(u32 x, u32 y) {
-  u32 i = (x & 7) | ((y & 7) << 8); // ---- -210
-  i = (i ^ (i << 2)) & 0x1313;      // ---2 --10
-  i = (i ^ (i << 1)) & 0x1515;      // ---2 -1-0
+  u32 i = (x & 7) | ((y & 7) << 8);  // ---- -210
+  i = (i ^ (i << 2)) & 0x1313;       // ---2 --10
+  i = (i ^ (i << 1)) & 0x1515;       // ---2 -1-0
   i = (i | (i >> 7)) & 0x3F;
   return i;
 }

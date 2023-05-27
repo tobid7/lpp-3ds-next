@@ -13,5 +13,5 @@ struct memory_metrics {
 size_t GetTotalAllocated();
 size_t GetTotalFreed();
 size_t GetCurrent();
-} // namespace Memory
-} // namespace nlc
+}  // namespace Memory
+}  // namespace nlc

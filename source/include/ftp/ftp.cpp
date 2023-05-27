@@ -87,8 +87,7 @@ int ftp_openCommandChannel() {
     listen(listenfd, 10);
   }
 
-  if (cmd_sock < 0)
-    cmd_sock = accept(listenfd, (struct sockaddr *)NULL, NULL);
+  if (cmd_sock < 0) cmd_sock = accept(listenfd, (struct sockaddr *)NULL, NULL);
   if (cmd_sock >= 0) {
     // closesocket(listenfd);
     // listenfd=-1;
@@ -141,8 +140,7 @@ int linelen(char *str) {
 }
 
 int ftp_processCommand(int s, char *data) {
-  if (!data)
-    return -1;
+  if (!data) return -1;
   int n = linelen(data);
   char cmd[5];
   char arg[256] = "";
@@ -150,14 +148,12 @@ int ftp_processCommand(int s, char *data) {
       (!data[3] || data[3] == ' ' || data[3] == '\n' || data[3] == '\r')) {
     memcpy(cmd, data, 3);
     cmd[3] = 0x0;
-    if (n > 3)
-      memcpy(arg, &data[4], n - 4);
+    if (n > 3) memcpy(arg, &data[4], n - 4);
   } else if (n > 3 && (!data[4] || data[4] == ' ' || data[4] == '\r' ||
                        data[4] == '\n')) {
     memcpy(cmd, data, 4);
     cmd[4] = 0x0;
-    if (n > 4)
-      memcpy(arg, &data[5], n - 5);
+    if (n > 4) memcpy(arg, &data[5], n - 5);
   } else
     return -1;
 
@@ -169,15 +165,14 @@ int ftp_processCommand(int s, char *data) {
       ftp_cmd[i].handler(s, cmd, arg);
       break;
     }
-  if (i >= ftp_cmd_num)
-    ftp_sendResponse(s, 502, "invalid command");
+  if (i >= ftp_cmd_num) ftp_sendResponse(s, 502, "invalid command");
   return 0;
 }
 
 int ftp_frame(int s) {
   int cmd_sock_2 = accept(listenfd, (struct sockaddr *)NULL, NULL);
   if (cmd_sock_2 >=
-      0) { // TODO: A proper implementation with poll could be much more better
+      0) {  // TODO: A proper implementation with poll could be much more better
     sprint(shared_ftp, "received connection ! %dgreeting...", cmd_sock_2);
     ftp_sendResponse(cmd_sock_2, 200, "hello");
     char buffer[512];
@@ -194,7 +189,7 @@ int ftp_frame(int s) {
   if (!ret) {
     closesocket(cmd_sock);
     cmd_sock = -1;
-    return 1; // client has disconnected
+    return 1;  // client has disconnected
   } else
     return ftp_processCommand(s, buffer);
 }

@@ -12,4 +12,4 @@ void WriteErr(std::string msg) {
   errs << "\nError Happened:\n" << msg << std::endl;
   errs.close();
 }
-} // namespace ErrorHelper
+}  // namespace ErrorHelper

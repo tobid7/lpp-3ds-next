@@ -1,11 +1,12 @@
-#include <NDS.hpp>
-
 #include <3ds.h>
 #include <arpa/inet.h>
 #include <citro3d.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <NDS.hpp>
+
 
 // RenderD7 Tasks impl
 
@@ -76,11 +77,11 @@ uint32_t mgkwelc = 0x54d75145;
 
 struct dbg_d {
   uint32_t mgk;
-  float usg_cpu; // Usage in MS
-  float usg_gpu; // Usage in MS
-  float usg_buf; // Buf Usage
-  int usg_mem;   // Mem in Bytes
-  int usg_lmem;  // Lin in Bytes
+  float usg_cpu;  // Usage in MS
+  float usg_gpu;  // Usage in MS
+  float usg_buf;  // Buf Usage
+  int usg_mem;    // Mem in Bytes
+  int usg_lmem;   // Lin in Bytes
 };
 uint32_t mgkdbg = 0x54d75a45;
 
@@ -126,7 +127,7 @@ void nsocLoop() {
     if (client_socket < 0) {
       std::cerr << "[-]Accept failed: " << strerror(errno) << std::endl;
       return;
-    } else { // set client socket to blocking to simplify sending data back
+    } else {  // set client socket to blocking to simplify sending data back
       fcntl(client_socket, F_SETFL,
             fcntl(client_socket, F_GETFL, 0) & ~O_NONBLOCK);
       printf("[+]Connected to Client!\n");
@@ -149,4 +150,4 @@ void Init() {
 }
 
 void Exit() { destroy(); }
-} // namespace nds
+}  // namespace nds

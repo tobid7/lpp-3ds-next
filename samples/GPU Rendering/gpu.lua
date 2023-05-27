@@ -2,7 +2,7 @@
 Graphics.init()
 
 -- Main Loop
-while true do
+while System.mainLoop() do
 	
 	-- Start printing on top screen
 	Screen.refresh()
@@ -20,7 +20,7 @@ while true do
 	Screen.waitVblankStart()
 	
 	-- Exit sample
-	if Controls.check(Controls.read(), KEY_SELECT) then
+	if Controls.check(Controls.read(), KEY_START) then
 		Graphics.term()
 		System.exit()
 	end

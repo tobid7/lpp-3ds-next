@@ -1,16 +1,18 @@
-#include "audio.hpp"
-#include "luaplayer.hpp"
 #include <3ds.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "audio.hpp"
+#include "luaplayer.hpp"
+
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 
 u32 *micbuf = NULL;
@@ -33,8 +35,7 @@ u32 sampleSize(MICU_SampleRate smplrt) {
 static int lua_regsound(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 time = luaL_checkinteger(L, 1);
   u32 samplerate = luaL_checkinteger(L, 2);
@@ -67,8 +68,7 @@ static int lua_regsound(lua_State *L) {
 static int lua_micplaying(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   bool isSampling;
   MICU_IsSampling(&isSampling);
@@ -79,8 +79,7 @@ static int lua_micplaying(lua_State *L) {
 static int lua_stoprec_CSND(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   bool isSampling;
   MICU_IsSampling(&isSampling);
@@ -117,8 +116,7 @@ static int lua_stoprec_CSND(lua_State *L) {
 static int lua_stoprec_DSP(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   bool isSampling;
   MICU_IsSampling(&isSampling);
@@ -155,8 +153,7 @@ static int lua_stoprec_DSP(lua_State *L) {
 static int lua_pausemic(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   bool isSampling;
   MICU_IsSampling(&isSampling);
@@ -170,8 +167,7 @@ static int lua_pausemic(lua_State *L) {
 static int lua_resumemic(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   bool isSampling;
   MICU_IsSampling(&isSampling);

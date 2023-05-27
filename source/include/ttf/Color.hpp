@@ -7,7 +7,7 @@
 #include "Common.hpp"
 
 class Color {
-public:
+ public:
   Color(unsigned char r, unsigned char g, unsigned char b,
         unsigned char a = 255) {
     this->r = r;
@@ -29,4 +29,4 @@ public:
   unsigned char r, g, b, a;
 };
 
-#endif // COLOR_HPP_INC
+#endif  // COLOR_HPP_INC

@@ -1,8 +1,9 @@
 // Font.cpp
 // @author: Nanni
 
-#include "Font.hpp"
 #include <3ds.h>
+
+#include "Font.hpp"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../utils.h"
 #include "stb_truetype.h"
@@ -17,8 +18,7 @@ Font::Font(const std::vector<unsigned char> &buffer) { loadFromMemory(buffer); }
 
 void *Font::loadFromFile(const std::string &filename) {
   FILE *fp = fopen(filename.c_str(), "r");
-  if (!fp)
-    return NULL;
+  if (!fp) return NULL;
   fseek(fp, 0, SEEK_END);
   unsigned int buffer_size = ftell(fp);
   unsigned char *buffer = new unsigned char[buffer_size];
@@ -43,17 +43,14 @@ void *Font::loadFromFile(const std::string &filename) {
 
 bool Font::loadFromMemory(const unsigned char *buffer,
                           unsigned int buffer_size) {
-  if (!buffer || buffer_size == 0)
-    return false;
-  if (stbtt_InitFont(&m_info, buffer, 0) != 1)
-    return false;
+  if (!buffer || buffer_size == 0) return false;
+  if (stbtt_InitFont(&m_info, buffer, 0) != 1) return false;
   m_scale = stbtt_ScaleForPixelHeight(&m_info, 16);
   return true;
 }
 
 bool Font::loadFromMemory(const std::vector<unsigned char> &buffer) {
-  if (buffer.size() == 0)
-    return false;
+  if (buffer.size() == 0) return false;
   return loadFromMemory(&buffer[0], buffer.size());
 }
 
@@ -312,15 +309,15 @@ std::wstring Font::utf8_to_UCS2(char *code) {
     int i = 0;
     int index = (utf & com) != 0;
     short int binary[16];
-    if (index == 0) /// 0xxxxxxx ==> 00000000 0xxxxxxxx
+    if (index == 0)  /// 0xxxxxxx ==> 00000000 0xxxxxxxx
     {
       for (; i < 8; ++i) {
         binary[i] = 0;
       }
       for (; i < 16; ++i) {
-        binary[i] = (utf & 1 << (15 - i)) != 0; //
+        binary[i] = (utf & 1 << (15 - i)) != 0;  //
       }
-    } else if (utf & (1 << 5) == 0) // 110xxxxx 10yyyyyy ==> 00000xxx xxyyyyyy
+    } else if (utf & (1 << 5) == 0)  // 110xxxxx 10yyyyyy ==> 00000xxx xxyyyyyy
     {
       for (; i < 5; ++i) {
         binary[i] = 0;
@@ -333,7 +330,7 @@ std::wstring Font::utf8_to_UCS2(char *code) {
       for (; i < 16; ++i) {
         binary[i] = (utf & (1 << (15 - i))) != 0;
       }
-    } else // 1110xxxx 10yyyyyy 10zzzzzz ==> xxxxyyyy yyzzzzzz
+    } else  // 1110xxxx 10yyyyyy 10zzzzzz ==> xxxxyyyy yyzzzzzz
     {
       for (; i < 4; ++i) {
         binary[i] = (utf & 1 << (3 - i)) != 0;

@@ -1,19 +1,21 @@
+#include <citro3d.h>
+
 #include "lua.hpp"
 #include "ttf/Font.hpp"
-#include <citro3d.h>
+
 
 // Old FS_dirent struct
 typedef struct {
-  u16 name[0x106];    ///< UTF-16 encoded name
-  u8 shortName[0x0A]; ///< 8.3 File name
-  u8 shortExt[0x04];  ///< 8.3 File extension (set to spaces for directories)
-  u8 unknown2;        ///< ???
-  u8 unknown3;        ///< ???
-  u8 isDirectory;     ///< Directory bit
-  u8 isHidden;        ///< Hidden bit
-  u8 isArchive;       ///< Archive bit
-  u8 isReadOnly;      ///< Read-only bit
-  u64 fileSize;       ///< File size
+  u16 name[0x106];     ///< UTF-16 encoded name
+  u8 shortName[0x0A];  ///< 8.3 File name
+  u8 shortExt[0x04];   ///< 8.3 File extension (set to spaces for directories)
+  u8 unknown2;         ///< ???
+  u8 unknown3;         ///< ???
+  u8 isDirectory;      ///< Directory bit
+  u8 isHidden;         ///< Hidden bit
+  u8 isArchive;        ///< Archive bit
+  u8 isReadOnly;       ///< Read-only bit
+  u64 fileSize;        ///< File size
 } FS_dirent;
 
 // fileStream struct

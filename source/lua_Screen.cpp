@@ -1,17 +1,18 @@
 #include <3ds.h>
-#include <Font.hpp>
-#include <Graphics.hpp>
-#include <luaplayer.hpp>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <utils.h>
 
+#include <Font.hpp>
+#include <Graphics.hpp>
+#include <luaplayer.hpp>
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 #define CONFIG_3D_SLIDERSTATE (*(float *)0x1FF81080)
 
@@ -30,11 +31,9 @@ static int lua_print(lua_State *L) {
   u8 alpha = (color >> 24) & 0xFF;
   int screen = luaL_checkinteger(L, 5);
   int side = 0;
-  if (argc == 6)
-    side = luaL_checkinteger(L, 6);
+  if (argc == 6) side = luaL_checkinteger(L, 6);
 #ifndef SKIP_ERROR_HANDLING
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
   if ((screen == 0) && (x > 400))
     return luaL_error(L, "out of framebuffer bounds");
   if ((screen == 1) && (x > 320))
@@ -67,8 +66,7 @@ static int lua_print(lua_State *L) {
 static int lua_enable3D(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   gfxSet3D(true);
   return 0;
@@ -77,8 +75,7 @@ static int lua_enable3D(lua_State *L) {
 static int lua_disable3D(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   gfxSet3D(false);
   return 0;
@@ -87,8 +84,7 @@ static int lua_disable3D(lua_State *L) {
 static int lua_get3D(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   lua_pushnumber(L, CONFIG_3D_SLIDERSTATE);
   return 1;
@@ -97,8 +93,7 @@ static int lua_get3D(lua_State *L) {
 static int lua_loadimg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   char *text = (char *)(luaL_checkstring(L, 1));
   fileStream fileHandle;
@@ -109,8 +104,7 @@ static int lua_loadimg(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -120,8 +114,7 @@ static int lua_loadimg(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -129,8 +122,7 @@ static int lua_loadimg(lua_State *L) {
   if (magic == 0x5089) {
     FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
     FS_Close(&fileHandle);
-    if (long_magic == 0x0A1A0A0D474E5089)
-      bitmap = loadPng(text);
+    if (long_magic == 0x0A1A0A0D474E5089) bitmap = loadPng(text);
   } else if (magic == 0x4D42) {
     FS_Close(&fileHandle);
     bitmap = LoadBitmap(text);
@@ -139,8 +131,7 @@ static int lua_loadimg(lua_State *L) {
     bitmap = OpenJPG(text);
   }
 #ifndef SKIP_ERROR_HANDLING
-  if (!bitmap)
-    return luaL_error(L, "Error loading image");
+  if (!bitmap) return luaL_error(L, "Error loading image");
 #endif
   bitmap->magic = 0x4C494D47;
   lua_pushinteger(L, (u32)(bitmap));
@@ -158,8 +149,7 @@ static int lua_pbitmap(lua_State *L) {
   Bitmap *file = (Bitmap *)luaL_checkinteger(L, 3);
   int screen = luaL_checkinteger(L, 4);
   int side = 0;
-  if (argc == 5)
-    side = luaL_checkinteger(L, 5);
+  if (argc == 5) side = luaL_checkinteger(L, 5);
 #ifndef SKIP_ERROR_HANDLING
   if (file->magic != 0x4C494D47)
     return luaL_error(L, "attempt to access wrong memory block type");
@@ -182,34 +172,26 @@ static int lua_pbitmap(lua_State *L) {
     if (screen == 0) {
       bool partial_x = false;
       bool partial_y = false;
-      if (file->width > 400)
-        partial_x = true;
-      if (file->height > 240)
-        partial_y = true;
+      if (file->width > 400) partial_x = true;
+      if (file->height > 240) partial_y = true;
       if (partial_x || partial_y) {
         int width = file->width;
         int height = file->height;
-        if (partial_x)
-          width = 400 - x;
-        if (partial_y)
-          height = 240 - y;
+        if (partial_x) width = 400 - x;
+        if (partial_y) height = 240 - y;
         PrintPartialScreenBitmap(x, y, 0, 0, width, height, file, screen, side);
       } else
         PrintScreenBitmap(x, y, file, screen, side);
     } else {
       bool partial_x = false;
       bool partial_y = false;
-      if (file->width > 320)
-        partial_x = true;
-      if (file->height > 240)
-        partial_y = true;
+      if (file->width > 320) partial_x = true;
+      if (file->height > 240) partial_y = true;
       if (partial_x || partial_y) {
         int width = file->width;
         int height = file->height;
-        if (partial_x)
-          width = 320 - x;
-        if (partial_y)
-          height = 240 - y;
+        if (partial_x) width = 320 - x;
+        if (partial_y) height = 240 - y;
         PrintPartialScreenBitmap(x, y, 0, 0, width, height, file, screen, side);
       } else
         PrintScreenBitmap(x, y, file, screen, side);
@@ -234,15 +216,12 @@ static int lua_partial(lua_State *L) {
   Bitmap *file = (Bitmap *)luaL_checkinteger(L, 7);
   int screen = luaL_checkinteger(L, 8);
   int side = 0;
-  if (argc == 9)
-    side = luaL_checkinteger(L, 9);
+  if (argc == 9) side = luaL_checkinteger(L, 9);
 #ifndef SKIP_ERROR_HANDLING
   if (file->magic != 0x4C494D47)
     return luaL_error(L, "attempt to access wrong memory block type");
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
-  if ((st_x < 0) || (st_y < 0))
-    return luaL_error(L, "out of image bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
+  if ((st_x < 0) || (st_y < 0)) return luaL_error(L, "out of image bounds");
   if (((st_x + width) > file->width) || (((st_y + height) > file->height)))
     return luaL_error(L, "out of image bounds");
   if ((screen == 0) && ((x + width) > 400))
@@ -270,8 +249,7 @@ static int lua_partial(lua_State *L) {
 static int lua_flipBitmap(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   u8 *not_flipped;
   Bitmap *src = (Bitmap *)luaL_checkinteger(L, 1);
@@ -295,8 +273,7 @@ static int lua_flipBitmap(lua_State *L) {
 static int lua_saveimg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2 && argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2 && argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   Bitmap *src = (Bitmap *)luaL_checkinteger(L, 1);
   char *text = (char *)(luaL_checkstring(L, 2));
@@ -305,16 +282,14 @@ static int lua_saveimg(lua_State *L) {
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
   bool isJPG = false;
-  if (argc == 3)
-    isJPG = lua_toboolean(L, 3);
-  if (!isJPG) { // BMP Format
+  if (argc == 3) isJPG = lua_toboolean(L, 3);
+  if (!isJPG) {  // BMP Format
     Handle fileHandle;
     FS_Path filePath = fsMakePath(PATH_ASCII, text);
     Result ret =
         FSUSER_OpenFileDirectly(&fileHandle, ARCHIVE_SDMC, filePath, filePath,
                                 FS_OPEN_CREATE | FS_OPEN_WRITE, 0x00000000);
-    if (ret)
-      return luaL_error(L, "error opening file");
+    if (ret) return luaL_error(L, "error opening file");
     u32 bytesWritten;
     u8 moltiplier = src->bitperpixel >> 3;
     u8 *tempbuf = new u8[0x36 + (src->width) * (src->height) * moltiplier];
@@ -343,12 +318,12 @@ static int lua_saveimg(lua_State *L) {
     FSFILE_Close(fileHandle);
     svcCloseHandle(fileHandle);
     delete[] tempbuf;
-  } else { // JPG Format
+  } else {  // JPG Format
     u8 moltiplier = src->bitperpixel >> 3;
     int size_val = (src->width) * (src->height) * moltiplier;
     u8 *flip_pixels = new u8[size_val];
     flip_pixels = flipBitmap(flip_pixels, src);
-    if (moltiplier == 4) { // 32bpp image - Need to delete alpha channel
+    if (moltiplier == 4) {  // 32bpp image - Need to delete alpha channel
       u8 *tmp = flip_pixels;
       flip_pixels = new u8[(src->width) * (src->height) * 3];
       u32 i = 0;
@@ -373,8 +348,7 @@ static int lua_saveimg(lua_State *L) {
 static int lua_newBitmap(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   int width_new = luaL_checkinteger(L, 1);
   int height_new = luaL_checkinteger(L, 2);
@@ -394,8 +368,7 @@ static int lua_newBitmap(lua_State *L) {
 static int lua_free(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Bitmap *src = (Bitmap *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -410,20 +383,19 @@ static int lua_free(lua_State *L) {
 static int lua_flip(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
-  // if (c3d_Frame_en)
-  // C3D_FrameEnd(0);
-  gfxSwapBuffers();
+  if (!c3d_Frame_en) {
+    gfxFlushBuffers();
+    gfxSwapBuffers();
+  }
   return 0;
 }
 
 static int lua_refresh(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   RefreshScreen();
   // if (c3d_Frame_en)
@@ -434,8 +406,7 @@ static int lua_refresh(lua_State *L) {
 static int lua_Vblank(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   gspWaitForVBlank();
   return 0;
@@ -444,16 +415,17 @@ static int lua_Vblank(lua_State *L) {
 static int lua_clearScreen(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int screen = luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
   if ((screen != 1) && (screen != 0))
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
-  ClearScreen(screen);
-  gfxFlushBuffers();
+  if (!c3d_Frame_en) {
+    ClearScreen(screen);
+    gfxFlushBuffers();
+  }
   return 0;
 }
 
@@ -471,8 +443,7 @@ static int lua_fillRect(lua_State *L) {
   u8 alpha = (color >> 24) & 0xFF;
   int screen = luaL_checkinteger(L, 6);
   int side = 0;
-  if (argc == 7)
-    side = luaL_checkinteger(L, 7);
+  if (argc == 7) side = luaL_checkinteger(L, 7);
 #ifndef SKIP_ERROR_HANDLING
   if ((x1 < 0) || (y1 < 0) || (x2 < 0) || (y2 < 0))
     return luaL_error(L, "out of bounds");
@@ -519,8 +490,7 @@ static int lua_drawline(lua_State *L) {
   u8 alpha = (color >> 24) & 0xFF;
   int screen = luaL_checkinteger(L, 6);
   int side = 0;
-  if (argc == 7)
-    side = luaL_checkinteger(L, 7);
+  if (argc == 7) side = luaL_checkinteger(L, 7);
 #ifndef SKIP_ERROR_HANDLING
   if ((x1 < 0) || (y1 < 0) || (x2 < 0) || (y2 < 0))
     return luaL_error(L, "out of bounds");
@@ -567,8 +537,7 @@ static int lua_fillEmptyRect(lua_State *L) {
   u8 alpha = (color >> 24) & 0xFF;
   int screen = luaL_checkinteger(L, 6);
   int side = 0;
-  if (argc == 7)
-    side = luaL_checkinteger(L, 7);
+  if (argc == 7) side = luaL_checkinteger(L, 7);
 #ifndef SKIP_ERROR_HANDLING
   if ((x1 < 0) || (y1 < 0) || (x2 < 0) || (y2 < 0))
     return luaL_error(L, "out of framebuffer bounds");
@@ -613,11 +582,9 @@ static int lua_pixel(lua_State *L) {
   u8 alpha = (color >> 24) & 0xFF;
   int screen = luaL_checkinteger(L, 4);
   int side = 0;
-  if (argc == 5)
-    side = luaL_checkinteger(L, 5);
+  if (argc == 5) side = luaL_checkinteger(L, 5);
 #ifndef SKIP_ERROR_HANDLING
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
   if ((screen == 0) && (x > 400))
     return luaL_error(L, "out of framebuffer bounds");
   if ((screen == 1) && (x > 320))
@@ -666,11 +633,9 @@ static int lua_pixel2(lua_State *L) {
   int y = luaL_checkinteger(L, 2);
   int screen = luaL_checkinteger(L, 3);
   int side = 0;
-  if (argc == 4)
-    side = luaL_checkinteger(L, 4);
+  if (argc == 4) side = luaL_checkinteger(L, 4);
 #ifndef SKIP_ERROR_HANDLING
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
   if ((screen == 0) && (x > 400))
     return luaL_error(L, "out of framebuffer bounds");
   if ((screen == 1) && (x > 320))
@@ -691,8 +656,7 @@ static int lua_pixel2(lua_State *L) {
 static int lua_getWidth(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Bitmap *src = (Bitmap *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -706,8 +670,7 @@ static int lua_getWidth(lua_State *L) {
 static int lua_getHeight(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Bitmap *src = (Bitmap *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -728,8 +691,7 @@ static int lua_color(lua_State *L) {
   int g = luaL_checkinteger(L, 2);
   int b = luaL_checkinteger(L, 3);
   int a = 255;
-  if (argc == 4)
-    a = luaL_checkinteger(L, 4);
+  if (argc == 4) a = luaL_checkinteger(L, 4);
   u32 color = b | (g << 8) | (r << 16) | (a << 24);
   lua_pushinteger(L, color);
   return 1;
@@ -738,8 +700,7 @@ static int lua_color(lua_State *L) {
 static int lua_convert(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   color *gpu_color = (color *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -755,8 +716,7 @@ static int lua_convert(lua_State *L) {
 static int lua_getB(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int color = luaL_checkinteger(L, 1);
   u32 colour = color & 0xFF;
@@ -767,8 +727,7 @@ static int lua_getB(lua_State *L) {
 static int lua_getG(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int color = luaL_checkinteger(L, 1);
   u32 colour = (color >> 8) & 0xFF;
@@ -779,8 +738,7 @@ static int lua_getG(lua_State *L) {
 static int lua_getR(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int color = luaL_checkinteger(L, 1);
   u32 colour = (color >> 16) & 0xFF;
@@ -791,8 +749,7 @@ static int lua_getR(lua_State *L) {
 static int lua_getA(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int color = luaL_checkinteger(L, 1);
   u32 colour = (color >> 24) & 0xFF;
@@ -803,8 +760,7 @@ static int lua_getA(lua_State *L) {
 static int lua_console(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   int screen = luaL_checkinteger(L, 1);
   Console *console = new Console;
@@ -818,8 +774,7 @@ static int lua_console(lua_State *L) {
 static int lua_conclear(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Console *console = (Console *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -833,8 +788,7 @@ static int lua_conclear(lua_State *L) {
 static int lua_condest(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Console *console = (Console *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -848,8 +802,7 @@ static int lua_condest(lua_State *L) {
 static int lua_conshow(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Console *console = (Console *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -865,8 +818,7 @@ static int lua_conshow(lua_State *L) {
 static int lua_conappend(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   Console *console = (Console *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -881,8 +833,7 @@ static int lua_conappend(lua_State *L) {
 static int lua_loadFont(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   char *text = (char *)(luaL_checkstring(L, 1));
   char tmpPath2[1024];
@@ -903,8 +854,7 @@ static int lua_loadFont(lua_State *L) {
 static int lua_fsize(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   ttf *font = (ttf *)(luaL_checkinteger(L, 1));
   u8 size = luaL_checkinteger(L, 2);
@@ -919,15 +869,13 @@ static int lua_fsize(lua_State *L) {
 static int lua_measureText(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2 && argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2 && argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   ttf *font = (ttf *)(luaL_checkinteger(L, 1));
   char *text = (char *)(luaL_checkstring(L, 2));
   std::wstring ucs2 = Font::utf8_to_UCS2(text);
   int max_width = 0;
-  if (argc == 3)
-    max_width = luaL_checkinteger(L, 3);
+  if (argc == 3) max_width = luaL_checkinteger(L, 3);
 #ifndef SKIP_ERROR_HANDLING
   if (font->magic != 0x4C464E54)
     return luaL_error(L, "attempt to access wrong memory block type");
@@ -942,8 +890,7 @@ static int lua_measureText(lua_State *L) {
 static int lua_unloadFont(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   ttf *font = (ttf *)(luaL_checkinteger(L, 1));
 #ifndef SKIP_ERROR_HANDLING
@@ -969,18 +916,14 @@ static int lua_fprint(lua_State *L) {
   u32 color = luaL_checkinteger(L, 5);
   int screen = luaL_checkinteger(L, 6);
   int side = 0;
-  if (argc >= 7)
-    side = luaL_checkinteger(L, 7);
+  if (argc >= 7) side = luaL_checkinteger(L, 7);
   int max_width = 0;
-  if (argc == 8)
-    max_width = luaL_checkinteger(L, 8);
+  if (argc == 8) max_width = luaL_checkinteger(L, 8);
 #ifndef SKIP_ERROR_HANDLING
   if (font->magic != 0x4C464E54)
     return luaL_error(L, "attempt to access wrong memory block type");
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
-  if (screen < 0)
-    return luaL_error(L, "wrong SCREEN value");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
+  if (screen < 0) return luaL_error(L, "wrong SCREEN value");
   if ((screen == 0) && (x > 400))
     return luaL_error(L, "out of framebuffer bounds");
   if ((screen == 1) && (x > 320))

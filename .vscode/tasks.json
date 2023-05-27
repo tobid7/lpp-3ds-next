@@ -1,0 +1,22 @@
+{
+    "tasks": [
+      {
+        "label": "make",
+        "type": "shell",
+        "command": "make"
+      },
+      {
+        "label": "clean",
+        "type": "shell",
+        "command": "make",
+        "args": ["clean"]
+      },
+      {
+        "label": "3dslink",
+        "type": "shell",
+        "command": "3dslink",
+        "args": ["-a", "192.168.2.220", "${workspaceFolder}/lpp-3ds-next.3dsx"]
+      }
+    ]
+  }
+  

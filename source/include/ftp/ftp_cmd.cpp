@@ -18,10 +18,8 @@ static u32 dataBuffer[DATA_BUFFER_SIZE / 4];
 static char renameSource[4096];
 
 static void unicodeToChar(char *dst, u16 *src) {
-  if (!src || !dst)
-    return;
-  while (*src)
-    *(dst++) = (*(src++)) & 0xFF;
+  if (!src || !dst) return;
+  while (*src) *(dst++) = (*(src++)) & 0xFF;
   *dst = 0x00;
 }
 
@@ -56,8 +54,7 @@ void ftp_cmd_LIST(int s, char *cmd, char *arg) {
     u16 entryBuffer[512];
     char data[256];
     FSDIR_Read(dirHandle, &entriesRead, 1, (FS_DirectoryEntry *)entryBuffer);
-    if (!entriesRead)
-      break;
+    if (!entriesRead) break;
     unicodeToChar(data, entryBuffer);
     siprintf((char *)entryBuffer,
              "%crwxrwxrwx   2 3DS        %d Feb  1  2009 %s\r",
@@ -154,8 +151,7 @@ void ftp_cmd_RETR(int s, char *cmd, char *arg) {
   do {
     ret = FSFILE_Read(fileHandle, (u32 *)&readSize, totalSize,
                       (u32 *)dataBuffer, DATA_BUFFER_SIZE);
-    if (ret || !readSize)
-      break;
+    if (ret || !readSize) break;
     ret = send(data_s, dataBuffer, readSize, 0);
     totalSize += readSize;
   } while (readSize && ret > 0);
@@ -180,8 +176,7 @@ void ftp_cmd_CWD(int s, char *cmd, char *arg) {
   else
     strcat(currentPath, arg);
   int l = strlen(currentPath);
-  if (!l || currentPath[l - 1] != '/')
-    strcat(currentPath, "/");
+  if (!l || currentPath[l - 1] != '/') strcat(currentPath, "/");
   sprintf(shared_ftp, "  => %s", currentPath);
   ftp_sendResponse(s, 200, "ok");
 }

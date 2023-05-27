@@ -1,23 +1,25 @@
-#include "utils.h"
 #include <3ds.h>
-#include <C2D_Helper.hpp>
-#include <Graphics.hpp>
-#include <luaplayer.hpp>
 #include <string.h>
 
+#include <C2D_Helper.hpp>
+#include <Graphics.hpp>
 #include <iostream>
+#include <luaplayer.hpp>
+
+#include "utils.h"
+
 
 bool c3d_Frame_en = false;
 
-#define RGBA8(r, g, b, a)                                                      \
-  ((((r)&0xFF) << 0) | (((g)&0xFF) << 8) | (((b)&0xFF) << 16) |                \
+#define RGBA8(r, g, b, a)                                       \
+  ((((r)&0xFF) << 0) | (((g)&0xFF) << 8) | (((b)&0xFF) << 16) | \
    (((a)&0xFF) << 24))
 
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 
 int cur_screen;
@@ -27,8 +29,7 @@ C3D_RenderTarget *t_targets[3];
 static int lua_init(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
   C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
@@ -44,8 +45,7 @@ static int lua_init(lua_State *L) {
 static int lua_term(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   cur_screen = 2;
   C2D_Fini();
@@ -62,8 +62,7 @@ static int lua_refresh(lua_State *L) {
 #endif
   int screen = luaL_checkinteger(L, 1);
   int side = 0;
-  if (argc == 2)
-    side = luaL_checkinteger(L, 2);
+  if (argc == 2) side = luaL_checkinteger(L, 2);
   gfxScreen_t my_screen;
   gfx3dSide_t eye;
   cur_screen = screen;
@@ -75,7 +74,11 @@ static int lua_refresh(lua_State *L) {
     eye = GFX_LEFT;
   else
     eye = GFX_RIGHT;
-  C3D_FrameBegin(0);
+  C3D_FrameBegin(C3D_FRAME_NONBLOCK);
+  C2D_TargetClear(t_targets[0], C2D_Color32(0, 0, 0, 0));
+  C2D_TargetClear(t_targets[1], C2D_Color32(0, 0, 0, 0));
+  C2D_TargetClear(t_targets[2], C2D_Color32(0, 0, 0, 0));
+  C2D_Prepare();
   if (eye == GFX_RIGHT && my_screen == GFX_TOP)
     C2D_SceneBegin(t_targets[2]);
   else if (eye == GFX_LEFT && my_screen == GFX_TOP)
@@ -88,8 +91,7 @@ static int lua_refresh(lua_State *L) {
 static int lua_end(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   C3D_FrameEnd(0);
   return 0;
@@ -98,8 +100,7 @@ static int lua_end(lua_State *L) {
 static int lua_flip(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   std::cout << "The function " << stringify(lua_flip)
             << " is completly \ndeprecated and will never\nbe supportet again!"
@@ -110,8 +111,7 @@ static int lua_flip(lua_State *L) {
 static int lua_rect(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5 && argc != 6)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments");
 #endif
   float x1 = luaL_checknumber(L, 1);
   float x2 = luaL_checknumber(L, 2);
@@ -133,8 +133,7 @@ static int lua_rect(lua_State *L) {
   if (cur_screen != 1 && cur_screen != 0)
     return luaL_error(L, "you need to call initBlend to use GPU rendering");
 #endif
-  if (argc == 6)
-    radius = luaL_checknumber(L, 6);
+  if (argc == 6) radius = luaL_checknumber(L, 6);
   if (radius == 0)
     C2D_DrawRectSolid(x1, y1, 0.5, x2 - x1, y2 - y1,
                       RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF,
@@ -147,8 +146,7 @@ static int lua_rect(lua_State *L) {
 static int lua_fillcircle(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 4)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 4) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -167,8 +165,7 @@ static int lua_fillcircle(lua_State *L) {
 static int lua_line(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5) return luaL_error(L, "wrong number of arguments");
 #endif
   float x1 = luaL_checknumber(L, 1);
   float x2 = luaL_checknumber(L, 2);
@@ -192,8 +189,7 @@ static int lua_line(lua_State *L) {
 static int lua_emptyrect(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5) return luaL_error(L, "wrong number of arguments");
 #endif
   float x1 = luaL_checknumber(L, 1);
   float x2 = luaL_checknumber(L, 2);
@@ -238,8 +234,7 @@ static int lua_emptyrect(lua_State *L) {
 static int lua_loadimg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   char *text = (char *)(luaL_checkstring(L, 1));
   fileStream fileHandle;
@@ -250,8 +245,7 @@ static int lua_loadimg(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -261,8 +255,7 @@ static int lua_loadimg(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
                                 filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
@@ -270,8 +263,7 @@ static int lua_loadimg(lua_State *L) {
   if (magic == 0x5089) {
     FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
     FS_Close(&fileHandle);
-    if (long_magic == 0x0A1A0A0D474E5089)
-      bitmap = decodePNGfile(text);
+    if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
     FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
@@ -280,8 +272,7 @@ static int lua_loadimg(lua_State *L) {
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
-  if (!bitmap)
-    return luaL_error(L, "Error loading image");
+  if (!bitmap) return luaL_error(L, "Error loading image");
 #endif
   if (bitmap->bitperpixel == 24) {
     int length = (bitmap->width * bitmap->height) << 2;
@@ -317,8 +308,7 @@ static int lua_loadimg(lua_State *L) {
 static int lua_convert(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   Bitmap *bitmap = (Bitmap *)(luaL_checkinteger(L, 1));
 #ifndef SKIP_ERROR_HANDLING
@@ -370,8 +360,7 @@ static int lua_convert(lua_State *L) {
 static int lua_drawimg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 3 && argc != 4)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -404,8 +393,7 @@ static int lua_drawimg(lua_State *L) {
 static int lua_drawimg_scale(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5 && argc != 6)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -434,8 +422,7 @@ static int lua_drawimg_scale(lua_State *L) {
 static int lua_drawimg_rotate(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 4 && argc != 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 4 && argc != 5) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -476,16 +463,14 @@ static int lua_drawimg_full(lua_State *L) {
   float scale_y = luaL_checknumber(L, 9);
   gpu_text *texture = (gpu_text *)luaL_checkinteger(L, 10);
   u32 color;
-  if (argc == 11)
-    color = luaL_checkinteger(L, 11);
+  if (argc == 11) color = luaL_checkinteger(L, 11);
 #ifndef SKIP_ERROR_HANDLING
   if (texture->magic != 0x4C545854)
     return luaL_error(L, "attempt to access wrong memory block type");
   if (cur_screen != 1 && cur_screen != 0)
     return luaL_error(L, "you need to call initBlend to use GPU rendering");
 #endif
-  if (argc == 10)
-    std::cout << "Not Supported\n";
+  if (argc == 10) std::cout << "Not Supported\n";
   // sf2d_draw_texture_part_rotate_scale(texture->tex, x, y, radius, st_x, st_y,
   // width, height, scale_x, scale_y);
   else
@@ -499,8 +484,7 @@ static int lua_drawimg_full(lua_State *L) {
 static int lua_partial(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 7 && argc != 8)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments");
 #endif
   float x = luaL_checknumber(L, 1);
   float y = luaL_checknumber(L, 2);
@@ -510,16 +494,14 @@ static int lua_partial(lua_State *L) {
   float height = luaL_checknumber(L, 6);
   gpu_text *file = (gpu_text *)luaL_checkinteger(L, 7);
   u32 color;
-  if (argc == 8)
-    color = luaL_checkinteger(L, 8);
+  if (argc == 8) color = luaL_checkinteger(L, 8);
 #ifndef SKIP_ERROR_HANDLING
   if (file->magic != 0x4C545854)
     return luaL_error(L, "attempt to access wrong memory block type");
   if (cur_screen != 1 && cur_screen != 0)
     return luaL_error(L, "you need to call initBlend to use GPU rendering");
 #endif
-  if (argc == 8)
-    std::cout << "Not Supported\n";
+  if (argc == 8) std::cout << "Not Supported\n";
   // sf2d_draw_texture_part_blend(file->tex, x, y, st_x, st_y, width, height,
   // RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF, (color >>
   // 24) & 0xFF));
@@ -532,8 +514,7 @@ static int lua_partial(lua_State *L) {
 static int lua_free(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   gpu_text *texture = (gpu_text *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -549,8 +530,7 @@ static int lua_free(lua_State *L) {
 static int lua_getWidth(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   gpu_text *src = (gpu_text *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -564,8 +544,7 @@ static int lua_getWidth(lua_State *L) {
 static int lua_getHeight(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   gpu_text *src = (gpu_text *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -579,8 +558,7 @@ static int lua_getHeight(lua_State *L) {
 static int lua_viewport(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 5) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 x = luaL_checkinteger(L, 1);
   u32 y = luaL_checkinteger(L, 2);
@@ -601,11 +579,9 @@ static int lua_pixel2(lua_State *L) {
   int y = luaL_checkinteger(L, 2);
   int screen = luaL_checkinteger(L, 3);
   int side = 0;
-  if (argc == 4)
-    side = luaL_checkinteger(L, 4);
+  if (argc == 4) side = luaL_checkinteger(L, 4);
 #ifndef SKIP_ERROR_HANDLING
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
   if ((screen == 0) && (x > 400))
     return luaL_error(L, "out of framebuffer bounds");
   if ((screen == 1) && (x > 320))

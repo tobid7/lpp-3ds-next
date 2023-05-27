@@ -8,7 +8,7 @@
 #include "Common.hpp"
 
 class Image {
-public:
+ public:
   enum Format { Format_Png, Format_Bmp, Format_Tga };
 
   Image();
@@ -55,10 +55,10 @@ public:
 
   unsigned char *getPixelsPointer();
 
-private:
+ private:
   int m_width;
   int m_height;
   std::vector<unsigned char> m_pixels;
 };
 
-#endif // IMAGE_HPP_INC
+#endif  // IMAGE_HPP_INC

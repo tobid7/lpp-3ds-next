@@ -1,14 +1,16 @@
-#include "Graphics.hpp"
-#include "../utils.h"
-#include "font.h"
-#include "lodepng.h"
 #include <3ds.h>
-#include <jpeglib.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+// clang-format off
+#include <jpeglib.h>
+// clang-format on
+#include "../utils.h"
+#include "Graphics.hpp"
+#include "font.h"
+#include "lodepng.h"
 
 #define CONFIG_3D_SLIDERSTATE (*(float *)0x1FF81080)
 
@@ -47,8 +49,7 @@ void DrawRGB565Screen(u8 *dst, u16 *pic) {
   int x;
   int y;
   u16 width = 400;
-  if (dst == BottomFB)
-    width = 320;
+  if (dst == BottomFB) width = 320;
   for (y = 0; y < 240; y++) {
     for (x = 0; x < width; x++) {
       DrawRGB565Pixel(dst, x, y, *pic);
@@ -92,8 +93,7 @@ Bitmap *LoadBitmap(char *fname) {
 
 void PrintImageBitmap(int xp, int yp, Bitmap *result, int screen) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return;
+  if (!result) return;
 #endif
   int x, y;
   if (result->bitperpixel == 24) {
@@ -130,8 +130,7 @@ void PrintGpuBitmap(int xp, int yp, Bitmap *result, int screen) {
 
 void PrintScreenBitmap(int xp, int yp, Bitmap *result, int screen, int side) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return;
+  if (!result) return;
 #endif
   u8 *buffer = NULL;
   if (screen == 0) {
@@ -166,8 +165,7 @@ void PrintPartialScreenBitmap(int xp, int yp, int st_x, int st_y, int width,
                               int height, Bitmap *result, int screen,
                               int side) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return;
+  if (!result) return;
 #endif
   u8 *buffer = NULL;
   if (screen == 0) {
@@ -201,8 +199,7 @@ void PrintPartialScreenBitmap(int xp, int yp, int st_x, int st_y, int width,
 void PrintPartialImageBitmap(int xp, int yp, int st_x, int st_y, int width,
                              int height, Bitmap *result, int screen) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return;
+  if (!result) return;
 #endif
   int x, y;
   if (((Bitmap *)screen)->bitperpixel == 32) {
@@ -255,8 +252,7 @@ void PrintPartialImageBitmap(int xp, int yp, int st_x, int st_y, int width,
 void PrintPartialGpuBitmap(int xp, int yp, int st_x, int st_y, int width,
                            int height, Bitmap *result, int screen) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return;
+  if (!result) return;
 #endif
   int x, y;
   if (result->bitperpixel == 24) {
@@ -286,8 +282,7 @@ void PrintPartialGpuBitmap(int xp, int yp, int st_x, int st_y, int width,
 
 u8 *flipBitmap(u8 *flip_bitmap, Bitmap *result) {
 #ifndef SKIP_ERROR_HANDLING
-  if (!result)
-    return NULL;
+  if (!result) return NULL;
 #endif
   int x, y;
   if (result->bitperpixel == 24) {
@@ -428,8 +423,7 @@ void DrawScreenText(int x, int y, char *str, u32 color, int screen, int side) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -440,8 +434,7 @@ void DrawScreenText(int x, int y, char *str, u32 color, int screen, int side) {
     for (cy = 0; cy < 12; cy++) {
       unsigned short val = ptr[4 + cy];
       for (cx = 0; cx < glyphsize; cx++) {
-        if (val & (1 << cx))
-          DrawPixel(buffer, x + cx, y + cy, color);
+        if (val & (1 << cx)) DrawPixel(buffer, x + cx, y + cy, color);
       }
     }
     x += glyphsize;
@@ -470,8 +463,7 @@ void DrawAlphaScreenText(int x, int y, char *str, u32 color, int screen,
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -482,8 +474,7 @@ void DrawAlphaScreenText(int x, int y, char *str, u32 color, int screen,
     for (cy = 0; cy < 12; cy++) {
       unsigned short val = ptr[4 + cy];
       for (cx = 0; cx < glyphsize; cx++) {
-        if (val & (1 << cx))
-          DrawAlphaPixel(buffer, x + cx, y + cy, color);
+        if (val & (1 << cx)) DrawAlphaPixel(buffer, x + cx, y + cy, color);
       }
     }
     x += glyphsize;
@@ -501,8 +492,7 @@ void DrawAlphaImageText(int x, int y, char *str, u32 color, int screen) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -532,8 +522,7 @@ void Draw32bppImageText(int x, int y, char *str, u32 color, int screen) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -563,8 +552,7 @@ void DrawImageText(int x, int y, char *str, u32 color, int screen) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -595,8 +583,7 @@ void DrawGpuText(int x, int y, char *str, u32 color, int screen) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -634,8 +621,7 @@ void DebugOutput(char *str) {
       continue;
     }
     u16 ch = str[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -650,8 +636,7 @@ void DebugOutput(char *str) {
           x = 0;
           y = y + 15;
         }
-        if (val & (1 << cx))
-          DrawPixel(BottomFB, x + cx, y + cy, 0xFFFFFF);
+        if (val & (1 << cx)) DrawPixel(BottomFB, x + cx, y + cy, 0xFFFFFF);
       }
     }
     x += glyphsize;
@@ -676,8 +661,7 @@ int ConsoleOutput(Console *console) {
   int y = 0;
   int res = 0;
   for (i = 0; console->text[i] != '\0'; i++) {
-    if (y > 230)
-      break;
+    if (y > 230) break;
     if (console->text[i] == 0x0A) {
       x = 0;
       y = y + 15;
@@ -693,8 +677,7 @@ int ConsoleOutput(Console *console) {
       continue;
     }
     u16 ch = console->text[i];
-    if (ch > 0x7E)
-      ch = 0x7F;
+    if (ch > 0x7E) ch = 0x7F;
     ptr = &font[(ch - 0x20) << 4];
     glyphsize = ptr[0];
     if (!glyphsize) {
@@ -706,14 +689,12 @@ int ConsoleOutput(Console *console) {
     if (x >= max_x - 10) {
       x = 0;
       y = y + 15;
-      if (y > 230)
-        break;
+      if (y > 230) break;
     }
     for (cy = 0; cy < 12; cy++) {
       unsigned short val = ptr[4 + cy];
       for (cx = 0; cx < glyphsize; cx++) {
-        if (val & (1 << cx))
-          DrawPixel(buffer, x + cx, y + cy, 0xFFFFFF);
+        if (val & (1 << cx)) DrawPixel(buffer, x + cx, y + cy, 0xFFFFFF);
       }
     }
     x += glyphsize;
@@ -1485,8 +1466,7 @@ void linecpy(u8 *screen, u16 x, u16 y, u16 width, u16 height, u8 *image,
 }
 
 void RAW2FB(int xp, int yp, Bitmap *result, int screen, int side) {
-  if (!result)
-    return;
+  if (!result) return;
   u8 *buffer = 0;
   if (screen == 0) {
     if (side == 0)
@@ -1513,8 +1493,7 @@ my_error_exit(j_common_ptr cinfo) {
 
 Bitmap *OpenJPG(const char *filename) {
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
-  if (result == NULL)
-    return 0;
+  if (result == NULL) return 0;
   u64 size;
   u32 bytesRead;
   fileStream fileHandle;
@@ -1570,8 +1549,7 @@ Bitmap *OpenJPG(const char *filename) {
 
 Bitmap *decodeJPGfile(const char *filename) {
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
-  if (result == NULL)
-    return 0;
+  if (result == NULL) return 0;
   u64 size;
   u32 bytesRead;
   fileStream fileHandle;

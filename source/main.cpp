@@ -4,14 +4,18 @@
  *   Copyright (C) 2021-2023 Tobi-D7
  */
 
-#include "include/luaplayer.hpp"
 #include <3ds.h>
-#include <ErrorHelper.hpp>
-#include <NDS.hpp>
-#include <memory.hpp>
+#include <citro2d.h>
+#include <citro3d.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <ErrorHelper.hpp>
+#include <NDS.hpp>
 #include <future>
+#include <memory.hpp>
+
+#include "include/luaplayer.hpp"
 
 bool f_quit = false;
 bool catch_at = true;
@@ -63,14 +67,14 @@ void InitLppServ() {
 }
 
 void ExitLppServ() {
-  if (catch_at) {
-    while (aptMainLoop()) {
-      hidScanInput();
-      if (hidKeysDown() & KEY_START) {
-        break;
-      }
-    }
-  }
+  // if (catch_at) {
+  //  while (aptMainLoop()) {
+  //    hidScanInput();
+  //    if (hidKeysDown() & KEY_START) {
+  //      break;
+  //    }
+  //  }
+  //}
   destroy();
   f_quit = true;
   aptExit();
@@ -89,19 +93,16 @@ bool isBottomLCDOn = true;
 bool GW_MODE;
 bool CIA_MODE;
 bool isCSND;
-char cur_dir[256];
+std::string cur_dir;
 
-void Prnt()
-{
-  std::cout << "Assync lol" << std::endl;
-}
+void Prnt() { std::cout << "Assync lol" << std::endl; }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   init_fnc(InitLppServ, ExitLppServ);
   ErrorHelper::SetupDirectories();
-  sprintf(cur_dir, "sdmc:/");
-  Run("romfs:/index.lua");
 
+  cur_dir = "sdmc:/";
+  Run("romfs:/index.lua");
   exit(0);
   // return 0; // Just caused by all the fnc
   //           // not contain return value pain lol

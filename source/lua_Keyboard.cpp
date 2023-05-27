@@ -1,16 +1,18 @@
-#include "Graphics.hpp"
-#include "hbkb.h"
-#include "luaplayer.hpp"
 #include <3ds.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "Graphics.hpp"
+#include "hbkb.h"
+#include "luaplayer.hpp"
+
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 HB_Keyboard keyboard;
 u8 keystate = 0;
@@ -18,8 +20,7 @@ u8 keystate = 0;
 static int lua_setText(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   const char *text = luaL_checkstring(L, 1);
   std::string s(text);
@@ -30,8 +31,7 @@ static int lua_setText(lua_State *L) {
 static int lua_show(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   touchPosition touch;
   hidScanInput();
@@ -43,8 +43,7 @@ static int lua_show(lua_State *L) {
 static int lua_state(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   lua_pushinteger(L, keystate);
   return 1;
@@ -53,11 +52,9 @@ static int lua_state(lua_State *L) {
 static int lua_input(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
-  if (keystate == 3)
-    keyboard.HBKB_Clean();
+  if (keystate == 3) keyboard.HBKB_Clean();
   lua_pushstring(L, keyboard.HBKB_CheckKeyboardInput().c_str());
   return 1;
 }
@@ -65,8 +62,7 @@ static int lua_input(lua_State *L) {
 static int lua_clear(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   keyboard.HBKB_Clean();
   keystate = 0;

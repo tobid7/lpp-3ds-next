@@ -1,5 +1,0 @@
-echo Installing
-whoami
-whoami
-         
-          

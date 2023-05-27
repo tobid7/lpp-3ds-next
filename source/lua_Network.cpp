@@ -1,6 +1,3 @@
-#include "ftp/ftp.h"
-#include "luaplayer.hpp"
-#include "utils.h"
 #include <3ds.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -11,11 +8,16 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "ftp/ftp.h"
+#include "luaplayer.hpp"
+#include "utils.h"
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 
 extern bool ftp_state;
@@ -33,8 +35,7 @@ u32 RootCertChain_contexthandle = 0;
 static int lua_checkFTPcommand(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   if (connfd < 0)
     connfd = ftp_getConnection();
@@ -52,8 +53,7 @@ static int lua_checkFTPcommand(lua_State *L) {
 static int lua_wifistat(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   u32 wifiStatus;
   if (ACU_GetWifiStatus(&wifiStatus) == (long int)0xE0A09D2E)
@@ -66,8 +66,7 @@ static int lua_wifistat(lua_State *L) {
 static int lua_macaddr(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   u8 *mac_byte = (u8 *)0x1FF81060;
   char mac_address[18];
@@ -81,8 +80,7 @@ static int lua_macaddr(lua_State *L) {
 
 static int lua_ipaddr(lua_State *L) {
   int argc = lua_gettop(L);
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
   u32 ip = (u32)gethostid();
   char ip_address[64];
   sprintf(ip_address, "%lu.%lu.%lu.%lu", ip & 0xFF, (ip >> 8) & 0xFF,
@@ -94,8 +92,7 @@ static int lua_ipaddr(lua_State *L) {
 static int lua_download(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc < 2 || argc > 5)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc < 2 || argc > 5) return luaL_error(L, "wrong number of arguments");
 #endif
   const char *url = luaL_checkstring(L, 1);
   // const char *file = luaL_checkstring(L, 2);
@@ -106,8 +103,7 @@ static int lua_download(lua_State *L) {
   u32 statuscode = 0;
   HTTPC_RequestMethod useMethod = HTTPC_METHOD_GET;
 
-  if (method <= 3 && method >= 1)
-    useMethod = (HTTPC_RequestMethod)method;
+  if (method <= 3 && method >= 1) useMethod = (HTTPC_RequestMethod)method;
 
   do {
     if (statuscode >= 301 && statuscode <= 308) {
@@ -131,13 +127,10 @@ static int lua_download(lua_State *L) {
       char *headervalue = NULL;
       do {
         headername = strtok(toker, ":");
-        if (headername == NULL)
-          break;
+        if (headername == NULL) break;
         headervalue = strtok(NULL, "\n");
-        if (headervalue == NULL)
-          break;
-        if (headervalue[0] == ' ')
-          headervalue++;
+        if (headervalue == NULL) break;
+        if (headervalue[0] == ' ') headervalue++;
         httpcAddRequestHeaderField(&context, headername, headervalue);
         toker = NULL;
       } while (headername != NULL && headervalue != NULL);
@@ -194,8 +187,7 @@ static int lua_download(lua_State *L) {
 static int lua_downstring(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc < 1 || argc > 4)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc < 1 || argc > 4) return luaL_error(L, "wrong number of arguments");
 #endif
   const char *url = luaL_checkstring(L, 1);
   const char *headers = (argc >= 2) ? luaL_checkstring(L, 2) : NULL;
@@ -204,8 +196,7 @@ static int lua_downstring(lua_State *L) {
   httpcContext context;
   HTTPC_RequestMethod useMethod = HTTPC_METHOD_GET;
 
-  if (method <= 3 && method >= 1)
-    useMethod = (HTTPC_RequestMethod)method;
+  if (method <= 3 && method >= 1) useMethod = (HTTPC_RequestMethod)method;
 
   u32 statuscode = 0;
   do {
@@ -230,13 +221,10 @@ static int lua_downstring(lua_State *L) {
       char *headervalue = NULL;
       do {
         headername = strtok(toker, ":");
-        if (headername == NULL)
-          break;
+        if (headername == NULL) break;
         headervalue = strtok(NULL, "\n");
-        if (headervalue == NULL)
-          break;
-        if (headervalue[0] == ' ')
-          headervalue++;
+        if (headervalue == NULL) break;
+        if (headervalue[0] == ' ') headervalue++;
         httpcAddRequestHeaderField(&context, headername, headervalue);
         toker = NULL;
       } while (headername != NULL && headervalue != NULL);
@@ -251,7 +239,7 @@ static int lua_downstring(lua_State *L) {
     if (ret == 0) {
 #endif
       httpcBeginRequest(&context);
-      long int contentsize = 0; // Crash on the += if u32. WTF?
+      long int contentsize = 0;  // Crash on the += if u32. WTF?
       u32 readSize = 0;
       httpcGetResponseStatusCode(&context, &statuscode);
       if (statuscode == 200) {
@@ -284,18 +272,16 @@ static int lua_downstring(lua_State *L) {
 static int SpaceCounter(char *string) {
   int res = 0;
   while (*string) {
-    if (string[0] == 0x20)
-      res++;
+    if (string[0] == 0x20) res++;
     string++;
   }
   return res;
 }
 
-static int lua_sendmail(lua_State *L) { // BETA func
+static int lua_sendmail(lua_State *L) {  // BETA func
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 3)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 3) return luaL_error(L, "wrong number of arguments");
 #endif
   char *to = (char *)luaL_checkstring(L, 1);
   char *subj = (char *)luaL_checkstring(L, 2);
@@ -353,8 +339,7 @@ static int lua_sendmail(lua_State *L) { // BETA func
     u32 statuscode = 0;
     u32 contentsize = 0;
     httpcGetResponseStatusCode(&context, &statuscode);
-    if (statuscode != 200)
-      luaL_error(L, "request error");
+    if (statuscode != 200) luaL_error(L, "request error");
     httpcGetDownloadSizeState(&context, NULL, &contentsize);
     u8 response;
     httpcDownloadData(&context, &response, contentsize, NULL);
@@ -371,8 +356,7 @@ static int lua_sendmail(lua_State *L) { // BETA func
 static int lua_wifilevel(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   u8 *wifi_link = (u8 *)0x1FF81066;
   lua_pushinteger(L, *wifi_link);
@@ -382,8 +366,7 @@ static int lua_wifilevel(lua_State *L) {
 static int lua_initSock(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
 
   // Init default socketing
@@ -412,8 +395,7 @@ static int lua_createServerSocket(lua_State *L) {
 #endif
   int port = luaL_checkinteger(L, 1);
   int type = IPPROTO_TCP;
-  if (argc == 2)
-    type = luaL_checkinteger(L, 2);
+  if (argc == 2) type = luaL_checkinteger(L, 2);
 
   Socket *my_socket = new Socket;
   my_socket->serverSocket = true;
@@ -423,8 +405,7 @@ static int lua_createServerSocket(lua_State *L) {
   else
     my_socket->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #ifndef SKIP_ERROR_HANDLING
-  if (my_socket->sock <= 0)
-    return luaL_error(L, "invalid socket.");
+  if (my_socket->sock <= 0) return luaL_error(L, "invalid socket.");
 #endif
 
   int rcvbuf = 32768;
@@ -439,8 +420,7 @@ static int lua_createServerSocket(lua_State *L) {
 
   int err = bind(my_socket->sock, (struct sockaddr *)&addrTo, sizeof(addrTo));
 #ifndef SKIP_ERROR_HANDLING
-  if (err != 0)
-    return luaL_error(L, "bind error.");
+  if (err != 0) return luaL_error(L, "bind error.");
 #endif
 
   fcntl(my_socket->sock, F_SETFL, O_NONBLOCK);
@@ -448,8 +428,7 @@ static int lua_createServerSocket(lua_State *L) {
   if (type == IPPROTO_TCP) {
     err = listen(my_socket->sock, 1);
 #ifndef SKIP_ERROR_HANDLING
-    if (err != 0)
-      return luaL_error(L, "listen error.");
+    if (err != 0) return luaL_error(L, "listen error.");
 #endif
   }
 
@@ -461,8 +440,7 @@ static int lua_createServerSocket(lua_State *L) {
 static int lua_shutSock(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
 
   // Closing default socketing
@@ -478,8 +456,7 @@ static int lua_shutSock(lua_State *L) {
 static int lua_recv(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
 
   Socket *my_socket = (Socket *)luaL_checkinteger(L, 1);
@@ -509,8 +486,7 @@ static int lua_recv(lua_State *L) {
 static int lua_send(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
 
   Socket *my_socket = (Socket *)luaL_checkinteger(L, 1);
@@ -522,8 +498,7 @@ static int lua_send(lua_State *L) {
     return luaL_error(L, "attempt to access wrong memory block type");
   if (my_socket->serverSocket)
     return luaL_error(L, "send not allowed for server sockets.");
-  if (!text)
-    return luaL_error(L, "Socket.send() expected a string.");
+  if (!text) return luaL_error(L, "Socket.send() expected a string.");
 #endif
 
   int result = 0;
@@ -546,11 +521,9 @@ static int lua_connect(lua_State *L) {
   char *host = (char *)luaL_checkstring(L, 1);
   int port = luaL_checkinteger(L, 2);
   bool isSSL = false;
-  if (argc >= 3)
-    isSSL = lua_toboolean(L, 3);
+  if (argc >= 3) isSSL = lua_toboolean(L, 3);
   int type = IPPROTO_TCP;
-  if (argc == 4)
-    type = luaL_checkinteger(L, 4);
+  if (argc == 4) type = luaL_checkinteger(L, 4);
   char port_str[8];
   sprintf(port_str, "%i", port);
 
@@ -634,8 +607,7 @@ static int lua_connect(lua_State *L) {
 static int lua_addCert(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   const char *text = luaL_checkstring(L, 1);
   fileStream fileHandle;
@@ -643,8 +615,7 @@ static int lua_addCert(lua_State *L) {
     fileHandle.isRomfs = true;
     FILE *handle = fopen(text, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle.handle = (u32)handle;
   } else {
@@ -658,8 +629,7 @@ static int lua_addCert(lua_State *L) {
         FSUSER_OpenFileDirectly(&fileHandle.handle, a_id, m_path, m_path,
                                 FS_OPEN_CREATE | FS_OPEN_WRITE, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   u64 cert_size;
@@ -676,8 +646,7 @@ static int lua_addCert(lua_State *L) {
 static int lua_accept(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
 
   Socket *my_socket = (Socket *)luaL_checkinteger(L, 1);
@@ -693,8 +662,7 @@ static int lua_accept(lua_State *L) {
   socklen_t cbAddrAccept = sizeof(addrAccept);
   int sockClient =
       accept(my_socket->sock, (struct sockaddr *)&addrAccept, &cbAddrAccept);
-  if (sockClient <= 0)
-    return 0;
+  if (sockClient <= 0) return 0;
 
   Socket *incomingSocket = new Socket;
   incomingSocket->serverSocket = 0;
@@ -710,8 +678,7 @@ static int lua_accept(lua_State *L) {
 static int lua_closeSock(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "Socket.close() takes one argument.");
+  if (argc != 1) return luaL_error(L, "Socket.close() takes one argument.");
 #endif
 
   Socket *my_socket = (Socket *)luaL_checkinteger(L, 1);
@@ -721,8 +688,7 @@ static int lua_closeSock(lua_State *L) {
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
 
-  if (my_socket->isSSL)
-    sslcDestroyContext(&my_socket->sslc_context);
+  if (my_socket->isSSL) sslcDestroyContext(&my_socket->sslc_context);
   closesocket(my_socket->sock);
   delete[] my_socket;
   return 0;

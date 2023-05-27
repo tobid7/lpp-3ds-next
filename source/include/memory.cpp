@@ -42,5 +42,5 @@ size_t GetTotalAllocated() { return metrics.t_TotalAllocated; }
 size_t GetTotalFreed() { return metrics.t_TotalFreed; }
 
 size_t GetCurrent() { return metrics.t_CurrentlyAllocated(); }
-} // namespace Memory
-} // namespace nlc
+}  // namespace Memory
+}  // namespace nlc

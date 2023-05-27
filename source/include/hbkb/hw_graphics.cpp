@@ -13,15 +13,15 @@
 #include "hw_graphics.h"
 
 // Graphics
-#include "hbkb_abc_lower_bin.h"   // 320x240 Keyboard ABC (Lowercase Letters)
-#include "hbkb_abc_upper_bin.h"   // 320x240 Keyboard ABC (Uppercase Letters)
-#include "hbkb_back_sel_bin.h"    // Back Key Selection
-#include "hbkb_caps_sel_bin.h"    // Caps Key Selection
-#include "hbkb_normal_sel_bin.h"  // Normal Key Selection
-#include "hbkb_shift_sel_bin.h"   // Shift Key Selection
-#include "hbkb_space_sel_bin.h"   // Space Key Selection
-#include "hbkb_special_bin.h"     // 320x240 Keyboard Special Characters
-#include "hbkb_special_sel_bin.h" // Special Key Shadow
+#include "hbkb_abc_lower_bin.h"    // 320x240 Keyboard ABC (Lowercase Letters)
+#include "hbkb_abc_upper_bin.h"    // 320x240 Keyboard ABC (Uppercase Letters)
+#include "hbkb_back_sel_bin.h"     // Back Key Selection
+#include "hbkb_caps_sel_bin.h"     // Caps Key Selection
+#include "hbkb_normal_sel_bin.h"   // Normal Key Selection
+#include "hbkb_shift_sel_bin.h"    // Shift Key Selection
+#include "hbkb_space_sel_bin.h"    // Space Key Selection
+#include "hbkb_special_bin.h"      // 320x240 Keyboard Special Characters
+#include "hbkb_special_sel_bin.h"  // Special Key Shadow
 
 enum Keys {
   HBKB_KEY_NONE = 0,
@@ -67,36 +67,36 @@ enum Keys {
   HBKB_KEY_SPACE = 63,
 
   // Special - Row 0
-  HBKB_KEY_SPECIAL_A = 66, // !
-  HBKB_KEY_SPECIAL_B = 67, // "
-  HBKB_KEY_SPECIAL_C = 68, // §
-  HBKB_KEY_SPECIAL_D = 69, // $
-  HBKB_KEY_SPECIAL_E = 70, // %
-  HBKB_KEY_SPECIAL_F = 71, // &
-  HBKB_KEY_SPECIAL_G = 72, // /
-  HBKB_KEY_SPECIAL_H = 73, // (
-  HBKB_KEY_SPECIAL_I = 74, // )
-  HBKB_KEY_SPECIAL_J = 75, // ?
+  HBKB_KEY_SPECIAL_A = 66,  // !
+  HBKB_KEY_SPECIAL_B = 67,  // "
+  HBKB_KEY_SPECIAL_C = 68,  // §
+  HBKB_KEY_SPECIAL_D = 69,  // $
+  HBKB_KEY_SPECIAL_E = 70,  // %
+  HBKB_KEY_SPECIAL_F = 71,  // &
+  HBKB_KEY_SPECIAL_G = 72,  // /
+  HBKB_KEY_SPECIAL_H = 73,  // (
+  HBKB_KEY_SPECIAL_I = 74,  // )
+  HBKB_KEY_SPECIAL_J = 75,  // ?
 
   // Special - Row 1
-  HBKB_KEY_SPECIAL_K = 76, // *
-  HBKB_KEY_SPECIAL_L = 77, // '
-  HBKB_KEY_SPECIAL_M = 78, // <
-  HBKB_KEY_SPECIAL_N = 79, // >
-  HBKB_KEY_SPECIAL_O = 80, // +
-  HBKB_KEY_SPECIAL_P = 81, // [
-  HBKB_KEY_SPECIAL_Q = 82, // ]
-  HBKB_KEY_SPECIAL_R = 83, // {
-  HBKB_KEY_SPECIAL_S = 84, // }
+  HBKB_KEY_SPECIAL_K = 76,  // *
+  HBKB_KEY_SPECIAL_L = 77,  // '
+  HBKB_KEY_SPECIAL_M = 78,  // <
+  HBKB_KEY_SPECIAL_N = 79,  // >
+  HBKB_KEY_SPECIAL_O = 80,  // +
+  HBKB_KEY_SPECIAL_P = 81,  // [
+  HBKB_KEY_SPECIAL_Q = 82,  // ]
+  HBKB_KEY_SPECIAL_R = 83,  // {
+  HBKB_KEY_SPECIAL_S = 84,  // }
 
   // Special - Row 2
-  HBKB_KEY_SPECIAL_T = 85, // ,
-  HBKB_KEY_SPECIAL_U = 86, // ;
-  HBKB_KEY_SPECIAL_V = 87, // .
-  HBKB_KEY_SPECIAL_W = 88, // :
-  HBKB_KEY_SPECIAL_X = 89, // -
-  HBKB_KEY_SPECIAL_Y = 90, // _
-  HBKB_KEY_SPECIAL_Z = 99, // =
+  HBKB_KEY_SPECIAL_T = 85,  // ,
+  HBKB_KEY_SPECIAL_U = 86,  // ;
+  HBKB_KEY_SPECIAL_V = 87,  // .
+  HBKB_KEY_SPECIAL_W = 88,  // :
+  HBKB_KEY_SPECIAL_X = 89,  // -
+  HBKB_KEY_SPECIAL_Y = 90,  // _
+  HBKB_KEY_SPECIAL_Z = 99,  // =
 
   HBKB_KEY_ENTER = 91,
   HBKB_KEY_BACK = 92,
@@ -118,15 +118,15 @@ HW_Graphics::~HW_Graphics() {}
 void HW_Graphics::DrawKeyboard(u8 &KeyboadState, s16 &T_X, s16 &T_Y,
                                bool &isShift, bool &isCaps, u8 &Key) {
   // Draw Background
-  if (KeyboadState == STATE_ABC) // ABC Characters
+  if (KeyboadState == STATE_ABC)  // ABC Characters
   {
-    if (isShift || isCaps) // Draw Keyboard with Uppercase Letters
+    if (isShift || isCaps)  // Draw Keyboard with Uppercase Letters
       gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_abc_upper_bin, 240, 320, 0,
                     0);
-    else // Lowercase Letters
+    else  // Lowercase Letters
       gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_abc_lower_bin, 240, 320, 0,
                     0);
-  } else if (KeyboadState == STATE_SPECIAL) // Special Characters
+  } else if (KeyboadState == STATE_SPECIAL)  // Special Characters
     gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_special_bin, 240, 320, 0, 0);
   else
     gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_abc_lower_bin, 240, 320, 0,
@@ -141,7 +141,7 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
   // TODO: This is so incredibly ugly handled...
 
   // Shift and Caps can be active without pressing by the User
-  if (isShift) // 40, 64, 160, 257
+  if (isShift)  // 40, 64, 160, 257
     gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_shift_sel_bin, 40, 64, 40,
                   256);
 
@@ -159,12 +159,11 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
     gfxDrawSprite(GFX_BOTTOM, GFX_LEFT, (u8 *)hbkb_space_sel_bin, 40, 192, 40,
                   64);
   else {
-
     // Set X, Y Holders
     s16 GraphicX, GraphicY;
 
     // Assign X | Y Coords
-    if (Key == HBKB_KEY_1) // First Row
+    if (Key == HBKB_KEY_1)  // First Row
     {
       GraphicX = 200;
       GraphicY = 0;
@@ -195,7 +194,7 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
     } else if (Key == HBKB_KEY_0) {
       GraphicX = 200;
       GraphicY = 288;
-    } else if (Key == HBKB_KEY_Q || Key == HBKB_KEY_SPECIAL_A) // Second Row
+    } else if (Key == HBKB_KEY_Q || Key == HBKB_KEY_SPECIAL_A)  // Second Row
     {
       GraphicX = 160;
       GraphicY = 0;
@@ -226,7 +225,7 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
     } else if (Key == HBKB_KEY_P || Key == HBKB_KEY_SPECIAL_J) {
       GraphicX = 160;
       GraphicY = 288;
-    } else if (Key == HBKB_KEY_A || Key == HBKB_KEY_SPECIAL_K) // Third Row
+    } else if (Key == HBKB_KEY_A || Key == HBKB_KEY_SPECIAL_K)  // Third Row
     {
       GraphicX = 120;
       GraphicY = 0;
@@ -254,7 +253,7 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
     } else if (Key == HBKB_KEY_L || Key == HBKB_KEY_SPECIAL_S) {
       GraphicX = 120;
       GraphicY = 256;
-    } else if (Key == HBKB_KEY_Z || Key == HBKB_KEY_SPECIAL_T) // Forth Row
+    } else if (Key == HBKB_KEY_Z || Key == HBKB_KEY_SPECIAL_T)  // Forth Row
     {
       GraphicX = 80;
       GraphicY = 64;
@@ -297,28 +296,21 @@ void HW_Graphics::DrawKeyShadow(u8 &Key, bool &isShift, bool &isCaps) {
 void HW_Graphics::gfxDrawSprite(gfxScreen_t screen, gfx3dSide_t side,
                                 u8 *spriteData, u16 width, u16 height, s16 x,
                                 s16 y) {
-  if (!spriteData)
-    return;
+  if (!spriteData) return;
 
   u16 fbWidth, fbHeight;
   u8 *fbAdr = gfxGetFramebuffer(screen, side, &fbWidth, &fbHeight);
 
-  if (x + width < 0 || x >= fbWidth)
-    return;
-  if (y + height < 0 || y >= fbHeight)
-    return;
+  if (x + width < 0 || x >= fbWidth) return;
+  if (y + height < 0 || y >= fbHeight) return;
 
   u16 xOffset = 0, yOffset = 0;
   u16 widthDrawn = width, heightDrawn = height;
 
-  if (x < 0)
-    xOffset = -x;
-  if (y < 0)
-    yOffset = -y;
-  if (x + width >= fbWidth)
-    widthDrawn = fbWidth - x;
-  if (y + height >= fbHeight)
-    heightDrawn = fbHeight - y;
+  if (x < 0) xOffset = -x;
+  if (y < 0) yOffset = -y;
+  if (x + width >= fbWidth) widthDrawn = fbWidth - x;
+  if (y + height >= fbHeight) heightDrawn = fbHeight - y;
   widthDrawn -= xOffset;
   heightDrawn -= yOffset;
 
@@ -332,28 +324,21 @@ void HW_Graphics::gfxDrawSprite(gfxScreen_t screen, gfx3dSide_t side,
 void HW_Graphics::gfxDrawSpriteAlpha(gfxScreen_t screen, gfx3dSide_t side,
                                      u8 *spriteData, u16 width, u16 height,
                                      s16 x, s16 y) {
-  if (!spriteData)
-    return;
+  if (!spriteData) return;
 
   u16 fbWidth, fbHeight;
   u8 *fbAdr = gfxGetFramebuffer(screen, side, &fbWidth, &fbHeight);
 
-  if (x + width < 0 || x >= fbWidth)
-    return;
-  if (y + height < 0 || y >= fbHeight)
-    return;
+  if (x + width < 0 || x >= fbWidth) return;
+  if (y + height < 0 || y >= fbHeight) return;
 
   u16 xOffset = 0, yOffset = 0;
   u16 widthDrawn = width, heightDrawn = height;
 
-  if (x < 0)
-    xOffset = -x;
-  if (y < 0)
-    yOffset = -y;
-  if (x + width >= fbWidth)
-    widthDrawn = fbWidth - x;
-  if (y + height >= fbHeight)
-    heightDrawn = fbHeight - y;
+  if (x < 0) xOffset = -x;
+  if (y < 0) yOffset = -y;
+  if (x + width >= fbWidth) widthDrawn = fbWidth - x;
+  if (y + height >= fbHeight) heightDrawn = fbHeight - y;
   widthDrawn -= xOffset;
   heightDrawn -= yOffset;
 

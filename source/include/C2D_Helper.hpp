@@ -32,4 +32,4 @@ inline C2D_Image LoadTextureMem8888(unsigned char *pixels, int pw, int ph) {
   }
   return res;
 }
-} // namespace C2DH
+}  // namespace C2DH

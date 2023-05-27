@@ -1,15 +1,17 @@
-#include "Graphics.hpp"
-#include "luaplayer.hpp"
 #include <3ds.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "Graphics.hpp"
+#include "luaplayer.hpp"
+
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 #define WAIT_TIMEOUT 300000000ULL
 
@@ -50,8 +52,7 @@ void initCam(CAMU_Size res, bool enable3D, bool isVideo) {
   }
   CAMU_SetSize(cam_type, res, CONTEXT_A);
   CAMU_SetOutputFormat(cam_type, OUTPUT_RGB_565, CONTEXT_A);
-  if (isVideo)
-    CAMU_SetFrameRate(cam_type, FRAME_RATE_10);
+  if (isVideo) CAMU_SetFrameRate(cam_type, FRAME_RATE_10);
   CAMU_SetNoiseFilter(cam_type, true);
   CAMU_SetAutoExposure(cam_type, true);
   CAMU_SetAutoWhiteBalance(cam_type, true);
@@ -60,8 +61,7 @@ void initCam(CAMU_Size res, bool enable3D, bool isVideo) {
   else
     CAMU_SetTrimming(PORT_CAM1, false);
   CAMU_SetPhotoMode(cam_type, pmode);
-  if (enable3D)
-    CAMU_SetTrimming(PORT_CAM2, false);
+  if (enable3D) CAMU_SetTrimming(PORT_CAM2, false);
   CAMU_GetMaxBytes(&bufSize, width, height);
   if (enable3D)
     CAMU_SetTransferBytes(PORT_BOTH, bufSize, width, height);
@@ -88,8 +88,7 @@ static int lua_caminit(lua_State *L) {
   cam_type = luaL_checkinteger(L, 2);
   pmode = (CAMU_PhotoMode)luaL_checkinteger(L, 3);
   is3D = false;
-  if (argc == 3)
-    is3D = lua_toboolean(L, 4);
+  if (argc == 3) is3D = lua_toboolean(L, 4);
   u16 width;
   u16 height = 240;
   camInit();
@@ -116,8 +115,7 @@ static int lua_caminit(lua_State *L) {
 static int lua_camoutput(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   Handle camReceiveEvent = 0;
   Handle camReceiveEvent2 = 0;
@@ -127,8 +125,7 @@ static int lua_camoutput(lua_State *L) {
     CAMU_SetReceiving(&camReceiveEvent2, cam_buf + SCREEN_SIZE, PORT_CAM2,
                       SCREEN_SIZE, (s16)bufSize);
   svcWaitSynchronization(camReceiveEvent, WAIT_TIMEOUT);
-  if (is3D)
-    svcWaitSynchronization(camReceiveEvent2, WAIT_TIMEOUT);
+  if (is3D) svcWaitSynchronization(camReceiveEvent2, WAIT_TIMEOUT);
   if (SCREEN_SIZE == 153600)
     DrawRGB565Screen(BottomFB, (u16 *)cam_buf);
   else {
@@ -139,16 +136,14 @@ static int lua_camoutput(lua_State *L) {
       DrawRGB565Screen(TopLFB, (u16 *)cam_buf);
   }
   svcCloseHandle(camReceiveEvent);
-  if (is3D)
-    svcCloseHandle(camReceiveEvent2);
+  if (is3D) svcCloseHandle(camReceiveEvent2);
   return 0;
 }
 
 static int lua_camimage(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
   if (SCREEN_SIZE == 153600)
@@ -216,8 +211,7 @@ static int lua_camshot(lua_State *L) {
     height = 240;
   }
   bool isJPG = false;
-  if (argc == 3)
-    isJPG = lua_toboolean(L, 3);
+  if (argc == 3) isJPG = lua_toboolean(L, 3);
   if (is3D)
     CAMU_StopCapture(PORT_BOTH);
   else
@@ -236,7 +230,7 @@ static int lua_camshot(lua_State *L) {
   CAMU_PlayShutterSound(SHUTTER_SOUND_TYPE_NORMAL);
   Handle fileHandle;
   int x, y;
-  if (!isJPG) { // BMP Format
+  if (!isJPG) {  // BMP Format
     FS_Path filePath = fsMakePath(PATH_ASCII, screenpath);
     Result ret =
         FSUSER_OpenFileDirectly(&fileHandle, ARCHIVE_SDMC, filePath, filePath,
@@ -299,8 +293,7 @@ static int lua_camshot(lua_State *L) {
   camExit();
   camInit();
   res = SIZE_CTR_TOP_LCD;
-  if (SCREEN_SIZE == 153600)
-    res = SIZE_QVGA;
+  if (SCREEN_SIZE == 153600) res = SIZE_QVGA;
   initCam(res, is3D, true);
   return 0;
 }
@@ -308,8 +301,7 @@ static int lua_camshot(lua_State *L) {
 static int lua_camexit(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   if (is3D)
     CAMU_StopCapture(PORT_BOTH);

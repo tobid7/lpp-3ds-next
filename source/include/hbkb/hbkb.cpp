@@ -17,11 +17,13 @@
  */
 
 #include <3ds.h>
+
 #include <string>
 
 #include "hbkb.h"
 #include "hw_controls.h"
 #include "hw_graphics.h"
+
 
 enum Keys {
   HBKB_KEY_NONE = 0,
@@ -67,36 +69,36 @@ enum Keys {
   HBKB_KEY_SPACE = 63,
 
   // Special - Row 0
-  HBKB_KEY_SPECIAL_A = 66, // !
-  HBKB_KEY_SPECIAL_B = 67, // "
-  HBKB_KEY_SPECIAL_C = 68, // §
-  HBKB_KEY_SPECIAL_D = 69, // $
-  HBKB_KEY_SPECIAL_E = 70, // %
-  HBKB_KEY_SPECIAL_F = 71, // &
-  HBKB_KEY_SPECIAL_G = 72, // /
-  HBKB_KEY_SPECIAL_H = 73, // (
-  HBKB_KEY_SPECIAL_I = 74, // )
-  HBKB_KEY_SPECIAL_J = 75, // ?
+  HBKB_KEY_SPECIAL_A = 66,  // !
+  HBKB_KEY_SPECIAL_B = 67,  // "
+  HBKB_KEY_SPECIAL_C = 68,  // §
+  HBKB_KEY_SPECIAL_D = 69,  // $
+  HBKB_KEY_SPECIAL_E = 70,  // %
+  HBKB_KEY_SPECIAL_F = 71,  // &
+  HBKB_KEY_SPECIAL_G = 72,  // /
+  HBKB_KEY_SPECIAL_H = 73,  // (
+  HBKB_KEY_SPECIAL_I = 74,  // )
+  HBKB_KEY_SPECIAL_J = 75,  // ?
 
   // Special - Row 1
-  HBKB_KEY_SPECIAL_K = 76, // *
-  HBKB_KEY_SPECIAL_L = 77, // '
-  HBKB_KEY_SPECIAL_M = 78, // <
-  HBKB_KEY_SPECIAL_N = 79, // >
-  HBKB_KEY_SPECIAL_O = 80, // +
-  HBKB_KEY_SPECIAL_P = 81, // [
-  HBKB_KEY_SPECIAL_Q = 82, // ]
-  HBKB_KEY_SPECIAL_R = 83, // {
-  HBKB_KEY_SPECIAL_S = 84, // }
+  HBKB_KEY_SPECIAL_K = 76,  // *
+  HBKB_KEY_SPECIAL_L = 77,  // '
+  HBKB_KEY_SPECIAL_M = 78,  // <
+  HBKB_KEY_SPECIAL_N = 79,  // >
+  HBKB_KEY_SPECIAL_O = 80,  // +
+  HBKB_KEY_SPECIAL_P = 81,  // [
+  HBKB_KEY_SPECIAL_Q = 82,  // ]
+  HBKB_KEY_SPECIAL_R = 83,  // {
+  HBKB_KEY_SPECIAL_S = 84,  // }
 
   // Special - Row 2
-  HBKB_KEY_SPECIAL_T = 85, // ,
-  HBKB_KEY_SPECIAL_U = 86, // ;
-  HBKB_KEY_SPECIAL_V = 87, // .
-  HBKB_KEY_SPECIAL_W = 88, // :
-  HBKB_KEY_SPECIAL_X = 89, // -
-  HBKB_KEY_SPECIAL_Y = 90, // _
-  HBKB_KEY_SPECIAL_Z = 99, // =
+  HBKB_KEY_SPECIAL_T = 85,  // ,
+  HBKB_KEY_SPECIAL_U = 86,  // ;
+  HBKB_KEY_SPECIAL_V = 87,  // .
+  HBKB_KEY_SPECIAL_W = 88,  // :
+  HBKB_KEY_SPECIAL_X = 89,  // -
+  HBKB_KEY_SPECIAL_Y = 90,  // _
+  HBKB_KEY_SPECIAL_Z = 99,  // =
 
   HBKB_KEY_ENTER = 91,
   HBKB_KEY_BACK = 92,
@@ -135,41 +137,40 @@ HW_Controls sControls;
 
 void HB_Keyboard::KeyInteraction(u8 &Key) {
   // Change Shift State
-  if (Key == HBKB_KEY_SHIFT) // Shift Management
+  if (Key == HBKB_KEY_SHIFT)  // Shift Management
   {
     if (isShift)
       isShift = false;
     else
       isShift = true;
-  } else if (Key == HBKB_KEY_CAPS) // Caps Management
+  } else if (Key == HBKB_KEY_CAPS)  // Caps Management
   {
     if (isCaps)
       isCaps = false;
     else
       isCaps = true;
-  } else if (Key == HBKB_KEY_CHANGEKEYS) // Keyboard Change
+  } else if (Key == HBKB_KEY_CHANGEKEYS)  // Keyboard Change
   {
     if (KeyboardState == 0)
-      KeyboardState = STATE_SPECIAL; // To Special
+      KeyboardState = STATE_SPECIAL;  // To Special
     else
-      KeyboardState = STATE_ABC; // To ABC
+      KeyboardState = STATE_ABC;  // To ABC
   } else if (Key != HBKB_KEY_ENTER &&
-             Key != HBKB_KEY_CANCEL) // Not Enter or Cancel
-    ChangeString(Key);               // Back Key is handled here.
+             Key != HBKB_KEY_CANCEL)  // Not Enter or Cancel
+    ChangeString(Key);                // Back Key is handled here.
   else
-    ChangeString(Key); // Back Key is still handled here.
+    ChangeString(Key);  // Back Key is still handled here.
 
   if (isShift && Key != HBKB_KEY_NONE &&
       Key !=
-          HBKB_KEY_SHIFT) // Change Shift if normal Key was Pressed with Shift
+          HBKB_KEY_SHIFT)  // Change Shift if normal Key was Pressed with Shift
     isShift = false;
 }
 
 void HB_Keyboard::ChangeString(u8 &Key) {
   if (Key == HBKB_KEY_BACK) {
     // Remove 1 Char from String
-    if (UserInput != "")
-      UserInput.erase(UserInput.end() - 1, UserInput.end());
+    if (UserInput != "") UserInput.erase(UserInput.end() - 1, UserInput.end());
   } else {
     if (Key == HBKB_KEY_A) {
       if (isShift || isCaps)
@@ -399,11 +400,11 @@ u8 HB_Keyboard::HBKB_CallKeyboard(touchPosition TouchScreenPos) {
     CurrentKey = sControls.CheckPressedKey(T_X, T_Y, KeyboardState);
 
     // Key Interaction
-    if (CurrentKey == OldKeyPress) // Skip Input Check if same Key
+    if (CurrentKey == OldKeyPress)  // Skip Input Check if same Key
     {
-      if (SpamKey) // Do we print the same Key for every Frame?
+      if (SpamKey)  // Do we print the same Key for every Frame?
         KeyInteraction(CurrentKey);
-    } else // Different Key, so add Key Instantly
+    } else  // Different Key, so add Key Instantly
     {
       OldKeyPress = CurrentKey;
       KeyInteraction(CurrentKey);
@@ -420,20 +421,20 @@ u8 HB_Keyboard::HBKB_CallKeyboard(touchPosition TouchScreenPos) {
     CurrentKey = 0;
     return RETURN_FINISHED;
   } else if (CurrentKey != 0 && CurrentKey != HBKB_KEY_CANCEL &&
-             CurrentKey !=
-                 HBKB_KEY_ENTER) // User entered any Key except Cancel and Enter
+             CurrentKey != HBKB_KEY_ENTER)  // User entered any Key except
+                                            // Cancel and Enter
   {
     CurrentKey = 0;
     return RETURN_ENTEREDKEY;
-  } else if (CurrentKey == HBKB_KEY_CANCEL) // User Canceled Keyboard Input
+  } else if (CurrentKey == HBKB_KEY_CANCEL)  // User Canceled Keyboard Input
   {
     CurrentKey = 0;
     return RETURN_CANCEL;
-  } else if (CurrentKey == 0) // No Key Pressed
+  } else if (CurrentKey == 0)  // No Key Pressed
   {
     CurrentKey = 0;
     return RETURN_NONE;
-  } else // Unknown Key Value or Key Value not set
+  } else  // Unknown Key Value or Key Value not set
   {
     CurrentKey = 0;
     return RETURN_UNKNOWN;

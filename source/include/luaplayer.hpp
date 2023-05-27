@@ -5,20 +5,22 @@
  */
 
 #pragma once
-#include <lua.hpp>
 #include <stdlib.h>
+
+#include <lua.hpp>
 #include <string>
 
-#define init_fnc(fnc_i, fnc_e)                                                 \
-  ({                                                                           \
-    fnc_i();                                                                   \
-    atexit(fnc_e);                                                             \
+
+#define init_fnc(fnc_i, fnc_e) \
+  ({                           \
+    fnc_i();                   \
+    atexit(fnc_e);             \
   })
 
 extern void luaC_collectgarbage(lua_State *L);
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define CLAMP(val, min, max)                                                   \
+#define CLAMP(val, min, max) \
   ((val) > (max) ? (max) : ((val) < (min) ? (min) : (val)))
 
 void Run(std::string path);
@@ -42,4 +44,4 @@ void luaKeyboard_init(lua_State *L);
 extern bool GW_MODE;
 extern bool CIA_MODE;
 extern bool isCSND;
-extern char cur_dir[256];
+extern std::string cur_dir;

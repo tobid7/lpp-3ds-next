@@ -101,7 +101,8 @@
         "xutility": "cpp",
         "gamestates.h": "c",
         "unordered_set": "cpp",
-        "*.x": "cpp"
+        "*.x": "cpp",
+        "stb_image.h": "c"
     },
     "cmake.configureOnOpen": false,
     "cmake.sourceDirectory": "${workspaceFolder}/external/libpicasso"

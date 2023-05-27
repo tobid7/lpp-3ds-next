@@ -1,13 +1,15 @@
 #include <3ds.h>
-#include <luaplayer.hpp>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <luaplayer.hpp>
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 
 int KEY_HOME = 0xFFFF;
@@ -18,8 +20,7 @@ extern bool isBottomLCDOn;
 static int lua_readC(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   hidScanInput();
   irrstScanInput();
@@ -30,8 +31,7 @@ static int lua_readC(lua_State *L) {
 static int lua_check(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 pad = luaL_checkinteger(L, 1);
   u32 button = luaL_checkinteger(L, 2);
@@ -42,8 +42,7 @@ static int lua_check(lua_State *L) {
 static int lua_circlepad(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   circlePosition cpos;
   hidScanInput();
@@ -56,8 +55,7 @@ static int lua_circlepad(lua_State *L) {
 static int lua_headset(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments");
 #endif
   lua_pushboolean(L, *(u8 *)0x1FF810C0);
   return 1;
@@ -66,8 +64,7 @@ static int lua_headset(lua_State *L) {
 static int lua_touchpad(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   touchPosition cpos;
   hidScanInput();
@@ -80,8 +77,7 @@ static int lua_touchpad(lua_State *L) {
 static int lua_gyro(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   angularRate cpos;
   hidScanInput();
@@ -95,8 +91,7 @@ static int lua_gyro(lua_State *L) {
 static int lua_accel(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   accelVector cpos;
   hidScanInput();
@@ -110,8 +105,7 @@ static int lua_accel(lua_State *L) {
 static int lua_cstickpad(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   circlePosition cpos;
   hidScanInput();
@@ -124,8 +118,7 @@ static int lua_cstickpad(lua_State *L) {
 static int lua_eg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   HIDUSER_EnableGyroscope();
   return 0;
@@ -134,8 +127,7 @@ static int lua_eg(lua_State *L) {
 static int lua_ea(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   HIDUSER_EnableAccelerometer();
   return 0;
@@ -144,8 +136,7 @@ static int lua_ea(lua_State *L) {
 static int lua_dg(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   HIDUSER_DisableGyroscope();
   return 0;
@@ -154,8 +145,7 @@ static int lua_dg(lua_State *L) {
 static int lua_da(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   HIDUSER_DisableAccelerometer();
   return 0;
@@ -164,8 +154,7 @@ static int lua_da(lua_State *L) {
 static int lua_volume(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   u8 value;
   HIDUSER_GetSoundVolume(&value);
@@ -176,8 +165,7 @@ static int lua_volume(lua_State *L) {
 static int lua_lcdon(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 screen = luaL_checkinteger(L, 1);
   u32 flag;
@@ -201,8 +189,7 @@ static int lua_lcdon(lua_State *L) {
 static int lua_lcdoff(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   u32 screen = luaL_checkinteger(L, 1);
   u32 flag;
@@ -226,8 +213,7 @@ static int lua_lcdoff(lua_State *L) {
 static int lua_shell(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 0)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 0) return luaL_error(L, "wrong number of arguments.");
 #endif
   u8 shell;
   PTMU_GetShellState(&shell);
