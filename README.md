@@ -5,7 +5,7 @@
 
 **Lua Player Plus 3DS** is the first lua interpreter made for Nintendo 3DS.
 
-The interpreter now runs under Lua 5.4.4
+The interpreter now runs under Lua 5.4.6
 It has now a debug Server for Npi-Debug Viewer (Not release yet)
 
 Official documentation: http://rinnegatamante.it/lpp-3ds_doc.html<br>
