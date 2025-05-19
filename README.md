@@ -1,7 +1,57 @@
+# LPP 3DS Next
 
-# Todo
-##### Finish rewrite and bugfixes
-# Description
+## Todo
+
+**Note that a lot of things i tested are still not Working!!!**
+
+- [X] Core Engine
+  - [X] File Loading
+  - [X] FTP Support on latest devkitarm
+  - [X] Fix Archive.cpp
+  - [X] Replace sf2d with Citro2D
+  - [X] Fix Graphics Engine
+- [X] Camera Module
+- [X] Controls Module
+- [X] Core Module
+- [X] Graphics Module
+- [X] Keyboard Module
+- [X] Mic Module
+- [X] Network Module
+- [X] Render Module
+- [X] Screen Module
+- [X] System Module
+- [X] Timer Module
+- [ ] Video Module
+
+## Building
+
+As i switched to cmake build system, it is super easy to build the project...
+
+Just make sure to have the folowing packages installed:
+
+```bash
+# Note that you would need devkit7 repo in pacman.conf for bannerool and makerom
+pacman -S 3ds-dev 3ds-portlibs # optional bannertool makerom
+```
+
+You need `git, cmake` as well.
+
+Then run
+
+```bash
+git submodule update --init --recursive # If not alredy done
+mkdir -p build && cd build
+cmake .. --toolchain /opt/devkitpro/cmake/3DS.cmake
+make
+```
+
+### Optional: Update Shader
+
+```bash
+python3 tools/build_shader.py
+```
+
+## Description
 
 **Lua Player Plus 3DS** is the first lua interpreter made for Nintendo 3DS.
 

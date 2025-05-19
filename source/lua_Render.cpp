@@ -4,8 +4,8 @@
 #include "Graphics.hpp"
 #include "luaplayer.hpp"
 #include "utils.h"
-#include "vshader_shbin.h"
-
+// #include "vshader_shbin.h"
+#include "vshader.hpp"
 
 u32 CLEAR_COLOR = 0x68B0D8FF;
 float light_r = 1.0f;
@@ -438,7 +438,8 @@ static int lua_init(lua_State *L) {
                             DISPLAY_TRANSFER_FLAGS);
 
   // Load the vertex shader, create a shader program and bind it
-  vshader_dvlb = DVLB_ParseFile((u32 *)vshader_shbin, vshader_shbin_size);
+  // vshader_dvlb = DVLB_ParseFile((u32 *)vshader_shbin, vshader_shbin_size);
+  vshader_dvlb = DVLB_ParseFile((u32 *)vshader, vshader_size);
   shaderProgramInit(&program);
   shaderProgramSetVsh(&program, &vshader_dvlb->DVLE[0]);
   C3D_BindProgram(&program);

@@ -1,0 +1,13 @@
+diff --git a/luaconf.h b/luaconf.h
+index 33bb580d..fe5159e1 100644
+--- a/luaconf.h
++++ b/luaconf.h
+@@ -122,7 +122,7 @@
+ /*
+ @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
+ */
+-#define LUA_32BITS	0
++#define LUA_32BITS	1
+ 
+ 
+ /*
