@@ -71,7 +71,7 @@ def build_shader(path):
     os.system('picasso -o ' + p + '/' + n + '.shbin ' + path)
 
 def cleanup():
-    t3x = glob.glob('shaders/*.shbin')
+    t3x = glob.glob('source/*.shbin')
     for f in t3x:
         os.remove(f)
 

@@ -55,8 +55,7 @@ python3 tools/build_shader.py
 
 **Lua Player Plus 3DS** is the first lua interpreter made for Nintendo 3DS.
 
-The interpreter now runs under Lua 5.4.6
-It has now a debug Server for Npi-Debug Viewer (Not release yet)
+The interpreter now runs under Lua 5.4.7
 
 Official documentation: http://rinnegatamante.it/lpp-3ds_doc.html<br>
 Official support board: http://rinnegatamante.it/board/forumdisplay.php?fid=12

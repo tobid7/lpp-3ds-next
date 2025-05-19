@@ -82,7 +82,6 @@ add_executable(${PROJECT_NAME}
     source/include/audio.cpp
     source/include/Graphics.cpp
     source/include/memory.cpp
-    source/include/NDS.cpp
     source/include/utils.cpp
     source/include/vshader.cpp
 )
