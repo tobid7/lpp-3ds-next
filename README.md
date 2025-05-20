@@ -2,7 +2,7 @@
 
 ## Todo
 
-**Note that a lot of things i tested are still not Working!!!**
+**Note that things listed here are set as finished when they are implemented. Tests are done later.**
 
 - [X] Core Engine
   - [X] File Loading
@@ -19,6 +19,7 @@
 - [X] Network Module
 - [X] Render Module
 - [X] Screen Module
+- [ ] Sound
 - [X] System Module
 - [X] Timer Module
 - [ ] Video Module
