@@ -6,11 +6,10 @@
 
 #include <luaplayer.hpp>
 
+#include "Archive.h"
 #include "Graphics.hpp"
-#include "include/Archive.h"
-#include "include/audio.hpp"
-#include "include/utils.h"
-
+#include "audio.hpp"
+#include "utils.h"
 
 #define stringify(str) #str
 #define VariableRegister(lua, value)      \
@@ -1448,7 +1447,7 @@ static int lua_ciainfo(lua_State *L) {
   return 1;
 }
 
-static int lua_ZipExtract(lua_State *L) {
+/*static int lua_ZipExtract(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
   if (argc != 2 && argc != 3)
@@ -1482,9 +1481,9 @@ static int lua_ZipExtract(lua_State *L) {
   ZipClose(handle);
   lua_pushinteger(L, result);
   return 1;
-}
+}*/
 
-static int lua_getfilefromzip(lua_State *L) {
+/*static int lua_getfilefromzip(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
   if (argc != 3 && argc != 4)
@@ -1524,7 +1523,7 @@ static int lua_getfilefromzip(lua_State *L) {
   }
   ZipClose(handle);
   return 1;
-}
+}*/
 
 static int lua_model(lua_State *L) {
   int argc = lua_gettop(L);
@@ -2053,7 +2052,7 @@ static const luaL_Reg System_functions[] = {
     {"uninstallCIA", lua_uninstallCia},
     {"extractCIA", lua_ciainfo},
     {"getRegion", lua_getRegion},
-    {"extractZIP", lua_ZipExtract},
+    // {"extractZIP", lua_ZipExtract},
     {"getModel", lua_model},
     {"showHomeMenu", lua_syscall1},
     {"checkStatus", lua_appstatus},
@@ -2070,7 +2069,7 @@ static const luaL_Reg System_functions[] = {
     {"eraseNews", lua_erasenews},
     {"setCpuSpeed", lua_setcpu},
     {"getCpuSpeed", lua_getcpu},
-    {"extractFromZIP", lua_getfilefromzip},
+    //{"extractFromZIP", lua_getfilefromzip},
     {"checkSDMC", lua_detectsd},
     {"fork", lua_dup},
     {"mainLoop", lua_syslp},

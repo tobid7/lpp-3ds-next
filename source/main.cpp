@@ -11,35 +11,11 @@
 #include <string.h>
 
 #include <ErrorHelper.hpp>
-#include <future>
-#include <memory.hpp>
-
-#include "include/luaplayer.hpp"
+#include <luaplayer.hpp>
 
 bool f_quit = false;
 bool catch_at = true;
 bool csndAccess = false;
-
-std::string formatBytes(int bytes) {
-  char out[32];
-
-  if (bytes == 1)
-    snprintf(out, sizeof(out), "%d b", bytes);
-
-  else if (bytes < 1024)
-    snprintf(out, sizeof(out), "%d b", bytes);
-
-  else if (bytes < 1024 * 1024)
-    snprintf(out, sizeof(out), "%.1f kb", (float)bytes / 1024);
-
-  else if (bytes < 1024 * 1024 * 1024)
-    snprintf(out, sizeof(out), "%.1f mb", (float)bytes / 1024 / 1024);
-
-  else
-    snprintf(out, sizeof(out), "%.1f gb", (float)bytes / 1024 / 1024 / 1024);
-
-  return out;
-}
 
 extern void nsocExit();
 
@@ -79,13 +55,12 @@ bool CIA_MODE;
 bool isCSND;
 std::string cur_dir;
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
   init_fnc(InitLppServ, ExitLppServ);
   ErrorHelper::SetupDirectories();
 
   cur_dir = "sdmc:/";
   Run("romfs:/index.lua");
   exit(0);
-  // return 0; // Just caused by all the fnc
-  //           // not contain return value pain lol
+  return 0;
 }

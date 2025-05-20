@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
+add_subdirectory(hbkb)
+
 project(lua)
 
 # As git symply throws an error when the file is already ptched

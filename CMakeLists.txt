@@ -21,24 +21,11 @@ set(APP_BANNERAUDIO "${CMAKE_SOURCE_DIR}/app/BannerAudio.wav")
 set(APP_RSF "${CMAKE_SOURCE_DIR}/app/build-cia.rsf")
 set(APP_LOGO "${CMAKE_SOURCE_DIR}/app/splash.lz")
 
-dkp_add_embedded_binary_library(${PROJECT_NAME}-data
-    data/hbkb_abc_lower.bin
-    data/hbkb_abc_upper.bin
-    data/hbkb_back_sel.bin
-    data/hbkb_caps_sel.bin
-    data/hbkb_normal_sel.bin
-    data/hbkb_shift_sel.bin
-    data/hbkb_space_sel.bin
-    data/hbkb_special_sel.bin
-    data/hbkb_special.bin
-)
-
-# Add Lua
-add_subdirectory(vendor)
+# Core and Lua
+add_subdirectory(lpp-next-core)
 
 add_executable(${PROJECT_NAME}
     source/main.cpp
-    source/ErrorHelper.cpp
     source/lua_Camera.cpp
     source/lua_Controls.cpp
     source/lua_Core.cpp
@@ -51,51 +38,15 @@ add_executable(${PROJECT_NAME}
     source/lua_System.cpp
     source/lua_Timer.cpp
     source/luaPlayer.cpp
-
-    # FTP
-    source/include/ftp/ftp_cmd.cpp
-    source/include/ftp/ftp.cpp
-
-    # HB Kbd (Trashy Keyboard)
-    source/include/hbkb/hbkb.cpp
-    source/include/hbkb/hw_controls.cpp
-    source/include/hbkb/hw_graphics.cpp
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_shift_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_special_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_abc_lower_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_space_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_normal_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_special_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_back_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_caps_sel_bin.S
-    build/.dkp-generated/lpp-3ds-next-data/hbkb_abc_upper_bin.S
-
-    # lodepng
-    source/include/lodepng/lodepng.cpp
-
-    # ttf
-    source/include/ttf/Font.cpp
-    source/include/ttf/Image.cpp
-
-    # Core Base (Could be completly removed)
-    source/include/Archive.cpp
-    source/include/audio.cpp
-    source/include/Graphics.cpp
-    source/include/memory.cpp
-    source/include/utils.cpp
-    source/include/vshader.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-    source/include
     source/include/hbkb
-    source/include/ttf
-    source/include/lodepng
     $ENV{DEVKITPRO}/portlibs/3ds/include
     ${CMAKE_BINARY_DIR}/.dkp-generated/${PROJECT_NAME}-data)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    lua m z jpeg citro2d citro3d ctru)
+    hbkb lpp-next-core)
 
 # Generate 3DSX
 ctr_generate_smdh(

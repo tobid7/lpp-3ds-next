@@ -9,7 +9,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "ftp/ftp.h"
+#include <Filesystem.hpp>
+
+#include "ftp.h"
 #include "luaplayer.hpp"
 #include "utils.h"
 
@@ -610,36 +612,9 @@ static int lua_addCert(lua_State *L) {
   if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   const char *text = luaL_checkstring(L, 1);
-  fileStream fileHandle;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-
-    FS_ArchiveID a_id = ARCHIVE_SDMC;
-    FS_Path m_path = (FS_Path){PATH_EMPTY, 1, (u8 *)""};
-    FS_Archive sdmcArchive;
-    FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC, m_path);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, a_id, m_path, m_path,
-                                FS_OPEN_CREATE | FS_OPEN_WRITE, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  u64 cert_size;
-  u32 bytesRead;
-  FS_GetSize(&fileHandle, &cert_size);
-  u8 *cert = new u8[cert_size];
-  FS_Read(&fileHandle, &bytesRead, 0, cert, cert_size);
-  sslcAddTrustedRootCA(RootCertChain_contexthandle, cert, cert_size, NULL);
-  delete[] cert;
-  FS_Close(&fileHandle);
+  auto f = D7::FS::ReadFile(text);
+  sslcAddTrustedRootCA(RootCertChain_contexthandle, (u8 *)f.Data, f.Size,
+                       nullptr);
   return 0;
 }
 

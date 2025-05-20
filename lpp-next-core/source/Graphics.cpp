@@ -8,9 +8,10 @@
 #include <jpeglib.h>
 // clang-format on
 #include "../utils.h"
+#include "Filesystem.hpp"
 #include "Graphics.hpp"
 #include "font.h"
-#include "lodepng.h"
+#include "stb_image.h"
 
 #define CONFIG_3D_SLIDERSTATE (*(float *)0x1FF81080)
 
@@ -59,35 +60,19 @@ void DrawRGB565Screen(u8 *dst, u16 *pic) {
 }
 
 Bitmap *LoadBitmap(char *fname) {
-  fileStream tmp;
-  u64 size;
   u32 bytesRead;
-  if (strncmp("romfs:/", fname, 7) == 0) {
-    tmp.isRomfs = true;
-    FILE *handle = fopen(fname, "r");
-    tmp.handle = (u32)handle;
-  } else {
-    tmp.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, fname);
-
-    FSUSER_OpenFileDirectly(&tmp.handle, ARCHIVE_SDMC, filePath, filePath,
-                            FS_OPEN_CREATE | FS_OPEN_WRITE, 0x00000000);
-  }
-  FS_GetSize(&tmp, &size);
+  D7::FS::File f = D7::FS::ReadFile(fname);
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
 
   if (!result) {
-    FS_Close(&tmp);
     return 0;
   }
 
-  result->pixels = (u8 *)malloc(size - 0x36);
-  FS_Read(&tmp, &bytesRead, 0x36, result->pixels, size - 0x36);
-  FS_Read(&tmp, &bytesRead, 0x12, &(result->width), 4);
-  FS_Read(&tmp, &bytesRead, 0x16, &(result->height), 4);
-  FS_Read(&tmp, &bytesRead, 0x1C, &(result->bitperpixel), 2);
-  FS_Close(&tmp);
-
+  result->pixels = (u8 *)malloc(f.Size - 0x36);
+  f.ReadDataAt(0x36, (char *)result->pixels, f.Size - 0x36);
+  f.ReadDataAt(0x12, (char *)&result->width, 4);
+  f.ReadDataAt(0x16, (char *)&result->height, 4);
+  f.ReadDataAt(0x1C, (char *)&result->bitperpixel, 2);
   return result;
 }
 
@@ -310,14 +295,14 @@ u8 *flipBitmap(u8 *flip_bitmap, Bitmap *result) {
 }
 
 void DrawPixel(u8 *screen, int x, int y, u32 color) {
-  int idx = (((x)*240) + (239 - (y))) * 3;
+  int idx = (((x) * 240) + (239 - (y))) * 3;
   *(u32 *)&(screen[idx]) =
-      (((color)&0x00FFFFFF) | ((*(u32 *)&(screen[idx])) & 0xFF000000));
+      (((color) & 0x00FFFFFF) | ((*(u32 *)&(screen[idx])) & 0xFF000000));
 }
 
 void DrawAlphaPixel(u8 *screen, int x, int y, u32 color) {
   u8 alpha = (((color) >> 24) & 0xFF);
-  int idx = ((x)*240) + (239 - (y));
+  int idx = ((x) * 240) + (239 - (y));
   float ratio = alpha / 255.0f;
   screen[idx * 3] =
       ((color & 0xFF) * ratio) + (screen[idx * 3] * (1.0 - ratio));
@@ -328,7 +313,7 @@ void DrawAlphaPixel(u8 *screen, int x, int y, u32 color) {
 }
 
 u32 GetPixel(int x, int y, int screen, int side) {
-  int idx = (((x)*240) + (239 - (y))) * 3;
+  int idx = (((x) * 240) + (239 - (y))) * 3;
   u32 color;
   if (screen == 0) {
     if (side == 0)
@@ -371,7 +356,8 @@ void DrawAlphaImagePixel(int x, int y, u32 color, Bitmap *screen) {
 void DrawImagePixel(int x, int y, u32 color, Bitmap *screen) {
   int idx = (x + (screen->height - y) * screen->width) * 3;
   *(u32 *)&(screen->pixels[idx]) =
-      (((color)&0x00FFFFFF) | ((*(u32 *)&(screen->pixels[idx])) & 0xFF000000));
+      (((color) & 0x00FFFFFF) |
+       ((*(u32 *)&(screen->pixels[idx])) & 0xFF000000));
 }
 
 void Draw32bppImagePixel(int x, int y, u32 color, Bitmap *screen) {
@@ -1341,43 +1327,16 @@ void DrawGpuLine(int x0, int y0, int x1, int y1, u32 color, int screen) {
 }
 
 Bitmap *loadPng(const char *filename) {
-  fileStream fileHandle;
   Bitmap *result;
   u64 size;
   u32 bytesRead;
   unsigned char *out;
-  unsigned char *in;
-  unsigned int w, h;
+  int w, h, c;
 
-  if (strncmp("romfs:/", filename, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(filename, "r");
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, filename);
-    FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                            filePath, FS_OPEN_READ, 0x00000000);
-  }
-
-  FS_GetSize(&fileHandle, &size);
-
-  in = (unsigned char *)malloc(size);
-
-  if (!in) {
-    FS_Close(&fileHandle);
+  out = stbi_load(filename, &w, &h, &c, 4);
+  if (!out) {
     return 0;
   }
-
-  FS_Read(&fileHandle, &bytesRead, 0x00, in, size);
-  FS_Close(&fileHandle);
-
-  if (lodepng_decode32(&out, &w, &h, in, size) != 0) {
-    free(in);
-    return 0;
-  }
-
-  free(in);
 
   result = (Bitmap *)malloc(sizeof(Bitmap));
   if (!result) {
@@ -1405,42 +1364,16 @@ Bitmap *loadPng(const char *filename) {
 }
 
 Bitmap *decodePNGfile(const char *filename) {
-  fileStream fileHandle;
   Bitmap *result;
   u64 size;
   u32 bytesRead;
   unsigned char *out;
-  unsigned char *in;
-  unsigned int w, h;
+  int w, h, c;
 
-  if (strncmp("romfs:/", filename, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(filename, "r");
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, filename);
-    FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                            filePath, FS_OPEN_READ, 0x00000000);
-  }
-  FS_GetSize(&fileHandle, &size);
-
-  in = (unsigned char *)malloc(size);
-
-  if (!in) {
-    FS_Close(&fileHandle);
+  out = stbi_load(filename, &w, &h, &c, 4);
+  if (!out) {
     return 0;
   }
-
-  FS_Read(&fileHandle, &bytesRead, 0x00, in, size);
-  FS_Close(&fileHandle);
-
-  if (lodepng_decode32(&out, &w, &h, in, size) != 0) {
-    free(in);
-    return 0;
-  }
-
-  free(in);
 
   result = (Bitmap *)malloc(sizeof(Bitmap));
   if (!result) {
@@ -1493,34 +1426,14 @@ my_error_exit(j_common_ptr cinfo) {
 
 Bitmap *OpenJPG(const char *filename) {
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
-  if (result == NULL) return 0;
-  u64 size;
-  u32 bytesRead;
-  fileStream fileHandle;
+  if (result == nullptr) return 0;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr jerr;
   cinfo.err = jpeg_std_error(&jerr.pub);
   jerr.pub.error_exit = my_error_exit;
   jpeg_create_decompress(&cinfo);
-  if (strncmp("romfs:/", filename, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(filename, "r");
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, filename);
-    FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                            filePath, FS_OPEN_READ, 0x00000000);
-  }
-  FS_GetSize(&fileHandle, &size);
-  unsigned char *in = (unsigned char *)malloc(size);
-  if (!in) {
-    FS_Close(&fileHandle);
-    return 0;
-  }
-  FS_Read(&fileHandle, &bytesRead, 0x00, in, size);
-  FS_Close(&fileHandle);
-  jpeg_mem_src(&cinfo, in, size);
+  auto f = D7::FS::ReadFile(filename);
+  jpeg_mem_src(&cinfo, (unsigned char *)f.Data, f.Size);
   jpeg_read_header(&cinfo, TRUE);
   cinfo.out_color_space = JCS_EXT_BGR;
   jpeg_start_decompress(&cinfo);
@@ -1542,7 +1455,6 @@ Bitmap *OpenJPG(const char *filename) {
   u8 *flipped = (u8 *)malloc(width * height * 3);
   flipped = flipBitmap(flipped, result);
   free(bgr_buffer);
-  free(in);
   result->pixels = flipped;
   return result;
 }
@@ -1550,33 +1462,14 @@ Bitmap *OpenJPG(const char *filename) {
 Bitmap *decodeJPGfile(const char *filename) {
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
   if (result == NULL) return 0;
-  u64 size;
-  u32 bytesRead;
-  fileStream fileHandle;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr jerr;
   cinfo.err = jpeg_std_error(&jerr.pub);
   jerr.pub.error_exit = my_error_exit;
   jpeg_create_decompress(&cinfo);
-  if (strncmp("romfs:/", filename, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(filename, "r");
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, filename);
-    FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                            filePath, FS_OPEN_READ, 0x00000000);
-  }
-  FS_GetSize(&fileHandle, &size);
-  unsigned char *in = (unsigned char *)malloc(size);
-  if (!in) {
-    FS_Close(&fileHandle);
-    return 0;
-  }
-  FS_Read(&fileHandle, &bytesRead, 0x00, in, size);
-  FS_Close(&fileHandle);
-  jpeg_mem_src(&cinfo, in, size);
+  auto f = D7::FS::ReadFile(filename);
+
+  jpeg_mem_src(&cinfo, (unsigned char *)f.Data, f.Size);
   jpeg_read_header(&cinfo, TRUE);
   jpeg_start_decompress(&cinfo);
   int width = cinfo.output_width;
@@ -1595,38 +1488,22 @@ Bitmap *decodeJPGfile(const char *filename) {
   result->height = height;
   result->pixels = bgr_buffer;
   int i = 0;
-  free(in);
   return result;
 }
 
 Bitmap *decodeBMPfile(const char *fname) {
-  fileStream fileHandle;
-  u64 size;
-  u32 bytesRead;
-  if (strncmp("romfs:/", fname, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(fname, "r");
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, fname);
-    FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                            filePath, FS_OPEN_READ, 0x00000000);
-  }
-  FS_GetSize(&fileHandle, &size);
+  auto f = D7::FS::ReadFile(fname);
   Bitmap *result = (Bitmap *)malloc(sizeof(Bitmap));
 
   if (!result) {
-    FS_Close(&fileHandle);
     return 0;
   }
 
-  result->pixels = (u8 *)malloc(size - 0x36);
-  FS_Read(&fileHandle, &bytesRead, 0x36, result->pixels, size - 0x36);
-  FS_Read(&fileHandle, &bytesRead, 0x12, &(result->width), 4);
-  FS_Read(&fileHandle, &bytesRead, 0x16, &(result->height), 4);
-  FS_Read(&fileHandle, &bytesRead, 0x1C, &(result->bitperpixel), 2);
-  FS_Close(&fileHandle);
+  result->pixels = (u8 *)malloc(f.Size - 0x36);
+  f.ReadDataAt(0x36, (char *)result->pixels, f.Size - 0x36);
+  f.ReadDataAt(0x12, (char *)&result->width, 4);
+  f.ReadDataAt(0x16, (char *)&result->height, 4);
+  f.ReadDataAt(0x1C, (char *)&result->bitperpixel, 2);
   u8 *flipped =
       (u8 *)malloc(result->width * result->height * result->bitperpixel);
   flipped = flipBitmap(flipped, result);

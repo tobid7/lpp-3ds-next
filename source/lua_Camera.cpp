@@ -3,9 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "Filesystem.hpp"
 #include "Graphics.hpp"
 #include "luaplayer.hpp"
-
 
 #define stringify(str) #str
 #define VariableRegister(lua, value)      \
@@ -228,17 +228,10 @@ static int lua_camshot(lua_State *L) {
                     (s16)bufSize);
   svcWaitSynchronization(camReceiveEvent, WAIT_TIMEOUT);
   CAMU_PlayShutterSound(SHUTTER_SOUND_TYPE_NORMAL);
-  Handle fileHandle;
   int x, y;
   if (!isJPG) {  // BMP Format
-    FS_Path filePath = fsMakePath(PATH_ASCII, screenpath);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle, ARCHIVE_SDMC, filePath, filePath,
-                                FS_OPEN_CREATE | FS_OPEN_WRITE, 0x00000000);
-    u32 bytesWritten;
     u8 *tempbuf = (u8 *)malloc(0x36 + BUFFER_SIZE);
     memset(tempbuf, 0, 0x36 + BUFFER_SIZE);
-    FSFILE_SetSize(fileHandle, (u16)(0x36 + BUFFER_SIZE));
     *(u16 *)&tempbuf[0x0] = 0x4D42;
     *(u32 *)&tempbuf[0x2] = 0x36 + BUFFER_SIZE;
     *(u32 *)&tempbuf[0xA] = 0x36;
@@ -260,10 +253,7 @@ static int lua_camshot(lua_State *L) {
         si++;
       }
     }
-    FSFILE_Write(fileHandle, &bytesWritten, 0, (u32 *)tempbuf,
-                 0x36 + BUFFER_SIZE, 0x10001);
-    FSFILE_Close(fileHandle);
-    svcCloseHandle(fileHandle);
+    D7::FS::Write2File(tempbuf, 0x36+BUFFER_SIZE, screenpath);
     free(tempbuf);
   } else {
     u8 *tempbuf = (u8 *)malloc(BUFFER_SIZE);

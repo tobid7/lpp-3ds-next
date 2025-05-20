@@ -1,7 +1,7 @@
 #include <citro3d.h>
 
 #include "lua.hpp"
-#include "ttf/Font.hpp"
+#include "Font.hpp"
 
 
 // Old FS_dirent struct

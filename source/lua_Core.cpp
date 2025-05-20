@@ -196,11 +196,11 @@ static int lua_getfh(lua_State *L) {
   if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   Handle hdl = luaL_checkinteger(L, 1);
-  fileStream *result = new fileStream;
-  result->isRomfs = false;
-  result->handle = (u32)hdl;
-  result->magic = 0xBEEFDEAD;
-  lua_pushinteger(L, (u32)result);
+  // fileStream *result = new fileStream;
+  // result->isRomfs = false;
+  // result->handle = (u32)hdl;
+  // result->magic = 0xBEEFDEAD;
+  // lua_pushinteger(L, (u32)result);
   return 1;
 }
 

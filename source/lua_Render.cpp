@@ -5,6 +5,8 @@
 #include "luaplayer.hpp"
 #include "utils.h"
 // #include "vshader_shbin.h"
+#include <Filesystem.hpp>
+
 #include "vshader.hpp"
 
 u32 CLEAR_COLOR = 0x68B0D8FF;
@@ -68,38 +70,17 @@ static int lua_loadobj(lua_State *L) {
   float emission = luaL_checknumber(L, 6);
 
   // Opening texture file
-  fileStream fileHandle;
-  u32 bytesRead;
   u16 magic;
   u64 long_magic;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, text);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
+  auto f = D7::FS::ReadFile(text);
+  f.ReadDataAt(0x0, (char *)&magic, 2);
   Bitmap *bitmap;
   if (magic == 0x5089) {
-    FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
-    FS_Close(&fileHandle);
+    f.ReadDataAt(0x2, (char *)&long_magic, 8);
     if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
-    FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
   } else if (magic == 0xD8FF) {
-    FS_Close(&fileHandle);
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
@@ -148,33 +129,11 @@ static int lua_loadobj(lua_State *L) {
   memcpy(bitmap->pixels, tmp2, length);
 
   // Opening model file
-  if (strncmp("romfs:/", file_tbo, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(file_tbo, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, file_tbo);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "error opening file");
-#endif
-  }
-
+  f = D7::FS::ReadFile(file_tbo);
   // Loading file on RAM
-  u64 size;
-  FS_GetSize(&fileHandle, &size);
-  char *content = new char[size + 1];
-  FS_Read(&fileHandle, &bytesRead, 0, content, size);
-  content[size] = 0;
-
-  // Closing file
-  FS_Close(&fileHandle);
+  char *content = new char[f.Size + 1];
+  f.ReadDataAt(0x0, content, f.Size);
+  content[f.Size] = 0;
 
   // Creating temp vertexList
   vertexList *vl = new vertexList;
@@ -330,7 +289,7 @@ static int lua_loadobj(lua_State *L) {
         ptr2 = strstr(ptr, " ");
       else {
         ptr2 = strstr(ptr, "\n");
-        if (ptr2 == NULL) ptr2 = content + size;
+        if (ptr2 == NULL) ptr2 = content + f.Size;
       }
       strncpy(val, ptr, ptr2 - ptr);
       val[ptr2 - ptr] = 0;
@@ -522,38 +481,17 @@ static int lua_useTexture(lua_State *L) {
   C3D_TexDelete(mdl->texture);
 
   // Opening new texture
-  fileStream fileHandle;
-  u32 bytesRead;
   u16 magic;
   u64 long_magic;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, text);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
+  auto f = D7::FS::ReadFile(text);
+  f.ReadDataAt(0x0, (char *)&magic, 2);
   Bitmap *bitmap;
   if (magic == 0x5089) {
-    FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
-    FS_Close(&fileHandle);
+    f.ReadDataAt(0x2, (char *)&long_magic, 8);
     if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
-    FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
   } else if (magic == 0xD8FF) {
-    FS_Close(&fileHandle);
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
@@ -634,38 +572,17 @@ static int lua_loadModel(lua_State *L) {
 #endif
 
   // Opening texture file
-  fileStream fileHandle;
-  u32 bytesRead;
   u16 magic;
   u64 long_magic;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, text);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
+  auto f = D7::FS::ReadFile(text);
+  f.ReadDataAt(0x0, (char *)&magic, 2);
   Bitmap *bitmap;
   if (magic == 0x5089) {
-    FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
-    FS_Close(&fileHandle);
+    f.ReadDataAt(0x0, (char *)&long_magic, 8);
     if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
-    FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
   } else if (magic == 0xD8FF) {
-    FS_Close(&fileHandle);
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING

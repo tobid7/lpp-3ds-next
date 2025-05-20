@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <utils.h>
 
+#include <Filesystem.hpp>
 #include <Font.hpp>
 #include <Graphics.hpp>
 #include <luaplayer.hpp>
@@ -96,38 +97,17 @@ static int lua_loadimg(lua_State *L) {
   if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   char *text = (char *)(luaL_checkstring(L, 1));
-  fileStream fileHandle;
-  u32 bytesRead;
   u16 magic;
   u64 long_magic;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, text);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
+  auto f = D7::FS::ReadFile(text);
+  f.ReadDataAt(0x0, (char *)&magic, 2);
   Bitmap *bitmap;
   if (magic == 0x5089) {
-    FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
-    FS_Close(&fileHandle);
+    f.ReadDataAt(0x2, (char *)&long_magic, 8);
     if (long_magic == 0x0A1A0A0D474E5089) bitmap = loadPng(text);
   } else if (magic == 0x4D42) {
-    FS_Close(&fileHandle);
     bitmap = LoadBitmap(text);
   } else if (magic == 0xD8FF) {
-    FS_Close(&fileHandle);
     bitmap = OpenJPG(text);
   }
 #ifndef SKIP_ERROR_HANDLING
@@ -940,7 +920,7 @@ static int lua_fprint(lua_State *L) {
     Bitmap *canvas = (Bitmap *)screen;
     font->f.drawStringToBuffer(
         x, y, w_text,
-        Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF),
+        Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF),
         canvas->pixels, canvas->width, canvas->height, canvas->bitperpixel,
         max_width);
   } else {
@@ -948,7 +928,7 @@ static int lua_fprint(lua_State *L) {
     bool top_screen = (bool)1 - screen;
     font->f.drawStringUnicode(
         x, y, w_text,
-        Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF),
+        Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF),
         top_screen, left_side, max_width);
     gfxFlushBuffers();
   }

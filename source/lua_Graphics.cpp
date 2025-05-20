@@ -2,18 +2,18 @@
 #include <string.h>
 
 #include <C2D_Helper.hpp>
+#include <Filesystem.hpp>
 #include <Graphics.hpp>
 #include <iostream>
 #include <luaplayer.hpp>
 
 #include "utils.h"
 
-
 bool c3d_Frame_en = false;
 
-#define RGBA8(r, g, b, a)                                       \
-  ((((r)&0xFF) << 0) | (((g)&0xFF) << 8) | (((b)&0xFF) << 16) | \
-   (((a)&0xFF) << 24))
+#define RGBA8(r, g, b, a)                                             \
+  ((((r) & 0xFF) << 0) | (((g) & 0xFF) << 8) | (((b) & 0xFF) << 16) | \
+   (((a) & 0xFF) << 24))
 
 #define stringify(str) #str
 #define VariableRegister(lua, value)      \
@@ -137,7 +137,7 @@ static int lua_rect(lua_State *L) {
   if (radius == 0)
     C2D_DrawRectSolid(x1, y1, 0.5, x2 - x1, y2 - y1,
                       RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF,
-                            (color)&0xFF, (color >> 24) & 0xFF));
+                            (color) & 0xFF, (color >> 24) & 0xFF));
   else
     std::cout << "Drawing Rotated Rectangles\nis not Supported by C2D!";
   return 0;
@@ -158,7 +158,7 @@ static int lua_fillcircle(lua_State *L) {
 #endif
   C2D_DrawCircleSolid(x, y, 0.5, radius,
                       RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF,
-                            (color)&0xFF, (color >> 24) & 0xFF));
+                            (color) & 0xFF, (color >> 24) & 0xFF));
   return 0;
 }
 
@@ -177,10 +177,10 @@ static int lua_line(lua_State *L) {
 #endif
   u32 color = luaL_checkinteger(L, 5);
   C2D_DrawLine(x1, y1,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                x2, y2,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                1, 1);
   return 0;
@@ -201,31 +201,31 @@ static int lua_emptyrect(lua_State *L) {
 #endif
   u32 color = luaL_checkinteger(L, 5);
   C2D_DrawLine(x1, y1,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                x1, y2,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                1, 1);
   C2D_DrawLine(x2, y1,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                x2, y2,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                1, 1);
   C2D_DrawLine(x1, y2,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                x2, y2,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                1, 1);
   C2D_DrawLine(x1, y1,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                x2, y1,
-               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color)&0xFF,
+               RGBA8((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF,
                      (color >> 24) & 0xFF),
                1, 1);
   return 0;
@@ -237,38 +237,17 @@ static int lua_loadimg(lua_State *L) {
   if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   char *text = (char *)(luaL_checkstring(L, 1));
-  fileStream fileHandle;
-  u32 bytesRead;
-  u16 magic;
-  u64 long_magic;
-  if (strncmp("romfs:/", text, 7) == 0) {
-    fileHandle.isRomfs = true;
-    FILE *handle = fopen(text, "r");
-#ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
-#endif
-    fileHandle.handle = (u32)handle;
-  } else {
-    fileHandle.isRomfs = false;
-    FS_Path filePath = fsMakePath(PATH_ASCII, text);
-    Result ret =
-        FSUSER_OpenFileDirectly(&fileHandle.handle, ARCHIVE_SDMC, filePath,
-                                filePath, FS_OPEN_READ, 0x00000000);
-#ifndef SKIP_ERROR_HANDLING
-    if (ret) return luaL_error(L, "file doesn't exist.");
-#endif
-  }
-  FS_Read(&fileHandle, &bytesRead, 0, &magic, 2);
+  auto f = D7::FS::ReadFile(text);
+  unsigned short magic;
+  unsigned long long long_magic;
+  f.ReadDataAt(0, (char *)&magic, 2);
   Bitmap *bitmap;
   if (magic == 0x5089) {
-    FS_Read(&fileHandle, &bytesRead, 0, &long_magic, 8);
-    FS_Close(&fileHandle);
+    f.ReadDataAt(2, (char *)&long_magic, 8);
     if (long_magic == 0x0A1A0A0D474E5089) bitmap = decodePNGfile(text);
   } else if (magic == 0x4D42) {
-    FS_Close(&fileHandle);
     bitmap = decodeBMPfile(text);
   } else if (magic == 0xD8FF) {
-    FS_Close(&fileHandle);
     bitmap = decodeJPGfile(text);
   }
 #ifndef SKIP_ERROR_HANDLING
