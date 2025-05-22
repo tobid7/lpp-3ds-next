@@ -1,7 +1,7 @@
 /*
  *   This file is part of lpp-3ds-next
  *   based on https://github.com/Rinnegatamante/lpp-3ds/
- *   Copyright (C) 2021-2023 Tobi-D7
+ *   Copyright (C) 2021-2025 tobid7
  */
 
 #include <3ds.h>
@@ -40,8 +40,6 @@ void ExitLppServ() {
   aptExit();
   cfguExit();
   romfsExit();
-  // nsocExit();
-  // nds::Exit();
   gfxExit();
 }
 

@@ -19,10 +19,10 @@
 - [X] Network Module
 - [X] Render Module
 - [X] Screen Module
-- [ ] Sound
+- [X] Sound
 - [X] System Module
 - [X] Timer Module
-- [ ] Video Module
+- [X] Video Module
 
 ## Building
 

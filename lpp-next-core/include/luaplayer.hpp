@@ -10,7 +10,6 @@
 #include <lua.hpp>
 #include <string>
 
-
 #define init_fnc(fnc_i, fnc_e) \
   ({                           \
     fnc_i();                   \
@@ -30,8 +29,8 @@ void luaScreen_init(lua_State *L);
 void luaControls_init(lua_State *L);
 void luaSystem_init(lua_State *L);
 void luaTimer_init(lua_State *L);
-// void luaSound_init(lua_State *L);
-// void luaVideo_init(lua_State *L);
+void luaSound_init(lua_State *L);
+void luaVideo_init(lua_State *L);
 void luaGraphics_init(lua_State *L);
 void luaNetwork_init(lua_State *L);
 void luaCamera_init(lua_State *L);

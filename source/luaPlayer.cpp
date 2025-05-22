@@ -1,7 +1,7 @@
 /*
  *   This file is part of lpp-3ds-next
  *   based on https://github.com/Rinnegatamante/lpp-3ds/
- *   Copyright (C) 2021-2023 Tobi-D7
+ *   Copyright (C) 2021-2025 tobid7
  */
 
 #include <3ds.h>
@@ -23,6 +23,31 @@ void Npi_Error(std::string Error) {
   exit(-1);
 }
 
+void CxxError(const char* msg) {
+  std::string err_text = std::string("C++ Exception:\n") + msg;
+  std::cout << err_text << std::endl;
+  ErrorHelper::WriteErr(err_text);
+  errorConf* cfg = new errorConf;
+  errorInit(cfg, errorType::ERROR_TEXT, CFG_LANGUAGE_EN);
+  errorText(cfg, std::string(err_text).c_str());
+  errorDisp(cfg);
+  exit(-1);
+}
+
+void CxxExceptionHandler() {
+  std::exception_ptr e_ = std::current_exception();
+  if (e_) {
+    try {
+      std::rethrow_exception(e_);
+    } catch (const std::exception& e) {
+      CxxError(e.what());
+    } catch (...) {
+      CxxError("Unknown Exception");
+    }
+  }
+  std::abort();
+}
+
 static void InitLibraries(lua_State* LState) {
   luaL_openlibs(LState);  // Standard Libraries.
   luaTimer_init(LState);
@@ -30,12 +55,14 @@ static void InitLibraries(lua_State* LState) {
   luaCore_init(LState);
   luaControls_init(LState);
   luaSystem_init(LState);
+  luaSound_init(LState);
   luaScreen_init(LState);
   luaGraphics_init(LState);
   luaRender_init(LState);
   luaKeyboard_init(LState);
   luaMic_init(LState);
   luaCamera_init(LState);
+  luaVideo_init(LState);
 }
 
 std::string detail_error(lua_State* LState) {
@@ -66,6 +93,7 @@ std::string detail_error(lua_State* LState) {
 
 void Run(std::string path) {
   if (path == "") return;
+  std::set_terminate(CxxExceptionHandler);
 
   std::pair<int, std::string> Status = std::make_pair(0, "");
   lua_State* LUAScript = luaL_newstate();

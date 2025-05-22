@@ -1,3 +1,9 @@
+/*
+ *   This file is part of lpp-3ds-next
+ *   based on https://github.com/Rinnegatamante/lpp-3ds/
+ *   Copyright (C) 2021-2025 tobid7
+ */
+
 #include <3ds.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +12,6 @@
 #include "Graphics.hpp"
 #include "hbkb.h"
 #include "luaplayer.hpp"
-
 
 #define stringify(str) #str
 #define VariableRegister(lua, value)      \

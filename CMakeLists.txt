@@ -35,9 +35,11 @@ add_executable(${PROJECT_NAME}
     source/lua_Network.cpp
     source/lua_Render.cpp
     source/lua_Screen.cpp
+    source/lua_Sound.cpp
     source/lua_System.cpp
     source/lua_Timer.cpp
     source/luaPlayer.cpp
+    source/lua_Video.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -46,7 +48,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_BINARY_DIR}/.dkp-generated/${PROJECT_NAME}-data)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    hbkb lpp-next-core)
+    hbkb audiodec lpp-next-core)
 
 # Generate 3DSX
 ctr_generate_smdh(

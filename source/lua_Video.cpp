@@ -1,8 +1,3 @@
-#include "audio.hpp"
-#include "Graphics.hpp"
-#include "luaplayer.hpp"
-#include "ogg/ogg.h"
-#include "utils.h"
 #include <3ds.h>
 #include <malloc.h>
 #include <math.h>
@@ -10,16 +5,24 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "Graphics.hpp"
+#include "audio.hpp"
+#include "luaplayer.hpp"
+#include "ogg/ogg.h"
+#include "tremor/ivorbiscodec.h"
+#include "tremor/ivorbisfile.h"
+#include "utils.h"
+
 #define stringify(str) #str
-#define VariableRegister(lua, value)                                           \
-  do {                                                                         \
-    lua_pushinteger(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define VariableRegister(lua, value)      \
+  do {                                    \
+    lua_pushinteger(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
-#define BooleanRegister(lua, value)                                            \
-  do {                                                                         \
-    lua_pushboolean(lua, value);                                               \
-    lua_setglobal(lua, stringify(value));                                      \
+#define BooleanRegister(lua, value)       \
+  do {                                    \
+    lua_pushboolean(lua, value);          \
+    lua_setglobal(lua, stringify(value)); \
   } while (0)
 
 #define MAX_RAM_ALLOCATION 524288
@@ -99,7 +102,6 @@ static void streamWAV(void *arg) {
           ((osGetTime() - src->tick) / 1000)) > (half_mem * src->moltiplier)) &&
         (src->isPlaying)) {
       if ((src->moltiplier % 2) == 1) {
-
         // Update and flush first half-buffer
         if (src->audiobuf2 == NULL) {
           FS_Read(src->sourceFile, &bytesRead,
@@ -135,7 +137,6 @@ static void streamWAV(void *arg) {
         }
 
       } else {
-
         // Update and flush second half-buffer
         u32 bytesRead;
         if (src->audiobuf2 == NULL) {
@@ -209,40 +210,35 @@ static void streamOGG(void *arg) {
           src->isPlaying = false;
           src->tick = (osGetTime() - src->tick);
           CSND_SetPlayState(src->ch1, 0);
-          if (src->audiobuf2 != NULL)
-            CSND_SetPlayState(src->ch2, 0);
+          if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
           CSND_UpdateInfo(0);
           ov_raw_seek((OggVorbis_File *)src->stdio_handle, 0);
-          if (src->audiobuf2 == NULL) { // Mono file
+          if (src->audiobuf2 == NULL) {  // Mono file
             int i = 0;
             while (!eof) {
               long ret = ov_read((OggVorbis_File *)src->stdio_handle, pcmout,
-                                 sizeof(pcmout), 0, 2, 1, &current_section);
+                                 sizeof(pcmout), &current_section);
               if (ret == 0)
                 eof = 1;
               else {
-
                 // Copying decoded block to PCM16 audiobuffer
                 memcpy(&src->audiobuf[i], pcmout, ret);
                 i = i + ret;
-                if (i >= src->mem_size)
-                  break;
+                if (i >= src->mem_size) break;
               }
             }
-          } else { // Stereo file
+          } else {  // Stereo file
             int i = 0;
             while (!eof) {
               long ret = ov_read((OggVorbis_File *)src->stdio_handle, pcmout,
-                                 sizeof(pcmout), 0, 2, 1, &current_section);
+                                 sizeof(pcmout), &current_section);
               if (ret == 0)
                 eof = 1;
               else {
-
                 // Copying decoded block to PCM16 audiobuffer
                 memcpy(&tmp_buf[i], pcmout, ret);
                 i = i + ret;
-                if (i >= src->mem_size)
-                  break;
+                if (i >= src->mem_size) break;
               }
             }
 
@@ -255,19 +251,18 @@ static void streamOGG(void *arg) {
               src->audiobuf2[j] = tmp_buf[z + 2];
               src->audiobuf2[j + 1] = tmp_buf[z + 3];
               j = j + 2;
-              if (j >= src->mem_size >> 1)
-                j = 0;
+              if (j >= src->mem_size >> 1) j = 0;
             }
           }
           src->moltiplier = 1;
         }
       } else if (control > block_size * src->moltiplier) {
-        if (src->audiobuf2 == NULL) { // Mono file
+        if (src->audiobuf2 == NULL) {  // Mono file
           int i = 0;
           int j = src->audio_pointer;
           while (!eof) {
             long ret = ov_read((OggVorbis_File *)src->stdio_handle, pcmout,
-                               sizeof(pcmout), 0, 2, 1, &current_section);
+                               sizeof(pcmout), &current_section);
             if (ret == 0) {
               if (!src->loop)
                 eof = 1;
@@ -277,8 +272,7 @@ static void streamOGG(void *arg) {
               memcpy(&tmp_buf[i], pcmout, ret);
               i = i + ret;
               src->package_size = i;
-              if (i >= (package_max_size))
-                break;
+              if (i >= (package_max_size)) break;
             }
           }
           if (j + src->package_size >= src->mem_size) {
@@ -293,12 +287,12 @@ static void streamOGG(void *arg) {
           }
           src->total_packages_size =
               src->total_packages_size + src->package_size;
-        } else { // Stereo file
+        } else {  // Stereo file
           char pcmout[2048];
           int i = 0;
           while (!eof) {
             long ret = ov_read((OggVorbis_File *)src->stdio_handle, pcmout,
-                               sizeof(pcmout), 0, 2, 1, &current_section);
+                               sizeof(pcmout), &current_section);
             if (ret == 0) {
               if (!src->loop)
                 eof = 1;
@@ -308,8 +302,7 @@ static void streamOGG(void *arg) {
               memcpy(&tmp_buf[i], pcmout, ret);
               i = i + ret;
               src->package_size = i;
-              if (i >= (package_max_size))
-                break;
+              if (i >= (package_max_size)) break;
             }
           }
 
@@ -322,8 +315,7 @@ static void streamOGG(void *arg) {
             src->audiobuf2[j] = tmp_buf[z + 2];
             src->audiobuf2[j + 1] = tmp_buf[z + 3];
             j = j + 2;
-            if (j >= src->mem_size >> 1)
-              j = 0;
+            if (j >= src->mem_size >> 1) j = 0;
           }
           src->audio_pointer = j;
           src->total_packages_size =
@@ -335,14 +327,13 @@ static void streamOGG(void *arg) {
   }
 }
 
-static int
-lua_loadJPGV(lua_State *L) // TODO: Fix looping feature for Vorbis audiocodec
-                           // (related to system hangs while exiting?)
+static int lua_loadJPGV(
+    lua_State *L)  // TODO: Fix looping feature for Vorbis audiocodec
+                   // (related to system hangs while exiting?)
 {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments.");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments.");
 #endif
   const char *file_tbo = luaL_checkstring(L, 1);
   fileStream *fileHandle = (fileStream *)malloc(sizeof(fileStream));
@@ -350,20 +341,20 @@ lua_loadJPGV(lua_State *L) // TODO: Fix looping feature for Vorbis audiocodec
     fileHandle->isRomfs = true;
     FILE *handle = fopen(file_tbo, "r");
 #ifndef SKIP_ERROR_HANDLING
-    if (handle == NULL)
-      return luaL_error(L, "file doesn't exist.");
+    if (handle == NULL) return luaL_error(L, "file doesn't exist.");
 #endif
     fileHandle->handle = (u32)handle;
   } else {
     fileHandle->isRomfs = false;
-    FS_Archive sdmcArchive =
-        (FS_Archive){ARCHIVE_SDMC, (FS_Path){PATH_EMPTY, 1, (u8 *)""}};
+    FS_Archive sdmcArchive;
+    FSUSER_OpenArchive(&sdmcArchive, ARCHIVE_SDMC,
+                       (FS_Path){PATH_EMPTY, 1, (u8 *)""});
     FS_Path filePath = fsMakePath(PATH_ASCII, file_tbo);
-    Result ret = FSUSER_OpenFileDirectly(&fileHandle->handle, sdmcArchive,
-                                         filePath, FS_OPEN_READ, 0x00000000);
+    Result ret =
+        FSUSER_OpenFileDirectly(&fileHandle->handle, ARCHIVE_SDMC, filePath,
+                                filePath, FS_OPEN_READ, 0x00000000);
 #ifndef SKIP_ERROR_HANDLING
-    if (ret)
-      return luaL_error(L, "file doesn't exist.");
+    if (ret) return luaL_error(L, "file doesn't exist.");
 #endif
   }
   u32 magic, bytesRead;
@@ -382,7 +373,7 @@ lua_loadJPGV(lua_State *L) // TODO: Fix looping feature for Vorbis audiocodec
     JPGV_file->currentFrame = 0;
     JPGV_file->package_size = 0;
     JPGV_file->total_packages_size = 0;
-    if (JPGV_file->audiocodec != 0) { // Vorbis audiocodec
+    if (JPGV_file->audiocodec != 0) {  // Vorbis audiocodec
       JPGV_file->loop_index = 1;
       char myFile[512];
       if (fileHandle->isRomfs)
@@ -391,7 +382,6 @@ lua_loadJPGV(lua_State *L) // TODO: Fix looping feature for Vorbis audiocodec
         strcpy(myFile, "sdmc:");
         strcat(myFile, file_tbo);
       }
-      sdmcInit();
       JPGV_file->stdio_handle = (u32)fopen(myFile, "r");
     }
     JPGV_file->sourceFile = fileHandle;
@@ -410,8 +400,7 @@ lua_loadJPGV(lua_State *L) // TODO: Fix looping feature for Vorbis audiocodec
 static int lua_startJPGV(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 2)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 2) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -427,16 +416,14 @@ static int lua_startJPGV(lua_State *L) {
     ch = 0x08;
     while (audioChannels[ch]) {
       ch++;
-      if (ch > 32)
-        return luaL_error(L, "audio device is busy");
+      if (ch > 32) return luaL_error(L, "audio device is busy");
     }
     audioChannels[ch] = true;
     ch2 = ch + 1;
     if (src->audiotype == 2) {
       while (audioChannels[ch2]) {
         ch2++;
-        if (ch2 > 32)
-          return luaL_error(L, "audio device is busy");
+        if (ch2 > 32) return luaL_error(L, "audio device is busy");
       }
       audioChannels[ch2] = true;
     }
@@ -447,7 +434,7 @@ static int lua_startJPGV(lua_State *L) {
   src->loop = loop;
   src->isPlaying = true;
   ThreadFunc streamFunction = streamWAV;
-  if (src->audiocodec != 0) { // Vorbis audiocodec
+  if (src->audiocodec != 0) {  // Vorbis audiocodec
     src->audio_pointer = 0;
     streamFunction = streamOGG;
     int eof = 0;
@@ -470,7 +457,7 @@ static int lua_startJPGV(lua_State *L) {
 
     // Decoding OGG buffer
     int i = 0;
-    if (my_info->channels == 1) { // Mono buffer
+    if (my_info->channels == 1) {  // Mono buffer
       src->audiotype = 1;
       src->moltiplier = 1;
       src->mem_size = src->audio_size >> 1;
@@ -480,15 +467,12 @@ static int lua_startJPGV(lua_State *L) {
       src->audiobuf = (u8 *)linearAlloc(src->mem_size);
       src->audiobuf2 = NULL;
       while (!eof) {
-        long ret =
-            ov_read(vf, pcmout, sizeof(pcmout), 0, 2, 1, &current_section);
+        long ret = ov_read(vf, pcmout, sizeof(pcmout), &current_section);
         if (ret == 0) {
-
           // EOF
           eof = 1;
 
         } else if (ret < 0) {
-
 // Error handling
 #ifndef SKIP_ERROR_HANDLING
           if (ret == OV_EBADLINK) {
@@ -497,15 +481,13 @@ static int lua_startJPGV(lua_State *L) {
 #endif
 
         } else {
-
           // Copying decoded block to PCM16 audiobuffer
           memcpy(&src->audiobuf[i], pcmout, ret);
           i = i + ret;
-          if (i >= src->mem_size)
-            break;
+          if (i >= src->mem_size) break;
         }
       }
-    } else { // Stereo buffer
+    } else {  // Stereo buffer
       src->audiotype = 2;
       tmp_buf;
       u32 size_tbp;
@@ -514,7 +496,7 @@ static int lua_startJPGV(lua_State *L) {
       src->mem_size = src->audio_size >> 1;
       u8 molt = 1;
       if (src->samplerate <= 30000)
-        molt = 4; // Temporary patch for low samplerates
+        molt = 4;  // Temporary patch for low samplerates
       while (src->mem_size > MAX_RAM_ALLOCATION * molt) {
         src->mem_size = src->mem_size >> 1;
       }
@@ -524,15 +506,12 @@ static int lua_startJPGV(lua_State *L) {
       src->audiobuf2 = (u8 *)linearAlloc(src->mem_size >> 1);
 
       while (!eof) {
-        long ret =
-            ov_read(vf, pcmout, sizeof(pcmout), 0, 2, 1, &current_section);
+        long ret = ov_read(vf, pcmout, sizeof(pcmout), &current_section);
         if (ret == 0) {
-
           // EOF
           eof = 1;
 
         } else if (ret < 0) {
-
 // Error handling
 #ifndef SKIP_ERROR_HANDLING
           if (ret == OV_EBADLINK) {
@@ -541,12 +520,10 @@ static int lua_startJPGV(lua_State *L) {
 #endif
 
         } else {
-
           // Copying decoded block to PCM16 audiobuffer
           memcpy(&tmp_buf[i], pcmout, ret);
           i = i + ret;
-          if (i >= src->mem_size)
-            break;
+          if (i >= src->mem_size) break;
         }
       }
 
@@ -616,12 +593,11 @@ static int lua_startJPGV(lua_State *L) {
                         (u32 *)src->audiobuf2, half_mem, 1.0, -1.0);
     }
     CSND_SetPlayState(src->ch1, 1);
-    if (src->audiotype == 2)
-      CSND_SetPlayState(src->ch2, 1);
+    if (src->audiotype == 2) CSND_SetPlayState(src->ch2, 1);
     CSND_UpdateInfo(0);
     src->tick = osGetTime();
     src->moltiplier = 1;
-    svcCreateEvent(&updateStream, 0);
+    svcCreateEvent(&updateStream, RESET_ONESHOT);
     src->thread = threadCreate(streamFunction, src, 8192, 0x18, 1, true);
   } else
     src->tick = osGetTime();
@@ -640,8 +616,7 @@ void draw3DJPGV(int x, int y, JPGV *src, int screen, bool use3D) {
         src->isPlaying = false;
         src->moltiplier = 1;
         CSND_SetPlayState(src->ch1, 0);
-        if (src->audiobuf2 != NULL)
-          CSND_SetPlayState(src->ch2, 0);
+        if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
         CSND_UpdateInfo(0);
       }
     } else {
@@ -666,8 +641,7 @@ void draw3DJPGV(int x, int y, JPGV *src, int screen, bool use3D) {
                 offset_left + (src->tot_frame << 4), frame_left, size_left);
         src->framebuf = decodeJpg(frame_left, size_left);
         free(frame_left);
-        if (screen == 1 || screen == 0)
-          RAW2FB(x, y, src->framebuf, screen, 0);
+        if (screen == 1 || screen == 0) RAW2FB(x, y, src->framebuf, screen, 0);
         free(src->framebuf->pixels);
         free(src->framebuf);
         if (use3D) {
@@ -713,8 +687,7 @@ void draw3DJPGV(int x, int y, JPGV *src, int screen, bool use3D) {
               frame, size);
       src->framebuf = decodeJpg(frame, size);
       free(frame);
-      if (screen == 1 || screen == 0)
-        RAW2FB(x, y, src->framebuf, screen, 0);
+      if (screen == 1 || screen == 0) RAW2FB(x, y, src->framebuf, screen, 0);
       free(src->framebuf->pixels);
       free(src->framebuf);
       if (use3D) {
@@ -723,8 +696,7 @@ void draw3DJPGV(int x, int y, JPGV *src, int screen, bool use3D) {
                 offset_right + (src->tot_frame << 4), frame2, size_right);
         src->framebuf = decodeJpg(frame2, size_right);
         free(frame2);
-        if (screen == 1 || screen == 0)
-          RAW2FB(x, y, src->framebuf, screen, 1);
+        if (screen == 1 || screen == 0) RAW2FB(x, y, src->framebuf, screen, 1);
         free(src->framebuf->pixels);
         free(src->framebuf);
       }
@@ -733,8 +705,7 @@ void draw3DJPGV(int x, int y, JPGV *src, int screen, bool use3D) {
 }
 
 void draw3DJPGVfast(JPGV *src, u8 *framebuf, bool use3D) {
-  if (framebuf != TopLFB)
-    use3D = false;
+  if (framebuf != TopLFB) use3D = false;
   int tb_ptr = 24 + src->audio_size;
   if (src->isPlaying) {
     if (src->currentFrame >= (src->tot_frame - 10)) {
@@ -746,8 +717,7 @@ void draw3DJPGVfast(JPGV *src, u8 *framebuf, bool use3D) {
         src->isPlaying = false;
         src->moltiplier = 1;
         CSND_SetPlayState(src->ch1, 0);
-        if (src->audiobuf2 != NULL)
-          CSND_SetPlayState(src->ch2, 0);
+        if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
         CSND_UpdateInfo(0);
       }
     } else {
@@ -841,8 +811,7 @@ static int lua_drawJPGVfast(lua_State *L) {
     return luaL_error(L, "attempt to access wrong memory block type");
 #endif
   svcSignalEvent(updateStream);
-  if (argc == 3)
-    use3D = lua_toboolean(L, 3);
+  if (argc == 3) use3D = lua_toboolean(L, 3);
   if (src->is3D) {
     draw3DJPGVfast(src, framebuf, use3D);
     return 0;
@@ -858,8 +827,7 @@ static int lua_drawJPGVfast(lua_State *L) {
         src->isPlaying = false;
         src->moltiplier = 1;
         CSND_SetPlayState(src->ch1, 0);
-        if (src->audiobuf2 != NULL)
-          CSND_SetPlayState(src->ch2, 0);
+        if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
         CSND_UpdateInfo(0);
       }
     } else {
@@ -926,12 +894,10 @@ static int lua_drawJPGV(lua_State *L) {
 #ifndef SKIP_ERROR_HANDLING
   if (src->magic != 0x4C4A5056)
     return luaL_error(L, "attempt to access wrong memory block type");
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
 #endif
   svcSignalEvent(updateStream);
-  if (argc == 5)
-    use3D = lua_toboolean(L, 5);
+  if (argc == 5) use3D = lua_toboolean(L, 5);
   if (src->is3D) {
     draw3DJPGV(x, y, src, screen, use3D);
     return 0;
@@ -947,8 +913,7 @@ static int lua_drawJPGV(lua_State *L) {
         src->isPlaying = false;
         src->moltiplier = 1;
         CSND_SetPlayState(src->ch1, 0);
-        if (src->audiobuf2 != NULL)
-          CSND_SetPlayState(src->ch2, 0);
+        if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
         CSND_UpdateInfo(0);
       }
     } else {
@@ -979,10 +944,8 @@ static int lua_drawJPGV(lua_State *L) {
         if ((screen == 1) && (x + src->framebuf->height > 320))
           return luaL_error(L, "out of framebuffer bounds");
 #endif
-        if (screen == 1 || screen == 0)
-          RAW2FB(x, y, src->framebuf, screen, 0);
-        if (use3D)
-          RAW2FB(x, y, src->framebuf, screen, 1);
+        if (screen == 1 || screen == 0) RAW2FB(x, y, src->framebuf, screen, 0);
+        if (use3D) RAW2FB(x, y, src->framebuf, screen, 1);
         free(src->framebuf->pixels);
         free(src->framebuf);
       }
@@ -1017,8 +980,7 @@ static int lua_drawJPGV(lua_State *L) {
       if ((screen == 1) && (x + src->framebuf->height > 320))
         return luaL_error(L, "out of framebuffer bounds");
 #endif
-      if (screen == 1 || screen == 0)
-        RAW2FB(x, y, src->framebuf, screen, 0);
+      if (screen == 1 || screen == 0) RAW2FB(x, y, src->framebuf, screen, 0);
       free(src->framebuf->pixels);
       free(src->framebuf);
     }
@@ -1079,8 +1041,7 @@ static int lua_JPGVshowFrame(lua_State *L) {
 #ifndef SKIP_ERROR_HANDLING
   if (src->magic != 0x4C4A5056)
     return luaL_error(L, "attempt to access wrong memory block type");
-  if ((x < 0) || (y < 0))
-    return luaL_error(L, "out of bounds");
+  if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
   if (frame_index > src->tot_frame)
     return luaL_error(L, "out of video file bounds");
 #endif
@@ -1114,8 +1075,7 @@ static int lua_JPGVshowFrame(lua_State *L) {
     return luaL_error(L, "out of framebuffer bounds");
 #endif
   RAW2FB(x, y, tmp_framebuf, screen, 0);
-  if (is3D)
-    RAW2FB(x, y, tmp_framebuf, screen, 1);
+  if (is3D) RAW2FB(x, y, tmp_framebuf, screen, 1);
   free(tmp_framebuf->pixels);
   free(tmp_framebuf);
   ;
@@ -1125,8 +1085,7 @@ static int lua_JPGVshowFrame(lua_State *L) {
 static int lua_getFPS2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1140,8 +1099,7 @@ static int lua_getFPS2(lua_State *L) {
 static int lua_getCF2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1155,8 +1113,7 @@ static int lua_getCF2(lua_State *L) {
 static int lua_getSize2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1170,8 +1127,7 @@ static int lua_getSize2(lua_State *L) {
 static int lua_getSrate2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1185,8 +1141,7 @@ static int lua_getSrate2(lua_State *L) {
 static int lua_isPlaying2(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1200,8 +1155,7 @@ static int lua_isPlaying2(lua_State *L) {
 static int lua_unloadJPGV(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1211,13 +1165,11 @@ static int lua_unloadJPGV(lua_State *L) {
 
   // Freeing audio-device channels
   audioChannels[src->ch1] = false;
-  if (src->audiotype == 2)
-    audioChannels[src->ch2] = false;
+  if (src->audiotype == 2) audioChannels[src->ch2] = false;
 
   // Stopping audio playback if still playing
   CSND_SetPlayState(src->ch1, 0);
-  if (src->audiobuf2 != NULL)
-    CSND_SetPlayState(src->ch2, 0);
+  if (src->audiobuf2 != NULL) CSND_SetPlayState(src->ch2, 0);
   CSND_UpdateInfo(0);
 
   // Closing audio playback thread
@@ -1225,18 +1177,16 @@ static int lua_unloadJPGV(lua_State *L) {
   svcSignalEvent(updateStream);
   if (src->audiocodec == 0)
     threadJoin(src->thread, U64_MAX);
-  else { // TODO: Fix system hanging (Vorbis) while exiting at video ends
-         // without breaking thread safety
+  else {  // TODO: Fix system hanging (Vorbis) while exiting at video ends
+          // without breaking thread safety
     threadJoin(src->thread, 1000000000);
     ov_clear((OggVorbis_File *)src->stdio_handle);
-    sdmcExit();
   }
 
   // Deallocating audio buffers
   if (src->samplerate != 0 && src->audio_size != 0 && src->audiobuf != NULL) {
     linearFree(src->audiobuf);
-    if (src->audiotype == 2)
-      linearFree(src->audiobuf2);
+    if (src->audiotype == 2) linearFree(src->audiobuf2);
   }
 
   // Closing file and freeing structs
@@ -1253,8 +1203,7 @@ static int lua_unloadJPGV(lua_State *L) {
 static int lua_pauseJPGV(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1266,8 +1215,7 @@ static int lua_pauseJPGV(lua_State *L) {
     src->tick = (osGetTime() - src->tick);
     if (src->samplerate != 0 && src->audio_size != 0) {
       CSND_SetPlayState(src->ch1, 0);
-      if (src->audiotype == 2)
-        CSND_SetPlayState(src->ch2, 0);
+      if (src->audiotype == 2) CSND_SetPlayState(src->ch2, 0);
       CSND_UpdateInfo(0);
     }
   }
@@ -1277,8 +1225,7 @@ static int lua_pauseJPGV(lua_State *L) {
 static int lua_resumeJPGV(lua_State *L) {
   int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-  if (argc != 1)
-    return luaL_error(L, "wrong number of arguments");
+  if (argc != 1) return luaL_error(L, "wrong number of arguments");
 #endif
   JPGV *src = (JPGV *)luaL_checkinteger(L, 1);
 #ifndef SKIP_ERROR_HANDLING
@@ -1290,8 +1237,7 @@ static int lua_resumeJPGV(lua_State *L) {
     src->tick = (osGetTime() - src->tick);
     if (src->samplerate != 0 && src->audio_size != 0) {
       CSND_SetPlayState(src->ch1, 1);
-      if (src->audiotype == 2)
-        CSND_SetPlayState(src->ch2, 1);
+      if (src->audiotype == 2) CSND_SetPlayState(src->ch2, 1);
       CSND_UpdateInfo(0);
     }
   }

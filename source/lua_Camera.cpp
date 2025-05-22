@@ -1,3 +1,9 @@
+/*
+ *   This file is part of lpp-3ds-next
+ *   based on https://github.com/Rinnegatamante/lpp-3ds/
+ *   Copyright (C) 2021-2025 tobid7
+ */
+
 #include <3ds.h>
 #include <stdlib.h>
 #include <string.h>
@@ -253,7 +259,7 @@ static int lua_camshot(lua_State *L) {
         si++;
       }
     }
-    D7::FS::Write2File(tempbuf, 0x36+BUFFER_SIZE, screenpath);
+    D7::FS::Write2File(tempbuf, 0x36 + BUFFER_SIZE, screenpath);
     free(tempbuf);
   } else {
     u8 *tempbuf = (u8 *)malloc(BUFFER_SIZE);

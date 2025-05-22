@@ -1,10 +1,5 @@
-function MenuPrint()
-	i = 0
-	while i < 9 do
-		Screen.debugPrint(0, i*16, "Test: "..i, Color.new(255, 255, 255), TOP_SCREEN)
-		i = i + 1
-	end
-end
+-- Initializing a console for top screen
+cns = Console.new(TOP_SCREEN)
 
 -- Main Loop
 while System.mainLoop() do
@@ -12,14 +7,43 @@ while System.mainLoop() do
 	-- Updating screens
 	Screen.waitVblankStart()
 	Screen.refresh()
+	Screen.clear(TOP_SCREEN)
 	
-	MenuPrint()
+	-- Showing console
+	Console.show(cns)
 	
-	-- Flipping screen
-	Screen.flip()
-
-	if Controls.check(Controls.read(), KEY_START) then
-		Graphics.term()
+	-- Check if user tapped the return button in the keyboard
+	local kbState = Keyboard.getState()
+	if kbState ~= FINISHED then
+	
+		-- Print keyboard graphics
+		Keyboard.show()
+		
+		-- Check if at least one button has been tapped
+		if kbState ~= NOT_PRESSED then
+			
+			-- Purge console text
+			Console.clear(cns)
+			
+			-- Check if user pressed a button different to the clear one
+			if kbState == PRESSED then
+			
+				-- Append the user input	
+				Console.append(cns, Keyboard.getInput())
+			
+			end
+			
+		end
+	
+	else
+		
+		-- If user tapped return button, exit sample
+		Console.destroy(cns)
 		System.exit()
+			
 	end
+	
+	-- Flipping screens
+	Screen.flip()
+	
 end

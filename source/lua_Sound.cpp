@@ -1,62 +1,5 @@
-/*----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#------  This File is Part Of :
-----------------------------------------------------------------------------------------#
-#------- _  -------------------  ______   _
---------------------------------------------------------------------------#
-#------ | | ------------------- (_____ \ | |
---------------------------------------------------------------------------#
-#------ | | ---  _   _   ____    _____) )| |  ____  _   _   ____   ____
-----------------------------------------------#
-#------ | | --- | | | | / _  |  |  ____/ | | / _  || | | | / _  ) / ___)
-----------------------------------------------#
-#------ | |_____| |_| |( ( | |  | |      | |( ( | || |_| |( (/ / | |
---------------------------------------------------#
-#------ |_______)\____| \_||_|  |_|      |_| \_||_| \__  | \____)|_|
---------------------------------------------------#
-#------------------------------------------------- (____/
--------------------------------------------------------------#
-#------------------------   ______   _
--------------------------------------------------------------------------------#
-#------------------------  (_____ \ | |
--------------------------------------------------------------------------------#
-#------------------------   _____) )| | _   _   ___
-------------------------------------------------------------------#
-#------------------------  |  ____/ | || | | | /___)
-------------------------------------------------------------------#
-#------------------------  | |      | || |_| ||___ |
-------------------------------------------------------------------#
-#------------------------  |_|      |_| \____|(___/
-------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Licensed under the GPL License
---------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Copyright (c) Nanni <lpp.nanni@gmail.com>
----------------------------------------------------------------------------#
-#- Copyright (c) Rinnegatamante <rinnegatamante@gmail.com>
--------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Credits :
------------------------------------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------------------------------------------#
-#- Smealum for ctrulib and ftpony src
-----------------------------------------------------------------------------------#
-#- StapleButter for debug font
------------------------------------------------------------------------------------------#
-#- Lode Vandevenne for lodepng
------------------------------------------------------------------------------------------#
-#- Jean-loup Gailly and Mark Adler for zlib
-----------------------------------------------------------------------------#
-#- xerpi for sf2dlib
----------------------------------------------------------------------------------------------------#
-#- Special thanks to Aurelio for testing, bug-fixing and various help with codes
-and implementations -------------------#
-#-----------------------------------------------------------------------------------------------------------------------*/
-
 #include <3ds.h>
+#include <audio_decoder.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,7 +23,6 @@ and implementations -------------------#
 #define DECODER_MAX_ALLOC 786432
 
 extern bool audioChannels[32];
-extern bool isNinjhax2;
 extern bool csndAccess;
 volatile bool closeStream = false;
 Handle updateStream;
@@ -134,7 +76,7 @@ void streamOGG_CSND(void* arg) {
         int i = 0;
         while (!eof) {
           long ret = ov_read((OggVorbis_File*)src->sourceFile, pcmout,
-                             sizeof(pcmout), 0, 2, 1, &current_section);
+                             sizeof(pcmout), &current_section);
           if (ret == 0) {
             // EOF
             eof = 1;
@@ -150,7 +92,7 @@ void streamOGG_CSND(void* arg) {
         int i = 0;
         while (!eof) {
           long ret = ov_read((OggVorbis_File*)src->sourceFile, pcmout,
-                             sizeof(pcmout), 0, 2, 1, &current_section);
+                             sizeof(pcmout), &current_section);
           if (ret == 0)
             eof = 1;
           else {
@@ -181,7 +123,7 @@ void streamOGG_CSND(void* arg) {
         int j = src->audio_pointer;
         while (!eof) {
           long ret = ov_read((OggVorbis_File*)src->sourceFile, pcmout,
-                             sizeof(pcmout), 0, 2, 1, &current_section);
+                             sizeof(pcmout), &current_section);
           if (ret == 0) {
             if (!src->streamLoop)
               eof = 1;
@@ -209,7 +151,7 @@ void streamOGG_CSND(void* arg) {
         int i = 0;
         while (!eof) {
           long ret = ov_read((OggVorbis_File*)src->sourceFile, pcmout,
-                             sizeof(pcmout), 0, 2, 1, &current_section);
+                             sizeof(pcmout), &current_section);
           if (ret == 0) {
             if (!src->streamLoop)
               eof = 1;
@@ -603,7 +545,7 @@ static int lua_openogg_old(lua_State* L) {
     }
     wav_file->audiobuf2 = NULL;
     while (!eof) {
-      long ret = ov_read(vf, pcmout, sizeof(pcmout), 0, 2, 1, &current_section);
+      long ret = ov_read(vf, pcmout, sizeof(pcmout), &current_section);
       if (ret == 0) {
         // EOF
         eof = 1;
@@ -648,7 +590,7 @@ static int lua_openogg_old(lua_State* L) {
     }
 
     while (!eof) {
-      long ret = ov_read(vf, pcmout, sizeof(pcmout), 0, 2, 1, &current_section);
+      long ret = ov_read(vf, pcmout, sizeof(pcmout), &current_section);
       if (ret == 0) {
         // EOF
         eof = 1;
@@ -1051,8 +993,8 @@ void streamOGG_DSP(void* arg) {
         // Decoding Vorbis audiobuffer
         int i = 0;
         while (!eof) {
-          long ret = ov_read(vf, (char*)&src->audiobuf[i], 2048, 0, 2, 1,
-                             &current_section);
+          long ret =
+              ov_read(vf, (char*)&src->audiobuf[i], 2048, &current_section);
           if (ret == 0)
             eof = 1;
           else {
@@ -1437,8 +1379,8 @@ static int lua_openogg(lua_State* L) {
   }
   int offs = 0;
   while (!eof) {
-    long ret = ov_read(vf, (char*)&songFile->audiobuf[offs], 2048, 0, 2, 1,
-                       &current_section);
+    long ret =
+        ov_read(vf, (char*)&songFile->audiobuf[offs], 2048, &current_section);
     if (ret == 0)
       eof = 1;
     else if (ret < 0) {
