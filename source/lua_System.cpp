@@ -249,7 +249,7 @@ static int lua_screenshot(lua_State *L) {
     u32 bytesWritten;
     u8 *tempbuf = new u8[0x36 + 576000];
     memset(tempbuf, 0, 0x36 + 576000);
-    tempbuf[0x36 + 576000] = 0;
+    tempbuf[0x36 + 576000 - 1] = 0;
     FSFILE_SetSize(fileHandle, (u16)(0x36 + 576000));
     *(u16 *)&tempbuf[0x0] = 0x4D42;
     *(u32 *)&tempbuf[0x2] = 0x36 + 576000;

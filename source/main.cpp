@@ -56,6 +56,7 @@ std::string cur_dir;
 int main(int argc, char* argv[]) {
   init_fnc(InitLppServ, ExitLppServ);
   ErrorHelper::SetupDirectories();
+  csndAccess = false;  // Make sure to not support this
 
   cur_dir = "sdmc:/";
   Run("romfs:/index.lua");

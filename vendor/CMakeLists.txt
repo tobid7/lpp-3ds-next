@@ -11,7 +11,6 @@ message(STATUS "Applying lua patch...")
 execute_process(
     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/lua
     git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/lua.patch
-    RESULT_VARIABLE PATCH_RESULT
 )
 
 add_library(lua STATIC
